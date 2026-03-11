@@ -1,14 +1,37 @@
+<div align="center">
+
+```
+  █████╗  ████████╗ ██╗   ██╗
+ ██╔══██╗ ╚══██╔══╝ ██║   ██║
+ ███████║    ██║    ██║   ██║
+ ██╔══██║    ██║    ╚██╗ ██╔╝
+ ██║  ██║    ██║     ╚████╔╝
+ ╚═╝  ╚═╝    ╚═╝      ╚═══╝
+```
+
 # ATV Starter Kit
 
-**A**gentic **T**ool & **W**orkflow — a one-click installer that scaffolds a complete GitHub Copilot agentic coding environment into any project.
+**A**gentic **T**ool & **V**ibes — a one-click installer that scaffolds a complete GitHub Copilot agentic coding environment into any project.
+
+[![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-Powered-8957e5?style=flat-square&logo=github)](https://github.com/features/copilot)
+
+*Logo generated with [oh-my-logo](https://github.com/shinshin86/oh-my-logo) — `npx oh-my-logo "ATV" sunset --filled`*
+
+---
+
+**One command. All 6 Copilot lifecycle hooks. 28 specialized agents. Instant agentic coding.**
+
+</div>
 
 ## Installation
 
 ### Option 1: Download Binary (Recommended)
 
-No dependencies required — single static binary, works immediately.
+> **Zero dependencies** — single static binary, works immediately.
 
-Download the latest release for your platform from [GitHub Releases](https://github.com/github/atv-installer/releases):
+Download the latest release for your platform from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases):
 
 | Platform | Download |
 |----------|----------|
@@ -32,8 +55,8 @@ sudo mv atv-installer /usr/local/bin/
 Requires [Go 1.22+](https://go.dev/dl/):
 
 ```bash
-git clone https://github.com/github/atv-installer.git
-cd atv-installer
+git clone https://github.com/All-The-Vibes/ATV-StarterKit.git
+cd ATV-StarterKit
 go build -o atv-installer .
 
 # Move to PATH
@@ -44,10 +67,10 @@ sudo mv atv-installer /usr/local/bin/   # macOS/Linux
 ### Option 3: Go Install
 
 ```bash
-go install github.com/github/atv-installer@latest
+go install github.com/All-The-Vibes/ATV-StarterKit@latest
 ```
 
-## Quick Start
+## ⚡ Quick Start
 
 ### One-Click Mode (Default)
 
@@ -56,21 +79,21 @@ cd your-project
 atv-installer init
 ```
 
-That's it. Auto-detects your stack, installs all 6 Copilot lifecycle hooks, done in seconds.
+> **That's it.** Auto-detects your stack, installs all 6 Copilot lifecycle hooks, done in seconds.
 
 ```
-  Auto-detected: TypeScript project (tsconfig.json found)
+  ✔ Auto-detected: TypeScript project (tsconfig.json found)
 
-  Created .github/copilot-instructions.md
-  Created .github/copilot-setup-steps.yml
-  Created .github/copilot-mcp-config.json
-  Created .github/skills/ (11 skills)
-  Created .github/agents/ (19 agents)
-  Created .github/typescript.instructions.md
-  Created .vscode/extensions.json
-  Created docs/plans/, docs/brainstorms/, docs/solutions/
+  ✔ Created .github/copilot-instructions.md
+  ✔ Created .github/copilot-setup-steps.yml
+  ✔ Created .github/copilot-mcp-config.json
+  ✔ Created .github/skills/ (11 skills)
+  ✔ Created .github/agents/ (19 agents)
+  ✔ Created .github/typescript.instructions.md
+  ✔ Created .vscode/extensions.json
+  ✔ Created docs/plans/, docs/brainstorms/, docs/solutions/
 
-  ATV Starter Kit ready!
+  🎉 ATV Starter Kit ready!
 
   Next steps:
     1. Open this folder in VS Code
@@ -78,7 +101,7 @@ That's it. Auto-detects your stack, installs all 6 Copilot lifecycle hooks, done
     3. Try: /ce-brainstorm "your first feature idea"
 ```
 
-### Guided Mode
+### 🎛️ Guided Mode
 
 Want to customize what gets installed? Use the interactive TUI wizard:
 
@@ -111,7 +134,7 @@ Select your stack, toggle individual component layers on/off with checkboxes:
 
 **Note:** The guided TUI requires a proper terminal (Windows Terminal, iTerm, etc.). The VS Code integrated terminal may not render Unicode box-drawing characters correctly.
 
-### Idempotent Re-runs
+### 🔄 Idempotent Re-runs
 
 Run it again any time — existing files are skipped, new content is added, JSON configs are merged:
 
@@ -121,7 +144,9 @@ Run it again any time — existing files are skipped, new content is added, JSON
   Created 2 files, 0 directories
 ```
 
-## What Gets Installed
+---
+
+## 📦 What Gets Installed
 
 ### All 6 Copilot Lifecycle Hooks
 
@@ -136,7 +161,7 @@ Run it again any time — existing files are skipped, new content is added, JSON
 
 Plus: `.vscode/extensions.json` and `docs/` structure (plans, brainstorms, solutions).
 
-## Supported Stacks
+## 🔧 Supported Stacks
 
 | Stack | Detection | Additional Content |
 |-------|-----------|-------------------|
@@ -145,7 +170,7 @@ Plus: `.vscode/extensions.json` and `docs/` structure (plans, brainstorms, solut
 | **Rails** | `Gemfile` + `config/routes.rb` | 8 additional agents (DHH, data integrity, schema drift, ...), 3 skills, Ruby file instructions |
 | **General** | fallback | Universal agents and skills only |
 
-## MCP Servers
+## 🌐 MCP Servers
 
 Pre-configured in `.github/copilot-mcp-config.json`:
 
@@ -176,7 +201,9 @@ These require VS Code extensions (listed in `.vscode/extensions.json` — VS Cod
 
 ---
 
-## Compound Engineering Pipeline
+---
+
+## 🔬 Compound Engineering Pipeline
 
 The ATV Starter Kit includes the **compound-engineering** multi-agent pipeline:
 
@@ -185,20 +212,25 @@ The ATV Starter Kit includes the **compound-engineering** multi-agent pipeline:
 These are the "run everything" entry points. The pipeline is:
 
 ```
-1. /ce-brainstorm  →  Explore WHAT to build (optional, user-driven)
-2. /ce-plan        →  Create a structured plan document
-3. /deepen-plan    →  Enrich plan sections with parallel research agents
-4. /ce-work        →  Execute the plan (write code, tests, commits)
-5. /ce-review      →  Multi-agent code review (security, perf, architecture)
-6. /resolve-todos  →  Fix findings from review in parallel
-7. /test-browser   →  Browser-based testing
-8. /feature-video  →  Record a walkthrough, attach to PR
-9. /ce-compound    →  Document what you learned for future sessions
+  brainstorm → plan → deepen → work → review → fix → test → video → compound
+       💭        📋      🔍       🔨     👀      🔧     🧪      🎬       📚
 ```
 
-Each step has a **GATE** — the pipeline won't advance until the prior step produces its artifact (plan file exists, code was actually changed, etc.).
+| # | Step | What it does |
+|---|------|--------------|
+| 1 | `/ce-brainstorm` | Explore WHAT to build (optional, user-driven) |
+| 2 | `/ce-plan` | Create a structured plan document |
+| 3 | `/deepen-plan` | Enrich plan sections with parallel research agents |
+| 4 | `/ce-work` | Execute the plan (write code, tests, commits) |
+| 5 | `/ce-review` | Multi-agent code review (security, perf, architecture) |
+| 6 | `/resolve-todos` | Fix findings from review in parallel |
+| 7 | `/test-browser` | Browser-based testing |
+| 8 | `/feature-video` | Record a walkthrough, attach to PR |
+| 9 | `/ce-compound` | Document what you learned for future sessions |
 
-## The 5 Core Skills
+> Each step has a **GATE** — the pipeline won't advance until the prior step produces its artifact.
+
+## 🧠 The 5 Core Skills
 
 ### 1. `ce-brainstorm` — "What should we build?"
 
@@ -241,7 +273,7 @@ Each step has a **GATE** — the pipeline won't advance until the prior step pro
 - Has a **context budget check** — warns if the session is too long and offers a compact-safe mode
 - Creates searchable institutional knowledge that future sessions consume via `learnings-researcher`
 
-## The Agent Roster (28 Specialized Agents)
+## 🤖 The Agent Roster (28 Specialized Agents)
 
 The `.github/agents/` directory contains **28 `.agent.md` files**, each a specialized persona:
 
@@ -258,7 +290,9 @@ The `.github/agents/` directory contains **28 `.agent.md` files**, each a specia
 | **Meta** | `agent-native-reviewer` (ensures features are agent-accessible), `ankane-readme-writer` |
 | **Ops** | `lint` |
 
-## Key Design Patterns
+---
+
+## 🏗️ Key Design Patterns
 
 ### 1. Parallel Sub-Agent Orchestration
 
@@ -286,15 +320,19 @@ The `setup` skill auto-detects your stack (Rails, Python, TypeScript, etc.) and 
 
 `/lfg` enforces strict ordering with verification gates. No coding until a plan exists. No review until code exists. This prevents the common AI failure mode of jumping straight to implementation.
 
-## Strengths
+## ✨ Why ATV?
 
-- **Full-lifecycle coverage** — brainstorm through video demo, nothing is manual
-- **Institutional memory** — the compound loop is genuinely novel; AI agents that learn from past sessions
-- **Multi-perspective review** — 28 agents cover more angles than any human reviewer
-- **Configurable depth** — `/ce-plan` has MINIMAL/STANDARD/COMPREHENSIVE detail levels; agents can run serial or parallel
-- **Risk-aware research** — doesn't waste time researching when patterns are clear, but always researches high-risk areas
+| | Feature | |
+|---|---|---|
+| 🔄 | **Full-lifecycle coverage** | Brainstorm through video demo — nothing is manual |
+| 🧠 | **Institutional memory** | AI agents that learn from past sessions via the compound loop |
+| 👀 | **Multi-perspective review** | 28 agents cover more angles than any human reviewer |
+| 📊 | **Configurable depth** | MINIMAL / STANDARD / COMPREHENSIVE detail levels |
+| 🛡️ | **Risk-aware research** | Always researches high-risk areas; skips when patterns are clear |
 
-## Project Structure
+---
+
+## 📁 Project Structure
 
 ```
 atv-installer/
@@ -324,7 +362,7 @@ atv-installer/
     └── release.yml           # goreleaser on tag push
 ```
 
-## Development
+## 🛠️ Development
 
 ```bash
 # Build
@@ -339,7 +377,7 @@ mkdir /tmp/test-project && cd /tmp/test-project
 /path/to/atv-installer init
 ```
 
-## Limitations & Considerations
+## ⚠️ Limitations & Considerations
 
 - **Token-heavy pipeline** — running 5+ parallel agents in a long session can hit context limits
 - **TUI requires proper terminal** — `--guided` mode needs Windows Terminal / iTerm / real TTY (not VS Code integrated terminal)
@@ -347,6 +385,14 @@ mkdir /tmp/test-project && cd /tmp/test-project
 - **Opinionated docs structure** — creates `docs/plans/`, `docs/brainstorms/`, `docs/solutions/`
 - **Originally Claude Code** — some skill patterns (Task tool, Bash commands) are Claude Code idioms that map approximately to Copilot
 
+---
+
+<div align="center">
+
 ## License
 
 MIT
+
+Built with ❤️ by [All The Vibes](https://github.com/All-The-Vibes)
+
+</div>

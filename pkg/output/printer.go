@@ -15,22 +15,22 @@ var bannerText string
 
 var (
 	bannerStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("63")). // purple/indigo
+			Foreground(lipgloss.Color("220")). // bright yellow
 			Bold(true)
 
 	titleStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("212")). // bright blue
+			Foreground(lipgloss.Color("178")). // golden yellow
 			Bold(true)
 
 	successStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("46")). // green
+			Foreground(lipgloss.Color("226")). // yellow-green
 			Bold(true)
 
 	skipStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("243")) // dim gray
 
 	mergeStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("214")) // orange
+			Foreground(lipgloss.Color("214")) // orange-yellow
 )
 
 // Printer handles terminal output with colored status indicators.
@@ -47,7 +47,7 @@ func (p *Printer) PrintBanner() {
 	art := strings.TrimRight(bannerText, "\n\r ")
 	fmt.Println(bannerStyle.Render(art))
 	fmt.Println()
-	fmt.Println(titleStyle.Render("  ATV Starter Kit — Agentic Tool & Workflow"))
+	fmt.Println(titleStyle.Render("  ⚡ Agentic Tool & Workflow ⚡"))
 	fmt.Println()
 }
 
