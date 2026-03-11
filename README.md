@@ -1,14 +1,8 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="assets/logo-light.svg">
-  <img alt="ATV Starter Kit" src="assets/logo-dark.svg" width="700">
-</picture>
+<h1>⚡ ATV Starter Kit ⚡</h1>
 
-# ATV Starter Kit
-
-**A**gentic **T**ool & **V**ibes — a one-click installer that scaffolds a complete GitHub Copilot agentic coding environment into any project.
+<strong>A</strong>gentic <strong>T</strong>ool & <strong>V</strong>ibes — a one-click installer that scaffolds a complete GitHub Copilot agentic coding environment into any project.
 
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
