@@ -1,16 +1,12 @@
 <div align="center">
 
-<h1>⚡ ATV Starter Kit ⚡</h1>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:FF8C00,50:FFD700,100:FFA500&height=250&section=header&text=ATV%20STARTER%20KIT&fontSize=55&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=One%20command.%20Instant%20agentic%20coding.&descAlignY=55&descSize=18&descColor=ffffff" width="100%"/>
 
-<strong>A</strong>gentic <strong>T</strong>ool & <strong>V</strong>ibes — a one-click installer that scaffolds a complete GitHub Copilot agentic coding environment into any project.
+**A**gentic **T**ool & **V**ibes — a one-click installer that scaffolds a complete GitHub Copilot agentic coding environment into any project.
 
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-Powered-8957e5?style=flat-square&logo=github)](https://github.com/features/copilot)
-
----
-
-**One command. All 6 Copilot lifecycle hooks. 28 specialized agents. Instant agentic coding.**
 
 </div>
 
