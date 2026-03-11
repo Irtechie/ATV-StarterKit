@@ -24,10 +24,6 @@ var (
 		lipgloss.NewStyle().Foreground(lipgloss.Color("230")).Bold(true), // near-white yellow
 	}
 
-	bannerStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("220")). // bright yellow
-			Bold(true)
-
 	accentStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("208")). // orange accent
 			Bold(true)

@@ -27,7 +27,22 @@
 
 ## Installation
 
-### Option 1: Download Binary (Recommended)
+### Option 1: npm / npx (Recommended)
+
+Requires [Node.js 16+](https://nodejs.org/):
+
+```bash
+# Quick run (no global install)
+npx atv-starterkit init
+
+# Or install globally
+npm install -g atv-starterkit
+atv-starterkit init
+```
+
+The npm package automatically downloads the correct binary for your platform.
+
+### Option 2: Download Binary
 
 > **Zero dependencies** — single static binary, works immediately.
 
@@ -38,7 +53,7 @@ Download the latest release for your platform from [GitHub Releases](https://git
 | **Windows** | `atv-installer_windows_amd64.zip` |
 | **macOS (Intel)** | `atv-installer_darwin_amd64.tar.gz` |
 | **macOS (Apple Silicon)** | `atv-installer_darwin_arm64.tar.gz` |
-| **Linux** | `atv-installer_darwin_amd64.tar.gz` |
+| **Linux** | `atv-installer_linux_amd64.tar.gz` |
 
 Extract and move to your PATH:
 
@@ -50,7 +65,7 @@ sudo mv atv-installer /usr/local/bin/
 # Windows — extract zip, add folder to PATH
 ```
 
-### Option 2: Build from Source
+### Option 3: Build from Source
 
 Requires [Go 1.22+](https://go.dev/dl/):
 
@@ -64,7 +79,7 @@ sudo mv atv-installer /usr/local/bin/   # macOS/Linux
 # Or on Windows: move atv-installer.exe to a folder in your PATH
 ```
 
-### Option 3: Go Install
+### Option 4: Go Install
 
 ```bash
 go install github.com/All-The-Vibes/ATV-StarterKit@latest
