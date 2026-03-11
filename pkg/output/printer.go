@@ -14,19 +14,36 @@ import (
 var bannerText string
 
 var (
+	// Gradient yellow palette for banner lines (top to bottom: gold → bright yellow → white-yellow)
+	bannerGradient = []lipgloss.Style{
+		lipgloss.NewStyle().Foreground(lipgloss.Color("214")).Bold(true), // deep gold
+		lipgloss.NewStyle().Foreground(lipgloss.Color("220")).Bold(true), // bright yellow
+		lipgloss.NewStyle().Foreground(lipgloss.Color("226")).Bold(true), // yellow
+		lipgloss.NewStyle().Foreground(lipgloss.Color("228")).Bold(true), // light yellow
+		lipgloss.NewStyle().Foreground(lipgloss.Color("229")).Bold(true), // pale yellow
+		lipgloss.NewStyle().Foreground(lipgloss.Color("230")).Bold(true), // near-white yellow
+	}
+
+	accentStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("208")). // orange accent
+			Bold(true)
+
 	titleStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("212")). // bright blue
+			Foreground(lipgloss.Color("178")). // golden yellow
 			Bold(true)
 
 	successStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("46")). // green
+			Foreground(lipgloss.Color("226")). // yellow-green
 			Bold(true)
 
 	skipStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("243")) // dim gray
 
 	mergeStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("214")) // orange
+			Foreground(lipgloss.Color("214")) // orange-yellow
+
+	dimStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("136")) // dim gold for decorative lines
 )
 
 // Printer handles terminal output with colored status indicators.
@@ -37,17 +54,28 @@ func NewPrinter() *Printer {
 	return &Printer{}
 }
 
-// PrintBanner shows the ATV ASCII art logo.
+// PrintBanner shows the ATV ASCII art logo with gradient yellow effect.
 func (p *Printer) PrintBanner() {
 	art := strings.TrimRight(bannerText, "\n\r ")
+	lines := strings.Split(art, "\n")
 
-	bannerStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("63")).
-		Bold(true)
-
-	fmt.Println(bannerStyle.Render(art))
+	// Top sparkle border
+	border := "  ✦ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ✦"
+	fmt.Println(dimStyle.Render(border))
 	fmt.Println()
-	fmt.Println(titleStyle.Render("  ATV Starter Kit — Agentic Tool & Workflow"))
+
+	// Render each line with a gradient color (cycling through the palette)
+	for i, line := range lines {
+		style := bannerGradient[i%len(bannerGradient)]
+		fmt.Println(style.Render("  " + line))
+	}
+
+	fmt.Println()
+	// Bottom sparkle border
+	fmt.Println(dimStyle.Render(border))
+	fmt.Println()
+	fmt.Println(accentStyle.Render("        ⚡") + titleStyle.Render(" Agentic Tool & Vibes ") + accentStyle.Render("⚡"))
+	fmt.Println(dimStyle.Render("        One command. Instant agentic coding."))
 	fmt.Println()
 }
 
