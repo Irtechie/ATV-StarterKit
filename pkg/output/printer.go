@@ -73,14 +73,15 @@ func (p *Printer) PrintBanner() {
 	fmt.Println(dimStyle.Render(border))
 	fmt.Println()
 
-	// Render each line centered in solid bright yellow
-	for _, line := range lines {
+	// Render each line centered with gradient yellow
+	for i, line := range lines {
 		runeLen := len([]rune(line))
 		pad := (termWidth - runeLen) / 2
 		if pad < 0 {
 			pad = 0
 		}
-		fmt.Println(bannerStyle.Render(strings.Repeat(" ", pad) + line))
+		style := bannerGradient[i%len(bannerGradient)]
+		fmt.Println(style.Render(strings.Repeat(" ", pad) + line))
 	}
 
 	fmt.Println()

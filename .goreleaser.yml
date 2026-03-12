@@ -37,7 +37,7 @@ changelog:
 
 release:
   github:
-    owner: github
-    name: atv-installer
-  draft: true
+    owner: All-The-Vibes
+    name: ATV-StarterKit
+  draft: false
   prerelease: auto
