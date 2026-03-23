@@ -86,8 +86,8 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 				Title("Which components do you want?").
 				Description("All are selected by default. Deselect any you don't need.").
 				Options(
-					huh.NewOption("Core pipeline skills (brainstorm, plan, work, review, compound)", LayerCoreSkills).Selected(true),
-					huh.NewOption("Orchestrators (lfg, slfg)", LayerOrchestrators).Selected(true),
+					huh.NewOption("Core workflow skills (brainstorm, plan, deepen, work, review, compound)", LayerCoreSkills).Selected(true),
+					huh.NewOption("Orchestrators and finishers (lfg, slfg, todo, browser, video)", LayerOrchestrators).Selected(true),
 					huh.NewOption("Universal agents (security, performance, architecture, ...)", LayerUniversalAgents).Selected(true),
 					huh.NewOption("Stack-specific agents (language reviewers)", LayerStackAgents).Selected(true),
 					huh.NewOption("MCP servers (GitHub, Azure, Terraform, Context7)", LayerMCPServers).Selected(true),

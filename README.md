@@ -89,7 +89,7 @@ atv-installer init
   ✔ Created .github/copilot-instructions.md
   ✔ Created .github/copilot-setup-steps.yml
   ✔ Created .github/copilot-mcp-config.json
-  ✔ Created .github/skills/ (11 skills)
+  ✔ Created .github/skills/ (14 skills)
   ✔ Created .github/agents/ (19 agents)
   ✔ Created .github/typescript.instructions.md
   ✔ Created .vscode/extensions.json
@@ -121,8 +121,8 @@ Select your stack, toggle individual component layers on/off with checkboxes:
 ┃   General
 ┃
 ┃ Which components do you want?
-┃ > [•] Core pipeline skills (brainstorm, plan, work, review, compound)
-┃   [•] Orchestrators (lfg, slfg)
+┃ > [•] Core workflow skills (brainstorm, plan, deepen, work, review, compound)
+┃   [•] Orchestrators and finishers (lfg, slfg, todo, browser, video)
 ┃   [•] Universal agents (security, performance, architecture, ...)
 ┃   [•] Stack-specific agents (language reviewers)
 ┃   [•] MCP servers (GitHub, Azure, Terraform, Context7)
@@ -225,7 +225,7 @@ These are the "run everything" entry points. The pipeline is:
 | 3 | `/deepen-plan` | Enrich plan sections with parallel research agents |
 | 4 | `/ce-work` | Execute the plan (write code, tests, commits) |
 | 5 | `/ce-review` | Multi-agent code review (security, perf, architecture) |
-| 6 | `/resolve-todos` | Fix findings from review in parallel |
+| 6 | `/resolve_todo_parallel` | Fix findings from review in parallel |
 | 7 | `/test-browser` | Browser-based testing |
 | 8 | `/feature-video` | Record a walkthrough, attach to PR |
 | 9 | `/ce-compound` | Document what you learned for future sessions |
