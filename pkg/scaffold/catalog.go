@@ -28,6 +28,7 @@ func BuildCatalog(stack detect.Stack) []Component {
 
 	// Directories first
 	catalog = append(catalog, directories()...)
+	catalog = append(catalog, documentationDirectories()...)
 
 	// Hook 1: System Instructions
 	catalog = append(catalog, systemInstructions(stack)...)
@@ -64,6 +65,9 @@ func BuildFilteredCatalog(stack detect.Stack, layers []string) []Component {
 
 	// Directories always included
 	catalog = append(catalog, directories()...)
+	if layerSet["docs-structure"] {
+		catalog = append(catalog, documentationDirectories()...)
+	}
 
 	if layerSet["copilot-instructions"] {
 		catalog = append(catalog, systemInstructions(stack)...)
@@ -74,8 +78,19 @@ func BuildFilteredCatalog(stack detect.Stack, layers []string) []Component {
 	if layerSet["mcp-servers"] {
 		catalog = append(catalog, mcpConfig()...)
 	}
-	if layerSet["core-skills"] || layerSet["orchestrators"] {
-		catalog = append(catalog, skills()...)
+	selectedSkillDirs := make(map[string]bool)
+	if layerSet["core-skills"] {
+		for _, dir := range coreSkillDirectories {
+			selectedSkillDirs[dir] = true
+		}
+	}
+	if layerSet["orchestrators"] {
+		for _, dir := range orchestratorSkillDirectories {
+			selectedSkillDirs[dir] = true
+		}
+	}
+	if len(selectedSkillDirs) > 0 {
+		catalog = append(catalog, skillComponents(selectedSkillDirs)...)
 	}
 	if layerSet["universal-agents"] || layerSet["stack-agents"] {
 		catalog = append(catalog, agents(stack)...)
@@ -95,6 +110,16 @@ func directories() []Component {
 		".github/skills",
 		".github/agents",
 		".vscode",
+	}
+	var comps []Component
+	for _, d := range dirs {
+		comps = append(comps, Component{Path: d, IsDir: true})
+	}
+	return comps
+}
+
+func documentationDirectories() []Component {
+	dirs := []string{
 		"docs/plans",
 		"docs/brainstorms",
 		"docs/solutions",
@@ -104,6 +129,26 @@ func directories() []Component {
 		comps = append(comps, Component{Path: d, IsDir: true})
 	}
 	return comps
+}
+
+var coreSkillDirectories = []string{
+	"brainstorming",
+	"ce-brainstorm",
+	"ce-compound",
+	"ce-plan",
+	"ce-review",
+	"ce-work",
+	"deepen-plan",
+	"document-review",
+	"setup",
+}
+
+var orchestratorSkillDirectories = []string{
+	"feature-video",
+	"lfg",
+	"resolve_todo_parallel",
+	"slfg",
+	"test-browser",
 }
 
 func systemInstructions(stack detect.Stack) []Component {
@@ -130,6 +175,10 @@ func mcpConfig() []Component {
 }
 
 func skills() []Component {
+	return skillComponents(nil)
+}
+
+func skillComponents(selected map[string]bool) []Component {
 	var comps []Component
 
 	if err := fs.WalkDir(templateFS, "templates/skills", func(path string, d fs.DirEntry, err error) error {
@@ -139,6 +188,12 @@ func skills() []Component {
 		content, _ := templateFS.ReadFile(path)
 
 		relPath := strings.TrimPrefix(path, "templates/skills/")
+		if selected != nil {
+			skillDir := strings.SplitN(relPath, "/", 2)[0]
+			if !selected[skillDir] {
+				return nil
+			}
+		}
 		destPath := filepath.Join(".github", "skills", relPath)
 		comps = append(comps, Component{Path: destPath, Content: content, HookType: 4})
 		return nil
