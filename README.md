@@ -114,19 +114,38 @@ future /ce-plan → learnings-researcher searches docs/solutions/ → avoids pas
 
 ## Quick Start
 
-### Fast path — zero questions
+### 1. Install
 
 ```bash
+cd your-project
 npx atv-starterkit init
 ```
 
 Auto-detects your stack. Installs 13 core ATV skills, 28 agents, MCP servers, and docs structure. Done in seconds.
 
-### Guided path — choose your level
+Want to choose your preset? Use `npx atv-starterkit init --guided` for the interactive TUI.
 
-```bash
-atv-installer init --guided
+### 2. Use
+
+Open **Copilot Chat** in VS Code (⌃⌘I / Ctrl+Shift+I) and run skills as slash commands:
+
+```text
+/ce-brainstorm   →  Explore the problem, produce a design doc
+/ce-plan         →  Generate an implementation plan with acceptance criteria
+/ce-work         →  Build against the plan with incremental commits
+/ce-review       →  Multi-agent code review (security, architecture, performance)
+/ce-compound     →  Document what you learned for future sessions
 ```
+
+Or skip the steps and run the full pipeline in one shot:
+
+```text
+/lfg             →  Plan → deepen → build → review → test → compound
+```
+
+### 3. Compound
+
+Every time you run `/ce-compound`, solved problems get saved to `docs/solutions/`. Next time `/ce-plan` runs, the `learnings-researcher` agent searches those files first — so your repo gets smarter with every PR.
 
 ---
 
