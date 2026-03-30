@@ -151,7 +151,6 @@ func (p *Printer) PrintNextSteps(stack detect.Stack, hasGstack bool, hasAgentBro
 	}
 	if hasAgentBrowser {
 		fmt.Println(titleStyle.Render(fmt.Sprintf("    %d.", step)) + ` Try: agent-browser open https://yourapp.com`)
-		step++
 	}
 	fmt.Println()
 	if hasGstack {

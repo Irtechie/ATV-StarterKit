@@ -25,12 +25,9 @@ var rootCmd = &cobra.Command{
 	Version: "dev",
 }
 
-func init() {
-	rootCmd.SetVersionTemplate("ATV Starter Kit v{{.Version}}\n")
-}
-
 func Execute() {
 	rootCmd.Version = appVersion
+	rootCmd.SetVersionTemplate(fmt.Sprintf("ATV Starter Kit v%s (%s)\n", appVersion, appCommit))
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
