@@ -192,15 +192,69 @@ Real-time animated spinners. Each step shows pending → running → done/failed
 
 ATV covers the complete software lifecycle:
 
-```text
-  Think          Plan          Build         Review        Test          Ship          Reflect
-   💭             📋            🔨            👀            🧪            🚀            📊
-  brainstorm   ce-plan       ce-work       ce-review      qa           ship          retro
-  office-hrs   plan-ceo      lfg/slfg      review         qa-only      land-deploy   compound
-               plan-eng                    design-review  benchmark    canary        document-rel
-               plan-design                 cso            browse       careful       learn
-               autoplan                    codex          agent-browser freeze/guard
-```
+<table>
+       <tr>
+              <td width="25%" valign="top">
+                     <strong>💭 Think</strong><br />
+                     <sub>Frame the problem</sub><br /><br />
+                     <code>/ce-brainstorm</code><br />
+                     <code>/gstack-office-hours</code>
+              </td>
+              <td width="25%" valign="top">
+                     <strong>📋 Plan</strong><br />
+                     <sub>Pressure-test the approach</sub><br /><br />
+                     <code>/ce-plan</code><br />
+                     <code>/gstack-plan-ceo-review</code><br />
+                     <code>/gstack-plan-eng-review</code><br />
+                     <code>/gstack-plan-design-review</code><br />
+                     <code>/gstack-autoplan</code>
+              </td>
+              <td width="25%" valign="top">
+                     <strong>🔨 Build</strong><br />
+                     <sub>Execute with momentum</sub><br /><br />
+                     <code>/ce-work</code><br />
+                     <code>/lfg</code><br />
+                     <code>/slfg</code>
+              </td>
+              <td width="25%" valign="top">
+                     <strong>👀 Review</strong><br />
+                     <sub>Find what you missed</sub><br /><br />
+                     <code>/ce-review</code><br />
+                     <code>/gstack-review</code><br />
+                     <code>/gstack-design-review</code><br />
+                     <code>/gstack-cso</code><br />
+                     <code>/gstack-codex</code>
+              </td>
+       </tr>
+       <tr>
+              <td width="33.33%" valign="top">
+                     <strong>🧪 Test</strong><br />
+                     <sub>Use real browser eyes</sub><br /><br />
+                     <code>agent-browser</code><br />
+                     <code>/gstack-qa</code><br />
+                     <code>/gstack-qa-only</code><br />
+                     <code>/gstack-benchmark</code><br />
+                     <code>/gstack-browse</code>
+              </td>
+              <td width="33.33%" valign="top">
+                     <strong>🚀 Ship</strong><br />
+                     <sub>Land without chaos</sub><br /><br />
+                     <code>/gstack-ship</code><br />
+                     <code>/gstack-land-and-deploy</code><br />
+                     <code>/gstack-canary</code><br />
+                     <code>/gstack-document-release</code>
+              </td>
+              <td width="33.33%" valign="top">
+                     <strong>📊 Reflect</strong><br />
+                     <sub>Compound what you learned</sub><br /><br />
+                     <code>/ce-compound</code><br />
+                     <code>/gstack-retro</code><br />
+                     <code>/gstack-learn</code>
+              </td>
+       </tr>
+</table>
+
+> 🛡️ Safety guardrails apply across the whole sprint: `/gstack-careful`, `/gstack-freeze`, `/gstack-guard`, and `/gstack-investigate`.
 
 ### Think
 
