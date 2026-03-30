@@ -2,13 +2,22 @@
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:FF8C00,50:FFD700,100:FFA500&height=250&section=header&text=ATV%20STARTER%20KIT&fontSize=55&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=One%20command.%20Instant%20agentic%20coding.&descAlignY=55&descSize=18&descColor=ffffff" width="100%"/>
 
-**A**gentic **T**ool & **V**ibes — a one-click installer that scaffolds a complete GitHub Copilot agentic coding environment into any project.
+**A**gentic **T**ool & **V**ibes — a one-click installer that scaffolds a complete AI-powered engineering environment into any project. Compound Engineering workflows for planning and review, plus Garry Tan's [gstack](https://github.com/garrytan/gstack) sprint process for QA, shipping, safety, and browser-based testing. **43 skills. 28 agents. One command.**
 
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-Powered-8957e5?style=flat-square&logo=github)](https://github.com/features/copilot)
 
 </div>
+
+## What is ATV?
+
+ATV gives you a virtual engineering team inside GitHub Copilot. It combines two complementary systems into a single installer:
+
+- **Compound Engineering** — a multi-agent pipeline for brainstorming, planning, code review, and institutional knowledge. Think → Plan → Build → Review → Document.
+- **gstack** — Garry Tan's open-source sprint process with 30 slash-command skills for QA, shipping, safety guardrails, security audits, and browser-based testing.
+
+Together they cover the full software lifecycle: from "what should I build?" through "is it deployed and healthy?" — with 43 skills and 28 specialized agents, all discoverable by GitHub Copilot.
 
 ## Installation
 
@@ -25,13 +34,11 @@ npm install -g atv-starterkit
 atv-starterkit init
 ```
 
-The npm package automatically downloads the correct binary for your platform.
-
 ### Option 2: Download Binary
 
 > **Zero dependencies** — single static binary, works immediately.
 
-Download the latest release for your platform from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases):
+Download from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases):
 
 | Platform | Download |
 |----------|----------|
@@ -40,39 +47,22 @@ Download the latest release for your platform from [GitHub Releases](https://git
 | **macOS (Apple Silicon)** | `atv-installer_darwin_arm64.tar.gz` |
 | **Linux** | `atv-installer_linux_amd64.tar.gz` |
 
-Extract and move to your PATH:
-
 ```bash
 # macOS/Linux
 tar xzf atv-installer_*.tar.gz
 sudo mv atv-installer /usr/local/bin/
-
-# Windows — extract zip, add folder to PATH
 ```
 
 ### Option 3: Build from Source
-
-Requires [Go 1.22+](https://go.dev/dl/):
 
 ```bash
 git clone https://github.com/All-The-Vibes/ATV-StarterKit.git
 cd ATV-StarterKit
 go build -o atv-installer .
-
-# Move to PATH
-sudo mv atv-installer /usr/local/bin/   # macOS/Linux
-# Or on Windows: move atv-installer.exe to a folder in your PATH
+sudo mv atv-installer /usr/local/bin/
 ```
 
-### Option 4: Go Install
-
-```bash
-go install github.com/All-The-Vibes/ATV-StarterKit@latest
-```
-
-This installs into your Go bin directory (`GOBIN`, or `%USERPROFILE%\\go\\bin` on Windows by default). Because the CLI entrypoint lives at the repo root, the installed executable is named after the package path, not `atv-installer`.
-
-## ⚡ Quick Start
+## Quick Start
 
 ### One-Click Mode (Default)
 
@@ -81,203 +71,146 @@ cd your-project
 atv-installer init
 ```
 
-> **That's it.** Auto-detects your stack, installs all 6 Copilot lifecycle hooks, done in seconds.
+Auto-detects your stack, installs all 6 Copilot lifecycle hooks and 13 core skills. Done in seconds.
 
-```
-  ✔ Auto-detected: TypeScript project (tsconfig.json found)
-
-  ✔ Created .github/copilot-instructions.md
-  ✔ Created .github/copilot-setup-steps.yml
-  ✔ Created .github/copilot-mcp-config.json
-  ✔ Created .github/skills/ (14 skills)
-  ✔ Created .github/agents/ (19 agents)
-  ✔ Created .github/typescript.instructions.md
-  ✔ Created .vscode/extensions.json
-  ✔ Created docs/plans/, docs/brainstorms/, docs/solutions/
-
-  🎉 ATV Starter Kit ready!
-
-  Next steps:
-    1. Open this folder in VS Code
-    2. Install recommended extensions when prompted
-    3. Try: /ce-brainstorm "your first feature idea"
-```
-
-### 🎛️ Guided Mode
-
-Want to customize what gets installed? Use the interactive TUI wizard:
+### Guided Mode — Choose Your Skills
 
 ```bash
 atv-installer init --guided
 ```
 
-Select your stack, toggle individual component layers on/off with checkboxes:
+The interactive TUI presents skills organized by function — not source. Pick what you need:
 
 ```
-┃ What's your primary stack?
-┃ > TypeScript
-┃   Python
-┃   Rails
-┃   General
+┃ Workflow skills (ATV + gstack)
+┃ Prerequisites: git 2.52.0, bun 1.3.10, node v22.18.0
 ┃
-┃ Which components do you want?
-┃ > [•] Core workflow skills (brainstorm, plan, deepen, work, review, compound)
-┃   [•] Orchestrators and finishers (lfg, slfg, todo, browser, video)
-┃   [•] Universal agents (security, performance, architecture, ...)
-┃   [•] Stack-specific agents (language reviewers)
-┃   [•] MCP servers (GitHub, Azure, Terraform, Context7)
-┃   [•] VS Code extensions.json
-┃   [•] Copilot instructions
-┃   [•] Copilot setup steps
-┃   [•] File-scoped instructions (applyTo globs)
-┃   [•] docs/ structure
-┃   [ ] Compound engineering local config
+┃   [•] Brainstorming — explore what to build
+┃   [•] Plan — structured implementation plans
+┃   [•] [gstack] Office Hours — YC-style forcing questions
+┃   [•] [gstack] Plan CEO Review — find the 10-star product
+┃   [•] CE Review — multi-agent code review
+┃   [•] [gstack] Review — staff-level PR review
+┃   [•] [gstack] QA — test app in real browser ⚠️ (requires Bun)
+┃   [•] [gstack] Ship — sync, test, push, open PR
+┃   [•] [gstack] Careful — warn before destructive commands
+┃   ...
 ```
 
-**Note:** The guided TUI requires a proper terminal (Windows Terminal, iTerm, etc.). The VS Code integrated terminal may not render Unicode box-drawing characters correctly.
+When you select gstack skills, the installer:
+1. Clones gstack to `.gstack/` (a gitignored staging area)
+2. Runs gstack's own setup to generate optimized skill docs
+3. Copies each skill to `.github/skills/gstack-*/SKILL.md` — flat, one level deep, auto-discovered by Copilot
+4. Creates a runtime sidecar at `.github/skills/gstack/` with binaries and assets
 
-### 🔄 Idempotent Re-runs
-
-Run it again any time — existing files are skipped, new content is added, JSON configs are merged:
-
-```
-  Skipped 37 existing files
-  Merged 2 JSON configs
-  Created 2 files, 0 directories
-```
+**Result:** 43 skills at `.github/skills/*/SKILL.md`, all discoverable by GitHub Copilot.
 
 ---
 
-## 📦 What Gets Installed
+## The Full Sprint
 
-### All 6 Copilot Lifecycle Hooks
+ATV covers the complete software lifecycle. Here's how the skills work together:
 
-| # | Hook | File | When It Fires |
-|---|------|------|---------------|
-| 1 | **System Instructions** | `.github/copilot-instructions.md` | Every Copilot chat — injected as system context |
-| 2 | **Setup Steps** | `.github/copilot-setup-steps.yml` | When Copilot Coding Agent initializes |
-| 3 | **MCP Servers** | `.github/copilot-mcp-config.json` | When Copilot starts — registers tool servers |
-| 4 | **Skills** | `.github/skills/*/SKILL.md` | When skill description matches user's request |
-| 5 | **Agents** | `.github/agents/*.agent.md` | When invoked by subagent orchestration |
-| 6 | **File Instructions** | `.github/*.instructions.md` | Auto-loaded by `applyTo` glob when editing files |
+```
+  Think          Plan          Build         Review        Test          Ship          Reflect
+   💭             📋            🔨            👀            🧪            🚀            📊
+  brainstorm   ce-plan       ce-work       ce-review      qa           ship          retro
+  office-hrs   plan-ceo      lfg/slfg      review         qa-only      land-deploy   compound
+               plan-eng                    design-review  benchmark    canary        document-rel
+               plan-design                 cso            browse       careful       learn
+               autoplan                    codex                       freeze/guard
+```
 
-Plus: `.vscode/extensions.json` and `docs/` structure (plans, brainstorms, solutions).
+### Phase 1: Think — What should we build?
 
-## 🔧 Supported Stacks
+| Skill | What it does |
+|-------|-------------|
+| `/ce-brainstorm` | Interactive dialogue to clarify requirements; runs repo research; produces a design doc in `docs/brainstorms/` |
+| `/gstack-office-hours` | YC-style forcing questions that reframe your product before you write code. Pushes back on your framing, challenges premises, generates alternatives |
+| `/gstack-plan-ceo-review` | CEO-level review: find the 10-star product hiding in the request. Four modes: Expansion, Selective Expansion, Hold Scope, Reduction |
 
-| Stack | Detection | Additional Content |
-|-------|-----------|-------------------|
-| **TypeScript** | `tsconfig.json` | `kieran-typescript-reviewer` agent, TS file instructions (`applyTo: **/*.ts`) |
-| **Python** | `pyproject.toml` / `requirements.txt` | `kieran-python-reviewer` agent, Python file instructions (`applyTo: **/*.py`) |
-| **Rails** | `Gemfile` + `config/routes.rb` | 8 additional agents (DHH, data integrity, schema drift, ...), 3 skills, Ruby file instructions |
-| **General** | fallback | Universal agents and skills only |
+### Phase 2: Plan — How do we build it?
 
-## 🌐 MCP Servers
+| Skill | What it does |
+|-------|-------------|
+| `/ce-plan` | Parallel research agents scan your codebase + external docs. Risk-based decision: security topics always get deep research. Outputs a plan in `docs/plans/` with acceptance criteria |
+| `/deepen-plan` | Enriches each plan section with parallel research agents — best practices, performance, UI patterns |
+| `/gstack-plan-eng-review` | Lock architecture, data flow, ASCII diagrams, edge cases, and tests. Forces hidden assumptions into the open |
+| `/gstack-plan-design-review` | Rates each design dimension 0-10, explains what a 10 looks like, edits the plan to get there. AI slop detection |
+| `/gstack-autoplan` | One command, fully reviewed plan. Runs CEO → design → eng review automatically |
 
-Pre-configured in `.github/copilot-mcp-config.json`:
+### Phase 3: Build — Execute the plan
 
-| Server | Type | Package |
-|--------|------|---------|
-| **Context7** | SSE (remote) | `mcp.context7.com` |
-| **GitHub** | stdio (npx) | `@modelcontextprotocol/server-github` (needs PAT) |
-| **Azure** | stdio (npx) | `@azure/mcp` |
-| **Terraform** | stdio (npx) | `terraform-mcp-server` |
+| Skill | What it does |
+|-------|-------------|
+| `/ce-work` | Reads the plan, breaks it into tasks, implements with incremental commits. System-Wide Test Check at each step (callbacks, orphaned state, error alignment). Checks off plan items as completed |
+| `/lfg` | Full autonomous pipeline: plan → deepen → work → review → test → video → compound. Sequential gates ensure nothing is skipped |
+| `/slfg` | Same as `/lfg` but parallelizes review + testing via swarm agents |
 
-### Extension-Only Servers
+### Phase 4: Review — Find bugs before they ship
 
-These require VS Code extensions (listed in `.vscode/extensions.json` — VS Code prompts to install on open):
+| Skill | What it does |
+|-------|-------------|
+| `/ce-review` | Launches parallel review agents (security, performance, architecture, language-specific). Configurable via `compound-engineering.local.md`. Ultra-thinking deep dive |
+| `/gstack-review` | Staff-level code review. Auto-fixes obvious issues, flags completeness gaps |
+| `/gstack-design-review` | Design audit then fix loop with atomic commits and before/after screenshots |
+| `/gstack-cso` | OWASP Top 10 + STRIDE threat model. Zero-noise: 17 false positive exclusions, 8/10+ confidence gate |
+| `/gstack-codex` | Independent code review from OpenAI Codex CLI — cross-model analysis |
 
-| Extension | ID |
-|-----------|----|
-| Bicep | `ms-azuretools.vscode-bicep` |
-| Azure Tools for Copilot | `ms-azuretools.vscode-azure-github-copilot` |
-| HashiCorp Terraform | `hashicorp.terraform` |
-| GitHub Copilot | `github.copilot` |
-| GitHub Copilot Chat | `github.copilot-chat` |
+### Phase 5: Test — Verify it works
 
-### Prerequisites
+| Skill | What it does |
+|-------|-------------|
+| `/gstack-qa` | Opens a real Chromium browser, clicks through flows, finds bugs, fixes them, generates regression tests, re-verifies. *Requires Bun* |
+| `/gstack-qa-only` | Same QA methodology, but report only — no code changes |
+| `/gstack-benchmark` | Baseline page load times, Core Web Vitals, resource sizes. Compare before/after on every PR |
+| `/gstack-browse` | Give the agent eyes. Real Chromium, real clicks, ~100ms per command |
 
-- **Node.js** — required for `npx` to run stdio MCP servers
-- **GitHub PAT** — prompted on first use (needs `repo`, `read:org` scopes)
-- **Azure CLI** — `az login` for Azure MCP authentication
+### Phase 6: Ship — Get it to production
+
+| Skill | What it does |
+|-------|-------------|
+| `/gstack-ship` | Sync main, run tests, audit coverage, push, open PR. Bootstraps test frameworks if you don't have one |
+| `/gstack-land-and-deploy` | Merge PR, wait for CI and deploy, verify production health. One command from "approved" to "verified in production" |
+| `/gstack-canary` | Post-deploy monitoring loop. Watches for console errors and performance regressions |
+| `/gstack-document-release` | Updates all project docs to match what you shipped. Catches stale READMEs |
+
+### Phase 7: Reflect — Learn and protect
+
+| Skill | What it does |
+|-------|-------------|
+| `/ce-compound` | Documents solved problems in `docs/solutions/` with YAML frontmatter. Future sessions search this via `learnings-researcher` — knowledge compounds |
+| `/gstack-retro` | Team-aware weekly retro with per-person breakdowns, shipping streaks, test health trends |
+| `/gstack-learn` | Per-project self-learning infrastructure |
+
+### Safety Guardrails
+
+| Skill | What it does |
+|-------|-------------|
+| `/gstack-careful` | Warns before destructive commands (rm -rf, DROP TABLE, force-push). Say "be careful" to activate |
+| `/gstack-freeze` | Restrict file edits to one directory while debugging. Hard block, not just a warning |
+| `/gstack-guard` | Careful + Freeze combined. Maximum safety for production work |
+| `/gstack-investigate` | Systematic root-cause debugging. Iron Law: no fixes without investigation first |
 
 ---
 
+## Knowledge Compounding Loop
+
+This is what makes ATV more than a collection of skills. Knowledge flows through the system:
+
+```
+solve problem → /ce-compound documents it → docs/solutions/
+                                                    ↓
+future /ce-plan → learnings-researcher searches docs/solutions/ → avoids past mistakes
+```
+
+Plans live in `docs/plans/` (created by `/ce-plan`, consumed by `/ce-work`). Brainstorms live in `docs/brainstorms/` (created by `/ce-brainstorm`, auto-discovered by `/ce-plan`). Solutions live in `docs/solutions/` (created by `/ce-compound`, searched by every future planning session). Everything is file-based and git-tracked — your team's knowledge compounds with every PR.
+
 ---
 
-## 🔬 Compound Engineering Pipeline
+## The Agent Roster (28 Specialized Agents)
 
-The ATV Starter Kit includes the **compound-engineering** multi-agent pipeline:
-
-### `/lfg` (sequential) and `/slfg` (swarm/parallel)
-
-These are the "run everything" entry points. The pipeline is:
-
-```
-  brainstorm → plan → deepen → work → review → fix → test → video → compound
-       💭        📋      🔍       🔨     👀      🔧     🧪      🎬       📚
-```
-
-| # | Step | What it does |
-|---|------|--------------|
-| 1 | `/ce-brainstorm` | Explore WHAT to build (optional, user-driven) |
-| 2 | `/ce-plan` | Create a structured plan document |
-| 3 | `/deepen-plan` | Enrich plan sections with parallel research agents |
-| 4 | `/ce-work` | Execute the plan (write code, tests, commits) |
-| 5 | `/ce-review` | Multi-agent code review (security, perf, architecture) |
-| 6 | `/resolve_todo_parallel` | Fix findings from review in parallel |
-| 7 | `/test-browser` | Browser-based testing |
-| 8 | `/feature-video` | Record a walkthrough, attach to PR |
-| 9 | `/ce-compound` | Document what you learned for future sessions |
-
-> Each step has a **GATE** — the pipeline won't advance until the prior step produces its artifact.
-
-## 🧠 The 5 Core Skills
-
-### 1. `ce-brainstorm` — "What should we build?"
-
-- Interactive dialogue using `AskUserQuestion` to clarify requirements
-- Runs `repo-research-analyst` to understand existing patterns
-- Produces a brainstorm document in `docs/brainstorms/`
-- Assesses whether brainstorming is even needed (clear requirements skip it)
-- Hands off to `/ce-plan`
-
-### 2. `ce-plan` — "How do we build it?"
-
-- Checks for existing brainstorm docs and uses them as primary input
-- Runs **parallel research agents**: `repo-research-analyst`, `learnings-researcher`, optionally `best-practices-researcher` + `framework-docs-researcher`
-- Makes a **risk-based research decision** — security/payments always get external research; strong local context skips it
-- Runs `spec-flow-analyzer` to validate user flows and edge cases
-- Outputs a plan in `docs/plans/` with YAML frontmatter, acceptance criteria, and checkboxes
-
-### 3. `ce-work` — "Execute the plan"
-
-- Reads the plan, breaks it into a todo list
-- Sets up git branches (supports worktrees for parallel dev)
-- Implements task-by-task with a **System-Wide Test Check** table (callbacks, mocks, orphaned state, error alignment)
-- Makes **incremental commits** at logical boundaries
-- Checks off plan items as they're completed (`[ ]` → `[x]`)
-- Optionally runs Figma design sync for UI work
-- Quality checks with configurable reviewer agents before finishing
-
-### 4. `ce-review` — "Multi-perspective code review"
-
-- Configurable via `compound-engineering.local.md` (created by `/setup`)
-- Launches **parallel review agents** (e.g., security-sentinel, performance-oracle, architecture-strategist, code-simplicity-reviewer, language-specific reviewers like kieran-rails-reviewer)
-- Has **conditional agents** that only fire for specific PR types (database migrations trigger schema-drift-detector + data-migration-expert + deployment-verification-agent)
-- "Ultra-thinking" deep dive with stakeholder perspective analysis (developer, ops, end user, security, business)
-- Supports `--serial` mode for long sessions to avoid context limits
-
-### 5. `ce-compound` — "Document what we learned"
-
-- Captures recently-solved problems into `docs/solutions/` with YAML frontmatter
-- Launches 5 parallel sub-agents: Context Analyzer, Solution Extractor, Related Docs Finder, Prevention Strategist
-- Has a **context budget check** — warns if the session is too long and offers a compact-safe mode
-- Creates searchable institutional knowledge that future sessions consume via `learnings-researcher`
-
-## 🤖 The Agent Roster (28 Specialized Agents)
-
-The `.github/agents/` directory contains **28 `.agent.md` files**, each a specialized persona:
+Every agent in `.github/agents/` is a specialist that can be invoked by skills during review, planning, or debugging:
 
 | Category | Agents |
 |----------|--------|
@@ -289,82 +222,91 @@ The `.github/agents/` directory contains **28 `.agent.md` files**, each a specia
 | **Design** | `design-implementation-reviewer`, `design-iterator`, `figma-design-sync` |
 | **Research** | `repo-research-analyst`, `best-practices-researcher`, `framework-docs-researcher`, `learnings-researcher`, `git-history-analyzer` |
 | **Process** | `pr-comment-resolver`, `spec-flow-analyzer`, `bug-reproduction-validator`, `pattern-recognition-specialist` |
-| **Meta** | `agent-native-reviewer` (ensures features are agent-accessible), `ankane-readme-writer` |
+| **Meta** | `agent-native-reviewer`, `ankane-readme-writer` |
 | **Ops** | `lint` |
 
 ---
 
-## 🏗️ Key Design Patterns
+## All 6 Copilot Lifecycle Hooks
 
-### 1. Parallel Sub-Agent Orchestration
+| # | Hook | File | When It Fires |
+|---|------|------|---------------|
+| 1 | **System Instructions** | `.github/copilot-instructions.md` | Every Copilot chat — injected as system context |
+| 2 | **Setup Steps** | `.github/copilot-setup-steps.yml` | When Copilot Coding Agent initializes |
+| 3 | **MCP Servers** | `.github/copilot-mcp-config.json` | When Copilot starts — registers tool servers |
+| 4 | **Skills** | `.github/skills/*/SKILL.md` | When skill description matches user's request |
+| 5 | **Agents** | `.github/agents/*.agent.md` | When invoked by subagent orchestration |
+| 6 | **File Instructions** | `.github/*.instructions.md` | Auto-loaded by `applyTo` glob when editing files |
 
-Nearly every step spawns multiple agents simultaneously. `/ce-plan` runs research agents in parallel. `/ce-review` runs all reviewers in parallel. `/ce-compound` runs 5 extractors in parallel. `/slfg` even parallelizes review + browser testing.
+## Supported Stacks
 
-### 2. Living Documents as State
+| Stack | Detection | Additional Content |
+|-------|-----------|-------------------|
+| **TypeScript** | `tsconfig.json` | `kieran-typescript-reviewer` agent, TS file instructions |
+| **Python** | `pyproject.toml` / `requirements.txt` | `kieran-python-reviewer` agent, Python file instructions |
+| **Rails** | `Gemfile` + `config/routes.rb` | 8 additional agents (DHH, data integrity, schema drift, ...), Ruby file instructions |
+| **General** | fallback | Universal agents and skills only |
 
-Plans in `docs/plans/` serve as shared state. `/ce-plan` creates them, `/deepen-plan` enriches them, `/ce-work` checks off items, `/ce-review` protects them from deletion. Brainstorms in `docs/brainstorms/` feed into plans. Solutions in `docs/solutions/` feed back into future planning.
+## MCP Servers
 
-### 3. Knowledge Compounding Loop
+Pre-configured in `.github/copilot-mcp-config.json`:
 
-This is the signature pattern:
-
-```
-solve problem → /ce-compound documents it → docs/solutions/
-                                                    ↓
-future /ce-plan → learnings-researcher searches docs/solutions/ → avoids past mistakes
-```
-
-### 4. Configurable Per-Project
-
-The `setup` skill auto-detects your stack (Rails, Python, TypeScript, etc.) and writes `compound-engineering.local.md` with the right reviewer agents. This means `/ce-review` and `/ce-work` adapt to any project.
-
-### 5. Gate-Based Progression
-
-`/lfg` enforces strict ordering with verification gates. No coding until a plan exists. No review until code exists. This prevents the common AI failure mode of jumping straight to implementation.
-
-## ✨ Why ATV?
-
-| | Feature | |
-|---|---|---|
-| 🔄 | **Full-lifecycle coverage** | Brainstorm through video demo — nothing is manual |
-| 🧠 | **Institutional memory** | AI agents that learn from past sessions via the compound loop |
-| 👀 | **Multi-perspective review** | 28 agents cover more angles than any human reviewer |
-| 📊 | **Configurable depth** | MINIMAL / STANDARD / COMPREHENSIVE detail levels |
-| 🛡️ | **Risk-aware research** | Always researches high-risk areas; skips when patterns are clear |
+| Server | Type | Package |
+|--------|------|---------|
+| **Context7** | SSE (remote) | `mcp.context7.com` |
+| **GitHub** | stdio (npx) | `@modelcontextprotocol/server-github` (needs PAT) |
+| **Azure** | stdio (npx) | `@azure/mcp` |
+| **Terraform** | stdio (npx) | `terraform-mcp-server` |
 
 ---
 
-## 📁 Project Structure
+## Prerequisites
+
+### Required
+
+- **Git** — for gstack clone and general usage
+- **Node.js 16+** — for npx-based MCP servers
+
+### Optional (for gstack browser skills)
+
+- **Bun** — required for `/gstack-qa`, `/gstack-browse`, `/gstack-benchmark`. Install: [bun.sh](https://bun.sh)
+- **GitHub PAT** — needed for GitHub MCP server (`repo`, `read:org` scopes)
+- **Azure CLI** — `az login` for Azure MCP authentication
+
+Without Bun, text-based gstack skills (`/gstack-review`, `/gstack-ship`, `/gstack-careful`, etc.) work fine. Only browser-based skills are disabled.
+
+## How It Works Under the Hood
 
 ```
-atv-installer/
-├── cmd/
-│   ├── root.go              # Cobra root command
-│   └── init.go              # `init` subcommand + --guided flag
-├── pkg/
-│   ├── detect/detect.go     # Stack detection (Rails/Python/TS/General)
-│   ├── scaffold/
-│   │   ├── scaffold.go      # Idempotent file writer + JSON merge
-│   │   ├── catalog.go       # Component registry + go:embed
-│   │   ├── hooks.go         # Copilot lifecycle hooks (1-6)
-│   │   └── templates/       # All embedded content
-│   │       ├── skills/      # 11 SKILL.md files
-│   │       ├── agents/      # 28 .agent.md files
-│   │       ├── configs/     # MCP config + extensions.json
-│   │       ├── instructions/  # copilot-instructions.md per stack
-│   │       ├── setup-steps/   # copilot-setup-steps.yml per stack
-│   │       └── file-instructions/  # *.instructions.md with applyTo
-│   ├── tui/wizard.go        # Interactive guided mode (charmbracelet/huh)
-│   └── output/printer.go    # Terminal output with status indicators
-├── main.go
-├── go.mod / go.sum
-├── .goreleaser.yml           # Cross-platform release builds
-└── .github/workflows/
-    ├── ci.yml                # Build + test + lint
-    └── release.yml           # goreleaser on tag push
+atv-installer init --guided
+        │
+        ▼
+ Detect stack (TS/Python/Rails/General) + detect git/bun/node
+        │
+        ▼
+ TUI: Pick skills by function (planning, review, QA, security, ...)
+        │
+        ├── ATV skills ──► Embedded templates → .github/skills/*/SKILL.md
+        │
+        └── gstack skills ──► git clone → .gstack/ (staging)
+                                    │
+                                    ├── bun run gen:skill-docs --host codex
+                                    ├── Copy gstack-*/SKILL.md → .github/skills/
+                                    └── Create sidecar: .github/skills/gstack/
+                                         (bin/, browse/, ETHOS.md, review assets)
 ```
 
-## 🛠️ Development
+**Key details:**
+- `.gstack/` is a gitignored staging area with the full gstack repo and runtime
+- `.github/skills/gstack-*/SKILL.md` are the lightweight copies Copilot discovers
+- `.github/skills/gstack/` is the runtime sidecar (binaries, utilities, checklists)
+- All skills are at one level deep in `.github/skills/` — exactly what Copilot expects
+- ATV skills have no prefix; gstack skills have `gstack-` prefix — no naming collisions
+- Idempotent: running again skips existing files, merges JSON configs
+
+---
+
+## Development
 
 ```bash
 # Build
@@ -374,18 +316,25 @@ go build -o atv-installer .
 ./atv-installer init
 ./atv-installer init --guided
 
+# Test
+go test ./...                              # all tests
+go test ./pkg/gstack/ -v                   # gstack unit tests
+go test ./test/sandbox/ -v                 # integration tests (sandbox)
+go test ./test/sandbox/ -v -run TestGstack # network-dependent gstack tests (skip with -short)
+
 # Test in a sandbox
 mkdir /tmp/test-project && cd /tmp/test-project
-/path/to/atv-installer init
+echo '{}' > tsconfig.json && git init
+/path/to/atv-installer init --guided
 ```
 
-## ⚠️ Limitations & Considerations
+## Limitations
 
+- **Bun required for browser skills** — `/gstack-qa`, `/gstack-browse`, `/gstack-benchmark` need Bun installed
+- **Network required for gstack** — guided mode clones gstack at install time (~22MB)
 - **Token-heavy pipeline** — running 5+ parallel agents in a long session can hit context limits
-- **TUI requires proper terminal** — `--guided` mode needs Windows Terminal / iTerm / real TTY (not VS Code integrated terminal)
-- **Assumes CLI tools** — MCP servers need Node.js (`npx`), GitHub operations need `gh` CLI
-- **Opinionated docs structure** — creates `docs/plans/`, `docs/brainstorms/`, `docs/solutions/`
-- **Originally Claude Code** — some skill patterns (Task tool, Bash commands) are Claude Code idioms that map approximately to Copilot
+- **TUI requires proper terminal** — `--guided` mode needs Windows Terminal / iTerm (not VS Code integrated terminal)
+- **gstack `./setup` on Windows** — falls back to `bun run gen:skill-docs` (bash path issues with Git Bash)
 
 ---
 
@@ -395,6 +344,6 @@ mkdir /tmp/test-project && cd /tmp/test-project
 
 MIT
 
-Built with ❤️ by [All The Vibes](https://github.com/All-The-Vibes)
+Built with ❤️ by [All The Vibes](https://github.com/All-The-Vibes) — powered by [gstack](https://github.com/garrytan/gstack)
 
 </div>
