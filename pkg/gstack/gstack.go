@@ -153,7 +153,8 @@ func generateDocs(gstackDir string) error {
 	return nil
 }
 
-// copyGeneratedSkills copies gstack-*/SKILL.md from .agents/skills/ to .github/skills/.
+// copyGeneratedSkills copies gstack-*/SKILL.md from .agents/skills/ to .github/skills/,
+// and creates a runtime sidecar at .github/skills/gstack/ with bin/, browse/dist/, ETHOS.md.
 // Falls back to copying raw skill dirs if .agents/ doesn't exist.
 func copyGeneratedSkills(gstackDir, targetSkillsDir string) (bool, []string) {
 	var dirs []string
@@ -166,7 +167,7 @@ func copyGeneratedSkills(gstackDir, targetSkillsDir string) (bool, []string) {
 				continue
 			}
 			name := e.Name()
-			// Only copy gstack-prefixed skill dirs
+			// Only copy gstack-prefixed skill dirs (not the root "gstack" sidecar)
 			if len(name) < 7 || name[:7] != "gstack-" {
 				continue
 			}
@@ -187,40 +188,131 @@ func copyGeneratedSkills(gstackDir, targetSkillsDir string) (bool, []string) {
 			}
 			dirs = append(dirs, name)
 		}
-		if len(dirs) > 0 {
-			return true, dirs
-		}
 	}
 
 	// Fallback: copy raw skill dirs directly from gstack root
-	entries, err := os.ReadDir(gstackDir)
+	if len(dirs) == 0 {
+		entries, err := os.ReadDir(gstackDir)
+		if err != nil {
+			return false, nil
+		}
+		for _, e := range entries {
+			if !e.IsDir() {
+				continue
+			}
+			name := e.Name()
+			srcSkill := filepath.Join(gstackDir, name, "SKILL.md")
+			if _, err := os.Stat(srcSkill); err != nil {
+				continue
+			}
+			destName := "gstack-" + name
+			destDir := filepath.Join(targetSkillsDir, destName)
+			if err := os.MkdirAll(destDir, 0755); err != nil {
+				continue
+			}
+			data, err := os.ReadFile(srcSkill)
+			if err != nil {
+				continue
+			}
+			if err := os.WriteFile(filepath.Join(destDir, "SKILL.md"), data, 0644); err != nil {
+				continue
+			}
+			dirs = append(dirs, destName)
+		}
+	}
+
+	// Create runtime sidecar at .github/skills/gstack/
+	// Skills reference $GSTACK_ROOT for binaries, ETHOS.md, and review assets
+	createSidecar(gstackDir, targetSkillsDir)
+
+	return len(dirs) > 0, dirs
+}
+
+// createSidecar creates .github/skills/gstack/ with the runtime assets that skills reference.
+// This mirrors what gstack's ./setup creates for Codex at .agents/skills/gstack/.
+func createSidecar(gstackDir, targetSkillsDir string) {
+	sidecar := filepath.Join(targetSkillsDir, "gstack")
+	os.MkdirAll(sidecar, 0755)
+
+	// Copy root SKILL.md (the meta-skill for browse)
+	copyFileIfExists(filepath.Join(gstackDir, "SKILL.md"), filepath.Join(sidecar, "SKILL.md"))
+
+	// Copy ETHOS.md (referenced by "Search Before Building" in all skill preambles)
+	copyFileIfExists(filepath.Join(gstackDir, "ETHOS.md"), filepath.Join(sidecar, "ETHOS.md"))
+
+	// Copy AGENTS.md
+	copyFileIfExists(filepath.Join(gstackDir, "AGENTS.md"), filepath.Join(sidecar, "AGENTS.md"))
+
+	// Symlink or copy bin/ (gstack-config, gstack-update-check, etc.)
+	linkOrCopyDir(filepath.Join(gstackDir, "bin"), filepath.Join(sidecar, "bin"))
+
+	// Symlink or copy browse/dist/ (compiled browse binary)
+	browseDist := filepath.Join(gstackDir, "browse", "dist")
+	if _, err := os.Stat(browseDist); err == nil {
+		os.MkdirAll(filepath.Join(sidecar, "browse"), 0755)
+		linkOrCopyDir(browseDist, filepath.Join(sidecar, "browse", "dist"))
+	}
+
+	// Symlink or copy browse/bin/ (helper scripts)
+	browseBin := filepath.Join(gstackDir, "browse", "bin")
+	if _, err := os.Stat(browseBin); err == nil {
+		os.MkdirAll(filepath.Join(sidecar, "browse"), 0755)
+		linkOrCopyDir(browseBin, filepath.Join(sidecar, "browse", "bin"))
+	}
+
+	// Symlink or copy design/dist/ (design binary)
+	designDist := filepath.Join(gstackDir, "design", "dist")
+	if _, err := os.Stat(designDist); err == nil {
+		os.MkdirAll(filepath.Join(sidecar, "design"), 0755)
+		linkOrCopyDir(designDist, filepath.Join(sidecar, "design", "dist"))
+	}
+
+	// Copy review runtime assets (checklists, not the SKILL.md)
+	reviewAssets := []string{"checklist.md", "design-checklist.md", "greptile-triage.md", "TODOS-format.md"}
+	reviewDir := filepath.Join(sidecar, "review")
+	os.MkdirAll(reviewDir, 0755)
+	for _, f := range reviewAssets {
+		copyFileIfExists(filepath.Join(gstackDir, "review", f), filepath.Join(reviewDir, f))
+	}
+}
+
+func copyFileIfExists(src, dst string) {
+	data, err := os.ReadFile(src)
 	if err != nil {
-		return false, nil
+		return
+	}
+	_ = os.WriteFile(dst, data, 0644)
+}
+
+// linkOrCopyDir creates a symlink from src to dst. Falls back to copy on Windows if symlinks fail.
+func linkOrCopyDir(src, dst string) {
+	// Remove existing target
+	os.RemoveAll(dst)
+
+	// Try symlink first (works on most systems, needs dev mode on Windows)
+	if err := os.Symlink(src, dst); err == nil {
+		return
+	}
+
+	// Fallback: copy the directory
+	copyDir(src, dst)
+}
+
+func copyDir(src, dst string) {
+	os.MkdirAll(dst, 0755)
+	entries, err := os.ReadDir(src)
+	if err != nil {
+		return
 	}
 	for _, e := range entries {
-		if !e.IsDir() {
-			continue
+		srcPath := filepath.Join(src, e.Name())
+		dstPath := filepath.Join(dst, e.Name())
+		if e.IsDir() {
+			copyDir(srcPath, dstPath)
+		} else {
+			copyFileIfExists(srcPath, dstPath)
 		}
-		name := e.Name()
-		srcSkill := filepath.Join(gstackDir, name, "SKILL.md")
-		if _, err := os.Stat(srcSkill); err != nil {
-			continue
-		}
-		destName := "gstack-" + name
-		destDir := filepath.Join(targetSkillsDir, destName)
-		if err := os.MkdirAll(destDir, 0755); err != nil {
-			continue
-		}
-		data, err := os.ReadFile(srcSkill)
-		if err != nil {
-			continue
-		}
-		if err := os.WriteFile(filepath.Join(destDir, "SKILL.md"), data, 0644); err != nil {
-			continue
-		}
-		dirs = append(dirs, destName)
 	}
-	return len(dirs) > 0, dirs
 }
 
 // findBash locates bash executable — on Windows it ships with Git.
