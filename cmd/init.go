@@ -53,6 +53,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 	var gstackDirs []string
 	var gstackRuntime bool
 	var installAgentBrowser bool
+	var presetName string
 
 	if guided {
 		// Interactive TUI wizard
@@ -63,60 +64,30 @@ func runInit(cmd *cobra.Command, args []string) error {
 		catalog = scaffold.BuildFilteredCatalog(result.Stack, result.Components)
 		gstackDirs = result.GstackDirs
 		gstackRuntime = result.GstackRuntime
+		installAgentBrowser = result.IncludeAgentBrowser
+		presetName = result.PresetName
 
-		// Check if agent-browser was selected
-		for _, key := range result.ATVLayers {
-			if key == "agent-browser" {
-				installAgentBrowser = true
-			}
+		// Build install steps for progress display
+		steps := buildInstallSteps(targetDir, catalog, gstackDirs, gstackRuntime, installAgentBrowser)
+
+		// Run with animated progress
+		if err := tui.RunProgress(steps, presetName, string(result.Stack)); err != nil {
+			return fmt.Errorf("install failed: %w", err)
 		}
+
+		// Print summary after progress completes
+		printer.PrintNextSteps(env.Stack, len(gstackDirs) > 0, installAgentBrowser)
 	} else {
 		// One-click mode — install everything for detected stack (ATV only, no gstack)
 		catalog = scaffold.BuildCatalog(env.Stack)
+
+		// Phase 3: Write ATV files
+		results := scaffold.WriteAll(targetDir, catalog)
+
+		// Phase 4: Print summary
+		printer.PrintResults(results)
+		printer.PrintNextSteps(env.Stack, false, false)
 	}
-
-	// Phase 3: Write ATV files
-	results := scaffold.WriteAll(targetDir, catalog)
-
-	// Phase 3b: Install gstack if selected
-	if len(gstackDirs) > 0 {
-		mode := gstack.ModeMarkdownOnly
-		if gstackRuntime {
-			mode = gstack.ModeFullRuntime
-		}
-
-		printer.PrintGstackStart(mode)
-		gResult := gstack.Install(targetDir, mode)
-
-		if gResult.Error != nil {
-			printer.GstackError(gResult.Error)
-		} else {
-			printer.PrintGstackResult(gResult)
-		}
-	}
-
-	// Phase 3c: Install agent-browser if selected
-	if installAgentBrowser {
-		printer.Info("🌐 Installing agent-browser...")
-		abResult := agentbrowser.Install(targetDir)
-		if abResult.Error != nil {
-			printer.Info(fmt.Sprintf("  ⚠️ agent-browser: %v", abResult.Error))
-		} else {
-			if abResult.SkillCopied {
-				printer.Info("  ✅ agent-browser SKILL.md copied to .github/skills/agent-browser/")
-			}
-			if abResult.Installed {
-				printer.Info("  ✅ agent-browser CLI available")
-			}
-			if abResult.Warning != "" {
-				printer.Info(fmt.Sprintf("  ⚠️ %s", abResult.Warning))
-			}
-		}
-	}
-
-	// Phase 4: Print summary
-	printer.PrintResults(results)
-	printer.PrintNextSteps(env.Stack, len(gstackDirs) > 0, installAgentBrowser)
 
 	// Update plan checkboxes only when running inside the installer repository.
 	if isInstallerRepo(targetDir) {
@@ -124,6 +95,54 @@ func runInit(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+// buildInstallSteps creates the ordered list of install steps for the progress display.
+func buildInstallSteps(targetDir string, catalog []scaffold.Component, gstackDirs []string, gstackRuntime bool, installAgentBrowser bool) []tui.InstallStep {
+	var steps []tui.InstallStep
+
+	// Step 1: ATV scaffold (always)
+	steps = append(steps, tui.InstallStep{
+		Name: "Scaffolding ATV files",
+		Action: func() error {
+			scaffold.WriteAll(targetDir, catalog)
+			return nil
+		},
+	})
+
+	// Step 2: gstack clone (if selected)
+	if len(gstackDirs) > 0 {
+		mode := gstack.ModeMarkdownOnly
+		if gstackRuntime {
+			mode = gstack.ModeFullRuntime
+		}
+		steps = append(steps, tui.InstallStep{
+			Name: "Cloning gstack",
+			Action: func() error {
+				result := gstack.Install(targetDir, mode)
+				if result.Error != nil {
+					return result.Error
+				}
+				return nil
+			},
+		})
+	}
+
+	// Step 3: agent-browser (if selected)
+	if installAgentBrowser {
+		steps = append(steps, tui.InstallStep{
+			Name: "Installing agent-browser + Chrome",
+			Action: func() error {
+				result := agentbrowser.Install(targetDir)
+				if result.Error != nil {
+					return result.Error
+				}
+				return nil
+			},
+		})
+	}
+
+	return steps
 }
 
 func isInstallerRepo(dir string) bool {
