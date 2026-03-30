@@ -63,41 +63,31 @@ func NewPrinter() *Printer {
 	return &Printer{}
 }
 
-// PrintBanner shows the ATV ASCII art logo centered in solid yellow.
+// PrintBanner shows the retro terminal-style ATV 2.0 banner.
 func (p *Printer) PrintBanner() {
 	art := strings.TrimRight(bannerText, "\n\r ")
 	lines := strings.Split(art, "\n")
 
-	// Find the widest line for centering
-	maxWidth := 0
-	for _, line := range lines {
-		if len([]rune(line)) > maxWidth {
-			maxWidth = len([]rune(line))
-		}
-	}
+	border := "  ✦ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ✦"
 
-	// Terminal width target for centering (typical 80 cols)
-	termWidth := 70
-	border := "  ✦ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ✦"
+	// Boot messages (retro terminal style)
 	fmt.Println(dimStyle.Render(border))
 	fmt.Println()
+	fmt.Println(dimStyle.Render("  > booting all the vibes 2.0 starter kit..."))
+	fmt.Println(dimStyle.Render("  > loading compound-engineering + gstack + copilot hooks"))
+	fmt.Println()
 
-	// Render each line centered with gradient yellow
+	// Render ASCII art with gradient
 	for i, line := range lines {
-		runeLen := len([]rune(line))
-		pad := (termWidth - runeLen) / 2
-		if pad < 0 {
-			pad = 0
-		}
 		style := bannerGradient[i%len(bannerGradient)]
-		fmt.Println(style.Render(strings.Repeat(" ", pad) + line))
+		fmt.Println(style.Render("  " + line))
 	}
 
 	fmt.Println()
 	fmt.Println(dimStyle.Render(border))
 	fmt.Println()
-	fmt.Println(accentStyle.Render("              ⚡") + titleStyle.Render(" Agentic Tool & Vibes ") + accentStyle.Render("⚡"))
-	fmt.Println(dimStyle.Render("           One command. Instant agentic coding."))
+	fmt.Println(accentStyle.Render("  ⚡") + titleStyle.Render(" All The Vibes 2.0 ") + accentStyle.Render("⚡"))
+	fmt.Println(dimStyle.Render("  One command. Full agentic coding setup."))
 	fmt.Println()
 }
 
