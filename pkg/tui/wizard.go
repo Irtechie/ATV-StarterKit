@@ -91,14 +91,11 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 	}
 
 	// ── Screen 2: Preset selection ──
-	var selectedPreset string
+	selectedPreset := "starter" // default to starter so all 3 are visible
 	presetOptions := make([]huh.Option[string], 0, 3)
 	for _, p := range AllPresets() {
 		label := fmt.Sprintf("%s %s — %s", p.Emoji, p.Name, p.Description)
 		opt := huh.NewOption(label, p.Key)
-		if p.Key == "pro" {
-			opt = opt.Selected(true)
-		}
 		presetOptions = append(presetOptions, opt)
 	}
 
