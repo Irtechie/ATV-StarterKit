@@ -30,6 +30,13 @@ This project uses the ATV (Agentic Tool & Workflow) Starter Kit.
 - `/investigate` — Systematic root-cause debugging
 - `/retro` — Weekly retrospective with trends
 
+## Browser Automation (if installed)
+
+- `agent-browser` — Vercel's headless browser CLI for AI agents (Rust native, fast)
+- Core workflow: `agent-browser open <url>` → `snapshot -i` → interact with `@refs` → re-snapshot
+- Install: `npm install -g agent-browser && agent-browser install`
+- Use for QA testing, form filling, screenshots, data extraction, and web automation
+
 ## ATV Override Rules
 
 When both ATV and gstack provide similar functionality, ATV takes priority:

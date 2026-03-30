@@ -39,6 +39,9 @@ var atvCategoryMapping = map[string][]CategorySkill{
 		{Label: "SLFG — swarm mode parallel execution", Key: "orchestrators:slfg", Source: "atv"},
 		{Label: "CE Compound — document solutions", Key: "core-skills:ce-compound", Source: "atv"},
 	},
+	gstack.CategoryQATesting: {
+		{Label: "agent-browser — Vercel's headless browser CLI for AI agents", Key: "agent-browser", Source: "atv"},
+	},
 }
 
 // BuildCategoryGroups creates the full list of TUI category groups,

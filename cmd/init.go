@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/agentbrowser"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/detect"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/gstack"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/output"
@@ -51,6 +52,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 	var catalog []scaffold.Component
 	var gstackDirs []string
 	var gstackRuntime bool
+	var installAgentBrowser bool
 
 	if guided {
 		// Interactive TUI wizard
@@ -61,6 +63,13 @@ func runInit(cmd *cobra.Command, args []string) error {
 		catalog = scaffold.BuildFilteredCatalog(result.Stack, result.Components)
 		gstackDirs = result.GstackDirs
 		gstackRuntime = result.GstackRuntime
+
+		// Check if agent-browser was selected
+		for _, key := range result.ATVLayers {
+			if key == "agent-browser" {
+				installAgentBrowser = true
+			}
+		}
 	} else {
 		// One-click mode — install everything for detected stack (ATV only, no gstack)
 		catalog = scaffold.BuildCatalog(env.Stack)
@@ -83,6 +92,25 @@ func runInit(cmd *cobra.Command, args []string) error {
 			printer.GstackError(gResult.Error)
 		} else {
 			printer.PrintGstackResult(gResult)
+		}
+	}
+
+	// Phase 3c: Install agent-browser if selected
+	if installAgentBrowser {
+		printer.Info("🌐 Installing agent-browser...")
+		abResult := agentbrowser.Install(targetDir)
+		if abResult.Error != nil {
+			printer.Info(fmt.Sprintf("  ⚠️ agent-browser: %v", abResult.Error))
+		} else {
+			if abResult.SkillCopied {
+				printer.Info("  ✅ agent-browser SKILL.md copied to .github/skills/agent-browser/")
+			}
+			if abResult.Installed {
+				printer.Info("  ✅ agent-browser CLI available")
+			}
+			if abResult.Warning != "" {
+				printer.Info(fmt.Sprintf("  ⚠️ %s", abResult.Warning))
+			}
 		}
 	}
 
