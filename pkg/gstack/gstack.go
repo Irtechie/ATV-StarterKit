@@ -299,7 +299,7 @@ func linkOrCopyDir(src, dst string) {
 }
 
 func copyDir(src, dst string) {
-	os.MkdirAll(dst, 0755)
+	_ = os.MkdirAll(dst, 0755)
 	entries, err := os.ReadDir(src)
 	if err != nil {
 		return
