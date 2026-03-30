@@ -76,7 +76,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 		}
 
 		// Print summary after progress completes
-		printer.PrintNextSteps(env.Stack, len(gstackDirs) > 0, installAgentBrowser)
+		printer.PrintNextSteps(len(gstackDirs) > 0, installAgentBrowser)
 	} else {
 		// One-click mode — install everything for detected stack (ATV only, no gstack)
 		catalog = scaffold.BuildCatalog(env.Stack)
@@ -86,7 +86,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 		// Phase 4: Print summary
 		printer.PrintResults(results)
-		printer.PrintNextSteps(env.Stack, false, false)
+		printer.PrintNextSteps(false, false)
 	}
 
 	// Update plan checkboxes only when running inside the installer repository.
