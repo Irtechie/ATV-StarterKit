@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/detect"
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/gstack"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/output"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/scaffold"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/tui"
@@ -48,6 +49,8 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	// Phase 2: Determine components
 	var catalog []scaffold.Component
+	var gstackDirs []string
+	var gstackRuntime bool
 
 	if guided {
 		// Interactive TUI wizard
@@ -56,17 +59,37 @@ func runInit(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		catalog = scaffold.BuildFilteredCatalog(result.Stack, result.Components)
+		gstackDirs = result.GstackDirs
+		gstackRuntime = result.GstackRuntime
 	} else {
-		// One-click mode — install everything for detected stack
+		// One-click mode — install everything for detected stack (ATV only, no gstack)
 		catalog = scaffold.BuildCatalog(env.Stack)
 	}
 
-	// Phase 3: Write files
+	// Phase 3: Write ATV files
 	results := scaffold.WriteAll(targetDir, catalog)
+
+	// Phase 3b: Install gstack if selected
+	if len(gstackDirs) > 0 {
+		gstackTargetDir := filepath.Join(targetDir, ".github", "skills", "gstack")
+		mode := gstack.ModeMarkdownOnly
+		if gstackRuntime {
+			mode = gstack.ModeFullRuntime
+		}
+
+		printer.PrintGstackStart(mode)
+		gResult := gstack.Install(gstackTargetDir, mode)
+
+		if gResult.Error != nil {
+			printer.GstackError(gResult.Error)
+		} else {
+			printer.PrintGstackResult(gResult)
+		}
+	}
 
 	// Phase 4: Print summary
 	printer.PrintResults(results)
-	printer.PrintNextSteps(env.Stack)
+	printer.PrintNextSteps(env.Stack, len(gstackDirs) > 0)
 
 	// Update plan checkboxes only when running inside the installer repository.
 	if isInstallerRepo(targetDir) {

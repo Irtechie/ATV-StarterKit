@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/detect"
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/gstack"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/scaffold"
+	"github.com/charmbracelet/lipgloss"
 )
 
 //go:embed banner.txt
@@ -44,6 +45,14 @@ var (
 
 	dimStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("136")) // dim gold for decorative lines
+
+	cloneStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("39")). // blue
+			Bold(true)
+
+	buildStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("208")). // orange
+			Bold(true)
 )
 
 // Printer handles terminal output with colored status indicators.
@@ -137,7 +146,7 @@ func (p *Printer) PrintResults(results []scaffold.WriteResult) {
 }
 
 // PrintNextSteps shows post-install guidance.
-func (p *Printer) PrintNextSteps(stack detect.Stack) {
+func (p *Printer) PrintNextSteps(stack detect.Stack, hasGstack bool) {
 	fmt.Println()
 	fmt.Println(successStyle.Render("  🎉 ATV Starter Kit ready!"))
 	fmt.Println()
@@ -145,7 +154,42 @@ func (p *Printer) PrintNextSteps(stack detect.Stack) {
 	fmt.Println(titleStyle.Render("    1.") + " Open this folder in VS Code")
 	fmt.Println(titleStyle.Render("    2.") + " Install recommended extensions when prompted")
 	fmt.Println(titleStyle.Render("    3.") + ` Try: /ce-brainstorm "your first feature idea"`)
+	if hasGstack {
+		fmt.Println(titleStyle.Render("    4.") + ` Try: /office-hours to start a gstack sprint`)
+		fmt.Println()
+		fmt.Println(dimStyle.Render("  Note: gstack creates ~/.gstack/ for session tracking and config."))
+	}
 	fmt.Println()
+}
+
+// PrintGstackStart shows the beginning of gstack installation.
+func (p *Printer) PrintGstackStart(mode gstack.InstallMode) {
+	fmt.Println()
+	modeLabel := "markdown-only"
+	if mode == gstack.ModeFullRuntime {
+		modeLabel = "full runtime"
+	}
+	fmt.Printf("  %s Installing gstack (%s)...\n", cloneStyle.Render("🔗"), modeLabel)
+}
+
+// PrintGstackResult shows the result of gstack installation.
+func (p *Printer) PrintGstackResult(result *gstack.InstallResult) {
+	if result.Warning != "" {
+		fmt.Printf("  %s %s\n", skipStyle.Render("⚠️"), result.Warning)
+		return
+	}
+	if result.Cloned {
+		fmt.Printf("  %s gstack cloned (%d skills)\n", cloneStyle.Render("🔗"), len(result.SkillDirs))
+	}
+	if result.Built {
+		fmt.Printf("  %s gstack binary built\n", buildStyle.Render("🔨"))
+	}
+}
+
+// GstackError shows a gstack installation error.
+func (p *Printer) GstackError(err error) {
+	fmt.Printf("  %s gstack install failed: %v\n", skipStyle.Render("⚠️"), err)
+	fmt.Println(dimStyle.Render("    ATV files were installed successfully. gstack can be added later."))
 }
 
 // Info prints an informational message.

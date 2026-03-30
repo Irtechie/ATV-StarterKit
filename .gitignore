@@ -29,6 +29,9 @@ Thumbs.db
 # Claude
 .claude/
 
+# gstack runtime state
+.gstack/
+
 # Node
 node_modules/
 

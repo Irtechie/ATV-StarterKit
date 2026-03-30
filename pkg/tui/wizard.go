@@ -3,29 +3,33 @@ package tui
 import (
 	"fmt"
 
-	"github.com/charmbracelet/huh"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/detect"
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/gstack"
+	"github.com/charmbracelet/huh"
 )
 
 // WizardResult holds the user's selections from the guided wizard.
 type WizardResult struct {
-	Stack      detect.Stack
-	Components []string
+	Stack         detect.Stack
+	Components    []string // legacy ATV layer keys (for backward compat)
+	ATVLayers     []string // parsed ATV layer keys
+	GstackDirs    []string // selected gstack skill directories
+	GstackRuntime bool     // whether to build the gstack TS binary
 }
 
 // component layer keys
 const (
-	LayerCoreSkills        = "core-skills"
-	LayerOrchestrators     = "orchestrators"
-	LayerUniversalAgents   = "universal-agents"
-	LayerStackAgents       = "stack-agents"
-	LayerMCPServers        = "mcp-servers"
-	LayerVSCodeExtensions  = "vscode-extensions"
+	LayerCoreSkills          = "core-skills"
+	LayerOrchestrators       = "orchestrators"
+	LayerUniversalAgents     = "universal-agents"
+	LayerStackAgents         = "stack-agents"
+	LayerMCPServers          = "mcp-servers"
+	LayerVSCodeExtensions    = "vscode-extensions"
 	LayerCopilotInstructions = "copilot-instructions"
-	LayerSetupSteps        = "setup-steps"
-	LayerFileInstructions  = "file-instructions"
-	LayerDocsStructure     = "docs-structure"
-	LayerLocalConfig       = "local-config"
+	LayerSetupSteps          = "setup-steps"
+	LayerFileInstructions    = "file-instructions"
+	LayerDocsStructure       = "docs-structure"
+	LayerLocalConfig         = "local-config"
 )
 
 // AllLayers returns all available component layer keys.
@@ -50,6 +54,9 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 		Stack: detected.Stack,
 	}
 
+	// Detect prerequisites for gstack runtime status
+	prereqs := gstack.DetectPrerequisites()
+
 	// Step 1: Confirm or override detected stack
 	stackOptions := []huh.Option[string]{
 		huh.NewOption("TypeScript", "typescript"),
@@ -70,8 +77,40 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 		selectedStack = "general"
 	}
 
-	// Step 2: Component selection
-	selectedComponents := AllLayers() // all selected by default
+	// Step 2: Build category-based skill options
+	groups := BuildCategoryGroups(prereqs)
+
+	var skillOptions []huh.Option[string]
+	for _, group := range groups {
+		for _, skill := range group.Skills {
+			label := skill.Label
+			if skill.IsGstack {
+				label = fmt.Sprintf("[gstack] %s", label)
+			}
+			if skill.RequiresBun && !prereqs.HasBun {
+				label = fmt.Sprintf("%s ⚠️ (requires Bun)", label)
+			}
+
+			opt := huh.NewOption(label, skill.Key)
+			// Default: select all ATV skills, select gstack skills that don't require unavailable runtime
+			if !skill.RequiresBun || prereqs.HasBun {
+				opt = opt.Selected(true)
+			}
+			skillOptions = append(skillOptions, opt)
+		}
+	}
+
+	// Step 3: Infrastructure layers (unchanged from original)
+	var infraOptions []huh.Option[string]
+	for _, infra := range InfraLayers {
+		infraOptions = append(infraOptions, huh.NewOption(infra.Label, infra.Key).Selected(true))
+	}
+
+	var selectedSkills []string
+	var selectedInfra []string
+
+	// Runtime status display
+	runtimeDesc := fmt.Sprintf("Prerequisites: %s", prereqs.Summary())
 
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -83,22 +122,17 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 		),
 		huh.NewGroup(
 			huh.NewMultiSelect[string]().
-				Title("Which components do you want?").
-				Description("All are selected by default. Deselect any you don't need.").
-				Options(
-					huh.NewOption("Core workflow skills (brainstorm, plan, deepen, work, review, compound)", LayerCoreSkills).Selected(true),
-					huh.NewOption("Orchestrators and finishers (lfg, slfg, todo, browser, video)", LayerOrchestrators).Selected(true),
-					huh.NewOption("Universal agents (security, performance, architecture, ...)", LayerUniversalAgents).Selected(true),
-					huh.NewOption("Stack-specific agents (language reviewers)", LayerStackAgents).Selected(true),
-					huh.NewOption("MCP servers (GitHub, Azure, Terraform, Context7)", LayerMCPServers).Selected(true),
-					huh.NewOption("VS Code extensions.json", LayerVSCodeExtensions).Selected(true),
-					huh.NewOption("Copilot instructions (.github/copilot-instructions.md)", LayerCopilotInstructions).Selected(true),
-					huh.NewOption("Copilot setup steps (.github/copilot-setup-steps.yml)", LayerSetupSteps).Selected(true),
-					huh.NewOption("File-scoped instructions (applyTo globs)", LayerFileInstructions).Selected(true),
-					huh.NewOption("docs/ structure (plans, brainstorms, solutions)", LayerDocsStructure).Selected(true),
-					huh.NewOption("Compound engineering local config", LayerLocalConfig),
-				).
-				Value(&selectedComponents),
+				Title("Workflow skills (ATV + gstack)").
+				Description(runtimeDesc).
+				Options(skillOptions...).
+				Value(&selectedSkills),
+		),
+		huh.NewGroup(
+			huh.NewMultiSelect[string]().
+				Title("Infrastructure & configuration").
+				Description("All selected by default. Deselect any you don't need.").
+				Options(infraOptions...).
+				Value(&selectedInfra),
 		),
 	).WithTheme(huh.ThemeCatppuccin())
 
@@ -119,6 +153,13 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 		result.Stack = detect.StackGeneral
 	}
 
-	result.Components = selectedComponents
+	// Parse selections into ATV layers and gstack dirs
+	atvLayers, gstackDirs := ParseSelections(selectedSkills)
+	atvLayers = append(atvLayers, selectedInfra...)
+	result.ATVLayers = atvLayers
+	result.GstackDirs = gstackDirs
+	result.Components = atvLayers // backward compat
+	result.GstackRuntime = prereqs.HasBun && len(gstackDirs) > 0
+
 	return result, nil
 }
