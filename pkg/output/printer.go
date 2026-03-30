@@ -146,7 +146,7 @@ func (p *Printer) PrintResults(results []scaffold.WriteResult) {
 }
 
 // PrintNextSteps shows post-install guidance.
-func (p *Printer) PrintNextSteps(stack detect.Stack, hasGstack bool) {
+func (p *Printer) PrintNextSteps(stack detect.Stack, hasGstack bool, hasAgentBrowser bool) {
 	fmt.Println()
 	fmt.Println(successStyle.Render("  🎉 ATV Starter Kit ready!"))
 	fmt.Println()
@@ -154,10 +154,21 @@ func (p *Printer) PrintNextSteps(stack detect.Stack, hasGstack bool) {
 	fmt.Println(titleStyle.Render("    1.") + " Open this folder in VS Code")
 	fmt.Println(titleStyle.Render("    2.") + " Install recommended extensions when prompted")
 	fmt.Println(titleStyle.Render("    3.") + ` Try: /ce-brainstorm "your first feature idea"`)
+	step := 4
 	if hasGstack {
-		fmt.Println(titleStyle.Render("    4.") + ` Try: /office-hours to start a gstack sprint`)
-		fmt.Println()
+		fmt.Println(titleStyle.Render(fmt.Sprintf("    %d.", step)) + ` Try: /office-hours to start a gstack sprint`)
+		step++
+	}
+	if hasAgentBrowser {
+		fmt.Println(titleStyle.Render(fmt.Sprintf("    %d.", step)) + ` Try: agent-browser open https://yourapp.com`)
+		step++
+	}
+	fmt.Println()
+	if hasGstack {
 		fmt.Println(dimStyle.Render("  Note: gstack creates ~/.gstack/ for session tracking and config."))
+	}
+	if hasAgentBrowser {
+		fmt.Println(dimStyle.Render("  Note: Run 'agent-browser install' once to download Chrome for Testing."))
 	}
 	fmt.Println()
 }

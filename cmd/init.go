@@ -116,7 +116,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	// Phase 4: Print summary
 	printer.PrintResults(results)
-	printer.PrintNextSteps(env.Stack, len(gstackDirs) > 0)
+	printer.PrintNextSteps(env.Stack, len(gstackDirs) > 0, installAgentBrowser)
 
 	// Update plan checkboxes only when running inside the installer repository.
 	if isInstallerRepo(targetDir) {
