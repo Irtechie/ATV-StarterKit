@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/detect"
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/gstack"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/scaffold"
+	"github.com/charmbracelet/lipgloss"
 )
 
 //go:embed banner.txt
@@ -44,6 +45,14 @@ var (
 
 	dimStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("136")) // dim gold for decorative lines
+
+	cloneStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("39")). // blue
+			Bold(true)
+
+	buildStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("208")). // orange
+			Bold(true)
 )
 
 // Printer handles terminal output with colored status indicators.
@@ -54,41 +63,31 @@ func NewPrinter() *Printer {
 	return &Printer{}
 }
 
-// PrintBanner shows the ATV ASCII art logo centered in solid yellow.
+// PrintBanner shows the retro terminal-style ATV 2.0 banner.
 func (p *Printer) PrintBanner() {
 	art := strings.TrimRight(bannerText, "\n\r ")
 	lines := strings.Split(art, "\n")
 
-	// Find the widest line for centering
-	maxWidth := 0
-	for _, line := range lines {
-		if len([]rune(line)) > maxWidth {
-			maxWidth = len([]rune(line))
-		}
-	}
+	border := "  ✦ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ✦"
 
-	// Terminal width target for centering (typical 80 cols)
-	termWidth := 70
-	border := "  ✦ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ✦"
+	// Boot messages (retro terminal style)
 	fmt.Println(dimStyle.Render(border))
 	fmt.Println()
+	fmt.Println(dimStyle.Render("  > booting all the vibes 2.0 starter kit..."))
+	fmt.Println(dimStyle.Render("  > compound-engineering + gstack + memory + agent browser"))
+	fmt.Println()
 
-	// Render each line centered with gradient yellow
+	// Render ASCII art with gradient
 	for i, line := range lines {
-		runeLen := len([]rune(line))
-		pad := (termWidth - runeLen) / 2
-		if pad < 0 {
-			pad = 0
-		}
 		style := bannerGradient[i%len(bannerGradient)]
-		fmt.Println(style.Render(strings.Repeat(" ", pad) + line))
+		fmt.Println(style.Render("  " + line))
 	}
 
 	fmt.Println()
 	fmt.Println(dimStyle.Render(border))
 	fmt.Println()
-	fmt.Println(accentStyle.Render("              ⚡") + titleStyle.Render(" Agentic Tool & Vibes ") + accentStyle.Render("⚡"))
-	fmt.Println(dimStyle.Render("           One command. Instant agentic coding."))
+	fmt.Println(accentStyle.Render("  ⚡") + titleStyle.Render(" All The Vibes 2.0 ") + accentStyle.Render("⚡"))
+	fmt.Println(dimStyle.Render("  One command. Full agentic coding setup."))
 	fmt.Println()
 }
 
@@ -137,7 +136,7 @@ func (p *Printer) PrintResults(results []scaffold.WriteResult) {
 }
 
 // PrintNextSteps shows post-install guidance.
-func (p *Printer) PrintNextSteps(stack detect.Stack) {
+func (p *Printer) PrintNextSteps(stack detect.Stack, hasGstack bool, hasAgentBrowser bool) {
 	fmt.Println()
 	fmt.Println(successStyle.Render("  🎉 ATV Starter Kit ready!"))
 	fmt.Println()
@@ -145,7 +144,50 @@ func (p *Printer) PrintNextSteps(stack detect.Stack) {
 	fmt.Println(titleStyle.Render("    1.") + " Open this folder in VS Code")
 	fmt.Println(titleStyle.Render("    2.") + " Install recommended extensions when prompted")
 	fmt.Println(titleStyle.Render("    3.") + ` Try: /ce-brainstorm "your first feature idea"`)
+	step := 4
+	if hasGstack {
+		fmt.Println(titleStyle.Render(fmt.Sprintf("    %d.", step)) + ` Try: /office-hours to start a gstack sprint`)
+		step++
+	}
+	if hasAgentBrowser {
+		fmt.Println(titleStyle.Render(fmt.Sprintf("    %d.", step)) + ` Try: agent-browser open https://yourapp.com`)
+		step++
+	}
 	fmt.Println()
+	if hasGstack {
+		fmt.Println(dimStyle.Render("  Note: gstack creates ~/.gstack/ for session tracking and config."))
+	}
+	fmt.Println()
+}
+
+// PrintGstackStart shows the beginning of gstack installation.
+func (p *Printer) PrintGstackStart(mode gstack.InstallMode) {
+	fmt.Println()
+	modeLabel := "markdown-only"
+	if mode == gstack.ModeFullRuntime {
+		modeLabel = "full runtime"
+	}
+	fmt.Printf("  %s Installing gstack (%s)...\n", cloneStyle.Render("🔗"), modeLabel)
+}
+
+// PrintGstackResult shows the result of gstack installation.
+func (p *Printer) PrintGstackResult(result *gstack.InstallResult) {
+	if result.Warning != "" {
+		fmt.Printf("  %s %s\n", skipStyle.Render("⚠️"), result.Warning)
+		return
+	}
+	if result.Cloned {
+		fmt.Printf("  %s gstack cloned (%d skills)\n", cloneStyle.Render("🔗"), len(result.SkillDirs))
+	}
+	if result.Built {
+		fmt.Printf("  %s gstack binary built\n", buildStyle.Render("🔨"))
+	}
+}
+
+// GstackError shows a gstack installation error.
+func (p *Printer) GstackError(err error) {
+	fmt.Printf("  %s gstack install failed: %v\n", skipStyle.Render("⚠️"), err)
+	fmt.Println(dimStyle.Render("    ATV files were installed successfully. gstack can be added later."))
 }
 
 // Info prints an informational message.

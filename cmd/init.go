@@ -6,7 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/agentbrowser"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/detect"
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/gstack"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/output"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/scaffold"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/tui"
@@ -48,6 +50,10 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	// Phase 2: Determine components
 	var catalog []scaffold.Component
+	var gstackDirs []string
+	var gstackRuntime bool
+	var installAgentBrowser bool
+	var presetName string
 
 	if guided {
 		// Interactive TUI wizard
@@ -56,17 +62,32 @@ func runInit(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		catalog = scaffold.BuildFilteredCatalog(result.Stack, result.Components)
+		gstackDirs = result.GstackDirs
+		gstackRuntime = result.GstackRuntime
+		installAgentBrowser = result.IncludeAgentBrowser
+		presetName = result.PresetName
+
+		// Build install steps for progress display
+		steps := buildInstallSteps(targetDir, catalog, gstackDirs, gstackRuntime, installAgentBrowser)
+
+		// Run with animated progress
+		if err := tui.RunProgress(steps, presetName, string(result.Stack)); err != nil {
+			return fmt.Errorf("install failed: %w", err)
+		}
+
+		// Print summary after progress completes
+		printer.PrintNextSteps(env.Stack, len(gstackDirs) > 0, installAgentBrowser)
 	} else {
-		// One-click mode — install everything for detected stack
+		// One-click mode — install everything for detected stack (ATV only, no gstack)
 		catalog = scaffold.BuildCatalog(env.Stack)
+
+		// Phase 3: Write ATV files
+		results := scaffold.WriteAll(targetDir, catalog)
+
+		// Phase 4: Print summary
+		printer.PrintResults(results)
+		printer.PrintNextSteps(env.Stack, false, false)
 	}
-
-	// Phase 3: Write files
-	results := scaffold.WriteAll(targetDir, catalog)
-
-	// Phase 4: Print summary
-	printer.PrintResults(results)
-	printer.PrintNextSteps(env.Stack)
 
 	// Update plan checkboxes only when running inside the installer repository.
 	if isInstallerRepo(targetDir) {
@@ -74,6 +95,54 @@ func runInit(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+// buildInstallSteps creates the ordered list of install steps for the progress display.
+func buildInstallSteps(targetDir string, catalog []scaffold.Component, gstackDirs []string, gstackRuntime bool, installAgentBrowser bool) []tui.InstallStep {
+	var steps []tui.InstallStep
+
+	// Step 1: ATV scaffold (always)
+	steps = append(steps, tui.InstallStep{
+		Name: "Scaffolding ATV files",
+		Action: func() error {
+			scaffold.WriteAll(targetDir, catalog)
+			return nil
+		},
+	})
+
+	// Step 2: gstack clone (if selected)
+	if len(gstackDirs) > 0 {
+		mode := gstack.ModeMarkdownOnly
+		if gstackRuntime {
+			mode = gstack.ModeFullRuntime
+		}
+		steps = append(steps, tui.InstallStep{
+			Name: "Cloning gstack",
+			Action: func() error {
+				result := gstack.Install(targetDir, mode)
+				if result.Error != nil {
+					return result.Error
+				}
+				return nil
+			},
+		})
+	}
+
+	// Step 3: agent-browser (if selected)
+	if installAgentBrowser {
+		steps = append(steps, tui.InstallStep{
+			Name: "Installing agent-browser + Chrome",
+			Action: func() error {
+				result := agentbrowser.Install(targetDir)
+				if result.Error != nil {
+					return result.Error
+				}
+				return nil
+			},
+		})
+	}
+
+	return steps
 }
 
 func isInstallerRepo(dir string) bool {

@@ -41,3 +41,9 @@ release:
     name: ATV-StarterKit
   draft: false
   prerelease: auto
+  header: |
+    ## ATV {{ .Version }}
+
+    See [CHANGELOG.md](https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/CHANGELOG.md) for full details.
+  extra_files:
+    - glob: .github/release-notes.md
