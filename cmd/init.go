@@ -71,14 +71,13 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	// Phase 3b: Install gstack if selected
 	if len(gstackDirs) > 0 {
-		gstackTargetDir := filepath.Join(targetDir, ".github", "skills", "gstack")
 		mode := gstack.ModeMarkdownOnly
 		if gstackRuntime {
 			mode = gstack.ModeFullRuntime
 		}
 
 		printer.PrintGstackStart(mode)
-		gResult := gstack.Install(gstackTargetDir, mode)
+		gResult := gstack.Install(targetDir, mode)
 
 		if gResult.Error != nil {
 			printer.GstackError(gResult.Error)

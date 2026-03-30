@@ -82,9 +82,13 @@ func TestGstackInstallMarkdownOnly(t *testing.T) {
 	}
 
 	sandboxDir := t.TempDir()
-	gstackDir := filepath.Join(sandboxDir, ".github", "skills", "gstack")
 
-	result := gstack.Install(gstackDir, gstack.ModeMarkdownOnly)
+	// Create .github/skills/ so copy has a target
+	if err := os.MkdirAll(filepath.Join(sandboxDir, ".github", "skills"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	result := gstack.Install(sandboxDir, gstack.ModeMarkdownOnly)
 
 	if result.Error != nil {
 		t.Fatalf("gstack install failed: %v", result.Error)
@@ -94,25 +98,34 @@ func TestGstackInstallMarkdownOnly(t *testing.T) {
 		t.Error("expected gstack to be cloned")
 	}
 
+	// .gstack/ staging dir should exist
+	gstackDir := filepath.Join(sandboxDir, ".gstack")
+	if _, err := os.Stat(gstackDir); os.IsNotExist(err) {
+		t.Error(".gstack/ staging directory should exist")
+	}
+
 	// Should not build in markdown-only mode
 	if result.Built {
 		t.Error("markdown-only mode should not build")
 	}
 
-	// .git should be stripped
-	if _, err := os.Stat(filepath.Join(gstackDir, ".git")); !os.IsNotExist(err) {
-		t.Error(".git directory should be removed after install")
-	}
-
-	// Should have skill dirs
+	// Should have copied skill dirs to .github/skills/gstack-*
 	if len(result.SkillDirs) == 0 {
 		t.Error("expected at least some skill directories")
+	}
+
+	// Verify skills are at the right level for Copilot discovery
+	for _, dir := range result.SkillDirs {
+		skillPath := filepath.Join(sandboxDir, ".github", "skills", dir, "SKILL.md")
+		if _, err := os.Stat(skillPath); os.IsNotExist(err) {
+			t.Errorf("expected skill file at %s", skillPath)
+		}
 	}
 }
 
 func TestGstackIdempotent(t *testing.T) {
 	sandboxDir := t.TempDir()
-	gstackDir := filepath.Join(sandboxDir, "gstack")
+	gstackDir := filepath.Join(sandboxDir, ".gstack")
 
 	// Create a fake existing install
 	if err := os.MkdirAll(gstackDir, 0755); err != nil {
@@ -121,8 +134,11 @@ func TestGstackIdempotent(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(gstackDir, "SKILL.md"), []byte("# gstack"), 0644); err != nil {
 		t.Fatal(err)
 	}
+	if err := os.MkdirAll(filepath.Join(sandboxDir, ".github", "skills"), 0755); err != nil {
+		t.Fatal(err)
+	}
 
-	result := gstack.Install(gstackDir, gstack.ModeMarkdownOnly)
+	result := gstack.Install(sandboxDir, gstack.ModeMarkdownOnly)
 	if result.Error != nil {
 		t.Fatalf("idempotent install should not error: %v", result.Error)
 	}

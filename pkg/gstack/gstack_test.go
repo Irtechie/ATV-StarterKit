@@ -80,79 +80,92 @@ func TestRuntimeAvailable(t *testing.T) {
 	}
 }
 
-func TestStripGit(t *testing.T) {
+func TestCopyGeneratedSkills(t *testing.T) {
 	tmpDir := t.TempDir()
+	gstackDir := filepath.Join(tmpDir, ".gstack")
+	skillsDir := filepath.Join(tmpDir, ".github", "skills")
 
-	// Create a fake .git directory
-	gitDir := filepath.Join(tmpDir, ".git")
-	if err := os.MkdirAll(gitDir, 0755); err != nil {
-		t.Fatal(err)
-	}
-	// Write a file inside .git
-	if err := os.WriteFile(filepath.Join(gitDir, "HEAD"), []byte("ref: refs/heads/main"), 0644); err != nil {
-		t.Fatal(err)
-	}
-
-	// Verify .git exists
-	if _, err := os.Stat(gitDir); os.IsNotExist(err) {
-		t.Fatal(".git should exist before strip")
+	// Create fake generated .agents/skills/gstack-* dirs
+	for _, name := range []string{"gstack-review", "gstack-qa", "gstack-ship"} {
+		dir := filepath.Join(gstackDir, ".agents", "skills", name)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte("# "+name), 0644); err != nil {
+			t.Fatal(err)
+		}
 	}
 
-	// Strip it
-	if err := StripGit(tmpDir); err != nil {
-		t.Fatalf("StripGit failed: %v", err)
+	copied, dirs := copyGeneratedSkills(gstackDir, skillsDir)
+	if !copied {
+		t.Error("expected skills to be copied")
+	}
+	if len(dirs) != 3 {
+		t.Errorf("expected 3 skill dirs, got %d: %v", len(dirs), dirs)
 	}
 
-	// Verify .git is gone
-	if _, err := os.Stat(gitDir); !os.IsNotExist(err) {
-		t.Error(".git should not exist after strip")
+	// Verify files exist in target
+	for _, name := range []string{"gstack-review", "gstack-qa", "gstack-ship"} {
+		skillPath := filepath.Join(skillsDir, name, "SKILL.md")
+		if _, err := os.Stat(skillPath); os.IsNotExist(err) {
+			t.Errorf("expected %s to exist", skillPath)
+		}
 	}
 }
 
-func TestListSkillDirs(t *testing.T) {
+func TestCopyFallbackRawSkills(t *testing.T) {
 	tmpDir := t.TempDir()
+	gstackDir := filepath.Join(tmpDir, ".gstack")
+	skillsDir := filepath.Join(tmpDir, ".github", "skills")
 
-	// Create fake skill directories
-	for _, name := range []string{"review", "qa", "ship"} {
-		skillDir := filepath.Join(tmpDir, name)
-		if err := os.MkdirAll(skillDir, 0755); err != nil {
+	// Create fake raw skill dirs (no .agents/, simulating failed gen)
+	for _, name := range []string{"review", "qa"} {
+		dir := filepath.Join(gstackDir, name)
+		if err := os.MkdirAll(dir, 0755); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(filepath.Join(skillDir, "SKILL.md"), []byte("# "+name), 0644); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte("# "+name), 0644); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	// Create a non-skill directory (no SKILL.md)
-	if err := os.MkdirAll(filepath.Join(tmpDir, "lib"), 0755); err != nil {
-		t.Fatal(err)
+	copied, dirs := copyGeneratedSkills(gstackDir, skillsDir)
+	if !copied {
+		t.Error("expected fallback copy to work")
 	}
-
-	dirs := listSkillDirs(tmpDir)
-	if len(dirs) != 3 {
-		t.Errorf("expected 3 skill dirs, got %d: %v", len(dirs), dirs)
+	if len(dirs) != 2 {
+		t.Errorf("expected 2 skill dirs, got %d: %v", len(dirs), dirs)
+	}
+	// Fallback should prefix with gstack-
+	for _, d := range dirs {
+		if len(d) < 7 || d[:7] != "gstack-" {
+			t.Errorf("fallback dirs should be prefixed with gstack-, got %s", d)
+		}
 	}
 }
 
 func TestInstallIdempotent(t *testing.T) {
 	tmpDir := t.TempDir()
-	targetDir := filepath.Join(tmpDir, "gstack")
 
-	// Create a fake existing gstack install
-	if err := os.MkdirAll(targetDir, 0755); err != nil {
+	// Create a fake existing .gstack/ install
+	gstackDir := filepath.Join(tmpDir, ".gstack")
+	if err := os.MkdirAll(gstackDir, 0755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(targetDir, "SKILL.md"), []byte("# gstack"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(gstackDir, "SKILL.md"), []byte("# gstack"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	// Create .github/skills/ target
+	if err := os.MkdirAll(filepath.Join(tmpDir, ".github", "skills"), 0755); err != nil {
 		t.Fatal(err)
 	}
 
-	// Install should skip when target already exists with SKILL.md
-	result := Install(targetDir, ModeMarkdownOnly)
+	result := Install(tmpDir, ModeMarkdownOnly)
 	if result.Error != nil {
 		t.Fatalf("idempotent install should not error: %v", result.Error)
 	}
 	if result.Warning == "" {
-		t.Error("idempotent install should produce a warning about existing install")
+		t.Error("idempotent install should produce a warning")
 	}
 	if result.Cloned {
 		t.Error("should not clone when already installed")
