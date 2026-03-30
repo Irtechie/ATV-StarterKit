@@ -1,6 +1,20 @@
-# atv-starterkit
+<p align="center">
+	<img src="https://raw.githubusercontent.com/All-The-Vibes/ATV-StarterKit/main/assets/hero-retro.svg" alt="ATV — All The Vibes 2.0 Starter Kit" width="100%" />
+</p>
 
-**A**gentic **T**ool & **W**orkflow — a one-click installer that scaffolds a complete GitHub Copilot agentic coding environment into any project.
+# ATV — All The Vibes 2.0 Starter Kit
+
+<p align="center"><strong>Install a complete GitHub Copilot agentic coding stack into any repo with one command.</strong></p>
+
+<p align="center">Compound Engineering for planning and review. gstack for QA, shipping, safety, and browser-based testing. Vercel <code>agent-browser</code> for direct browser automation.</p>
+
+<p align="center">
+	<a href="https://www.npmjs.com/package/atv-starterkit"><img alt="npm atv-starterkit" src="https://img.shields.io/badge/npm-atv--starterkit-cb3837?style=flat-square&logo=npm&logoColor=white"></a>
+	<a href="https://opensource.org/licenses/MIT"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-ffd700?style=flat-square"></a>
+	<a href="https://github.com/features/copilot"><img alt="GitHub Copilot Ready" src="https://img.shields.io/badge/GitHub%20Copilot-Ready-8957e5?style=flat-square&logo=github"></a>
+</p>
+
+`ATV` is the short name. The brand is **All The Vibes 2.0 Starter Kit**. The package name stays `atv-starterkit`.
 
 ## Prerequisites
 
@@ -39,6 +53,37 @@ atv-starterkit init --guided
 ```
 
 Interactive TUI wizard — select your stack, toggle individual components on/off.
+
+## Why people install it
+
+- **One command setup** for Copilot instructions, skills, agents, MCP config, and stack-specific guidance
+- **Better planning before coding** with Compound Engineering workflows
+- **Real browser QA** through gstack runtime support
+- **Direct browser automation** through optional `agent-browser` installation in guided mode
+- **File-based knowledge compounding** via `docs/brainstorms/`, `docs/plans/`, and `docs/solutions/`
+
+## `agent-browser` support
+
+ATV can also install [Vercel `agent-browser`](https://github.com/vercel-labs/agent-browser), a browser automation CLI for AI agents.
+
+Use it when you want direct control over the browser for:
+
+- screenshots
+- filling forms
+- clicking through flows
+- scraping content
+- checking console or network issues
+
+Best workflow:
+
+```bash
+agent-browser open https://example.com
+agent-browser snapshot -i --json
+agent-browser click @e1
+agent-browser fill @e2 "hello"
+```
+
+Use gstack's browser skills when you want a higher-level QA workflow; use `agent-browser` when you want precise, one-off browser control.
 
 ## What Gets Installed
 
