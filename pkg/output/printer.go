@@ -167,9 +167,6 @@ func (p *Printer) PrintNextSteps(stack detect.Stack, hasGstack bool, hasAgentBro
 	if hasGstack {
 		fmt.Println(dimStyle.Render("  Note: gstack creates ~/.gstack/ for session tracking and config."))
 	}
-	if hasAgentBrowser {
-		fmt.Println(dimStyle.Render("  Note: Run 'agent-browser install' once to download Chrome for Testing."))
-	}
 	fmt.Println()
 }
 

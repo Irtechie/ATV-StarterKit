@@ -28,7 +28,7 @@ func IsInstalled() bool {
 	return err == nil
 }
 
-// Install installs agent-browser globally via npm and copies the SKILL.md for Copilot discovery.
+// Install installs agent-browser globally via npm, downloads Chrome, and copies the SKILL.md for Copilot discovery.
 func Install(projectDir string) *InstallResult {
 	result := &InstallResult{}
 
@@ -43,7 +43,14 @@ func Install(projectDir string) *InstallResult {
 		result.Installed = true
 	}
 
-	// Step 2: Fetch and copy SKILL.md to .github/skills/agent-browser/
+	// Step 2: Download Chrome for Testing (agent-browser install)
+	if result.Installed {
+		if err := installChrome(); err != nil {
+			result.Warning = fmt.Sprintf("Chrome download failed (%v), run 'agent-browser install' manually", err)
+		}
+	}
+
+	// Step 3: Fetch and copy SKILL.md to .github/skills/agent-browser/
 	if err := copySkill(projectDir); err != nil {
 		if result.Warning != "" {
 			result.Error = fmt.Errorf("agent-browser setup failed: %w", err)
@@ -68,6 +75,17 @@ func npmInstall() error {
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("npm install -g agent-browser failed: %w", err)
+	}
+	return nil
+}
+
+// installChrome runs "agent-browser install" to download Chrome for Testing.
+func installChrome() error {
+	cmd := exec.Command("agent-browser", "install")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("agent-browser install failed: %w", err)
 	}
 	return nil
 }
