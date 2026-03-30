@@ -74,7 +74,7 @@ func (p *Printer) PrintBanner() {
 	fmt.Println(dimStyle.Render(border))
 	fmt.Println()
 	fmt.Println(dimStyle.Render("  > booting all the vibes 2.0 starter kit..."))
-	fmt.Println(dimStyle.Render("  > loading compound-engineering + gstack + copilot hooks"))
+	fmt.Println(dimStyle.Render("  > compound-engineering + gstack + memory + agent browser"))
 	fmt.Println()
 
 	// Render ASCII art with gradient
