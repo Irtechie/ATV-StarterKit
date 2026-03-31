@@ -61,7 +61,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		catalog = scaffold.BuildFilteredCatalog(result.Stack, result.Components)
+		catalog = scaffold.BuildFilteredCatalogForPacks(result.StackPacks, result.Stack, result.Components)
 		gstackDirs = result.GstackDirs
 		gstackRuntime = result.GstackRuntime
 		installAgentBrowser = result.IncludeAgentBrowser

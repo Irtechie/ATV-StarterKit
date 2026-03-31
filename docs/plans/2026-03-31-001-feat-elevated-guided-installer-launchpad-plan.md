@@ -80,16 +80,16 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 
 **Tasks**
 
-- [ ] Define `StackPack` semantics, including whether `General` is additive, fallback-only, or base-layer only
+- [x] Define `StackPack` semantics, including whether `General` is additive, fallback-only, or base-layer only
 - [x] Decide whether zero selected stack packs is invalid or a supported “minimal” path
-- [ ] Decide guided rerun behavior: additive-only vs manifest-updated-without-removal vs destructive reconciliation
+- [x] Decide guided rerun behavior: additive-only vs manifest-updated-without-removal vs destructive reconciliation
 - [x] Add regression tests or golden tests for non-guided mode behavior so “untouched” has a measurable meaning
 - [x] Create shared install-state types for manifest, events, and recommendations
 - [x] Decide whether manifest storage is repo-local only (`.atv/`) or repo-visible (`.github/`), and version the schema
 
 **Success criteria**
 
-- [ ] Multi-stack semantics are explicit and documented
+- [x] Multi-stack semantics are explicit and documented
 - [x] Non-guided mode contract is testable
 - [x] Later phases can build on typed state instead of ad hoc booleans/strings
 
@@ -99,10 +99,10 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 
 **Tasks**
 
-- [ ] Replace singular stack selection with additive stack-pack selection in `pkg/tui/wizard.go`
-- [ ] Update `pkg/detect/detect.go` so detection becomes recommendation metadata rather than a hidden decision
-- [ ] Redefine `WizardResult` to hold multiple stack packs and richer preset/customization state
-- [ ] Refactor `pkg/scaffold/catalog.go` / `BuildFilteredCatalog(...)` to support multi-pack composition deterministically
+- [x] Replace singular stack selection with additive stack-pack selection in `pkg/tui/wizard.go`
+- [x] Update `pkg/detect/detect.go` so detection becomes recommendation metadata rather than a hidden decision
+- [x] Redefine `WizardResult` to hold multiple stack packs and richer preset/customization state
+- [x] Refactor `pkg/scaffold/catalog.go` / `BuildFilteredCatalog(...)` to support multi-pack composition deterministically
 - [x] Fix current preset drift in `pkg/tui/presets.go`, especially Pro vs Full browser/runtime behavior
 - [ ] Improve preset previews so downgrade behavior and prerequisites are obvious
 - [ ] Upgrade grouped category descriptions in `pkg/tui/categories.go` so users can tell what each capability does before selection
@@ -116,9 +116,9 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 
 **Success criteria**
 
-- [ ] Guided mode supports additive multi-stack selection with deterministic outcomes regardless of toggle order
+- [x] Guided mode supports additive multi-stack selection with deterministic outcomes regardless of toggle order
 - [ ] Preset and customization flows clearly explain what will be installed and what prerequisites are needed
-- [ ] Auto / non-guided mode remains behaviorally unchanged
+- [x] Auto / non-guided mode remains behaviorally unchanged
 
 #### Phase 2: Structured install telemetry and manifest foundation
 
@@ -253,7 +253,7 @@ Equivalent surfaces that must stay aligned:
 
 ### Integration Test Scenarios
 
-- [ ] Guided multi-stack selection produces deterministic file output regardless of selection order
+- [x] Guided multi-stack selection produces deterministic file output regardless of selection order
 - [ ] Missing prerequisites downgrade or skip runtime-dependent capabilities with clear telemetry and manifest output
 - [ ] Partial install success still writes a valid manifest and useful completion summary
 - [ ] Re-running guided mode after a prior install preserves or updates state according to the chosen rerun model
@@ -263,8 +263,8 @@ Equivalent surfaces that must stay aligned:
 
 ### Functional Requirements
 
-- [ ] `init --guided` supports additive stack-pack selection and no longer forces one primary stack
-- [ ] Detection acts as a recommendation/preselection layer rather than silently choosing for the user
+- [x] `init --guided` supports additive stack-pack selection and no longer forces one primary stack
+- [x] Detection acts as a recommendation/preselection layer rather than silently choosing for the user
 - [ ] Preset previews clearly state capability scope, install/runtime expectations, and downgrade behavior
 - [ ] Customization presents grouped, understandable capability choices
 - [ ] Install progress includes first-class warnings, skips, failures, and reasons
@@ -274,18 +274,18 @@ Equivalent surfaces that must stay aligned:
 
 ### Non-Functional Requirements
 
-- [ ] Multi-stack composition is deterministic for the same set of selected packs
+- [x] Multi-stack composition is deterministic for the same set of selected packs
 - [ ] Manifest writes are atomic and recover cleanly from partial install failures
-- [ ] Non-guided mode remains behaviorally unchanged during Phase 1 and Phase 2
+- [x] Non-guided mode remains behaviorally unchanged during Phase 1 and Phase 2
 - [ ] Launchpad recommendations are deterministic and offline-friendly
 - [ ] Headless/no-GUI environments degrade gracefully to a strong terminal summary and reopen instructions
 
 ### Quality Gates
 
-- [ ] Add test coverage for guided flow state transitions or extracted planning logic
-- [ ] Add regression coverage for non-guided mode behavior
+- [x] Add test coverage for guided flow state transitions or extracted planning logic
+- [x] Add regression coverage for non-guided mode behavior
 - [ ] Document manifest schema and recommendation heuristics
-- [ ] Resolve preset drift between docs and code before shipping the new guided presets publicly
+- [x] Resolve preset drift between docs and code before shipping the new guided presets publicly
 
 ## Success Metrics
 

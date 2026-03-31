@@ -2,19 +2,22 @@ package tui
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/detect"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/gstack"
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/installstate"
 	"github.com/charmbracelet/huh"
 )
 
 // WizardResult holds the user's selections from the guided wizard.
 type WizardResult struct {
-	Stack               detect.Stack
-	Components          []string // legacy ATV layer keys (for backward compat)
-	ATVLayers           []string // parsed ATV layer keys
-	GstackDirs          []string // selected gstack skill directories
-	GstackRuntime       bool     // whether to build the gstack TS binary
+	Stack               detect.Stack             // primary stack for root templates and progress display
+	StackPacks          []installstate.StackPack // additive selected packs for stack-specific assets
+	Components          []string                 // legacy ATV layer keys (for backward compat)
+	ATVLayers           []string                 // parsed ATV layer keys
+	GstackDirs          []string                 // selected gstack skill directories
+	GstackRuntime       bool                     // whether to build the gstack TS binary
 	IncludeAgentBrowser bool
 	PresetName          string // which preset was selected (for progress display)
 }
@@ -53,42 +56,40 @@ func AllLayers() []string {
 // RunWizard runs the interactive guided mode TUI with preset selection.
 func RunWizard(detected detect.Environment) (*WizardResult, error) {
 	result := &WizardResult{
-		Stack: detected.Stack,
+		Stack:      detected.Stack,
+		StackPacks: installstate.AllStackPacks(),
 	}
 
 	prereqs := gstack.DetectPrerequisites()
 
 	// ── Screen 1: Stack selection ──
-	var selectedStack string
-	switch detected.Stack {
-	case detect.StackTypeScript:
-		selectedStack = "typescript"
-	case detect.StackPython:
-		selectedStack = "python"
-	case detect.StackRails:
-		selectedStack = "rails"
-	default:
-		selectedStack = "general"
-	}
+	selectedStackPacks := []string{"general", "typescript", "python", "rails"}
 
 	stackForm := huh.NewForm(
 		huh.NewGroup(
-			huh.NewSelect[string]().
-				Title("What's your primary stack?").
-				Description(fmt.Sprintf("Auto-detected: %s (%s)", detected.Stack, detected.StackHint)).
+			huh.NewMultiSelect[string]().
+				Title("Choose stack packs for this repo").
+				Description(stackSelectionDescription(detected)).
 				Options(
-					huh.NewOption("TypeScript", "typescript"),
-					huh.NewOption("Python", "python"),
-					huh.NewOption("Rails", "rails"),
-					huh.NewOption("General", "general"),
+					huh.NewOption("General — shared/base guidance", "general").Selected(true),
+					huh.NewOption("TypeScript", "typescript").Selected(true),
+					huh.NewOption("Python", "python").Selected(true),
+					huh.NewOption("Rails", "rails").Selected(true),
 				).
-				Value(&selectedStack),
+				Value(&selectedStackPacks),
 		),
 	).WithTheme(huh.ThemeCatppuccin())
 
 	if err := stackForm.Run(); err != nil {
 		return nil, fmt.Errorf("wizard cancelled: %w", err)
 	}
+
+	parsedPacks, err := parseStackPackSelections(selectedStackPacks)
+	if err != nil {
+		return nil, err
+	}
+	result.StackPacks = parsedPacks
+	result.Stack = detect.PrimaryStackForPacks(parsedPacks, detected.Stack)
 
 	// ── Screen 2: Preset selection ──
 	selectedPreset := "starter" // default to starter so all 3 are visible
@@ -225,18 +226,6 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 		}
 	}
 
-	// Map stack
-	switch selectedStack {
-	case "typescript":
-		result.Stack = detect.StackTypeScript
-	case "python":
-		result.Stack = detect.StackPython
-	case "rails":
-		result.Stack = detect.StackRails
-	default:
-		result.Stack = detect.StackGeneral
-	}
-
 	result.ATVLayers = atvLayers
 	result.GstackDirs = gstackDirs
 	result.Components = atvLayers
@@ -245,4 +234,44 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 	result.PresetName = preset.Name
 
 	return result, nil
+}
+
+func stackSelectionDescription(detected detect.Environment) string {
+	if len(detected.DetectedPacks) == 1 && detected.DetectedPacks[0] == installstate.StackPackGeneral {
+		return "All packs start selected. No strong stack signals were detected, so General is your safest base pack."
+	}
+
+	labels := make([]string, 0, len(detected.DetectedPacks))
+	for _, pack := range detected.DetectedPacks {
+		labels = append(labels, stackPackLabel(pack))
+	}
+	return fmt.Sprintf("All packs start selected. Likely matches in this repo: %s.", strings.Join(labels, ", "))
+}
+
+func parseStackPackSelections(selected []string) ([]installstate.StackPack, error) {
+	packs := make([]installstate.StackPack, 0, len(selected))
+	for _, value := range selected {
+		packs = append(packs, installstate.StackPack(value))
+	}
+	normalized, err := installstate.NormalizeStackPacks(packs)
+	if err != nil {
+		return nil, fmt.Errorf("invalid stack pack selection: %w", err)
+	}
+	if err := installstate.ValidateStackPacks(normalized); err != nil {
+		return nil, fmt.Errorf("choose at least one stack pack: %w", err)
+	}
+	return normalized, nil
+}
+
+func stackPackLabel(pack installstate.StackPack) string {
+	switch pack {
+	case installstate.StackPackRails:
+		return "Rails"
+	case installstate.StackPackPython:
+		return "Python"
+	case installstate.StackPackTypeScript:
+		return "TypeScript"
+	default:
+		return "General"
+	}
 }

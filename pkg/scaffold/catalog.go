@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/detect"
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/installstate"
 )
 
 //go:embed all:templates
@@ -56,6 +57,19 @@ func BuildCatalog(stack detect.Stack) []Component {
 
 // BuildFilteredCatalog returns components filtered by the user's layer selections.
 func BuildFilteredCatalog(stack detect.Stack, layers []string) []Component {
+	return BuildFilteredCatalogForPacks([]installstate.StackPack{detect.StackPackForStack(stack)}, stack, layers)
+}
+
+// BuildFilteredCatalogForPacks returns components filtered by the user's layer selections
+// and additive stack-pack selections. Primary stack controls singular root templates;
+// selected packs control stack-specific file instructions and agents.
+func BuildFilteredCatalogForPacks(packs []installstate.StackPack, primaryStack detect.Stack, layers []string) []Component {
+	normalizedPacks, err := installstate.NormalizeStackPacks(packs)
+	if err != nil || len(normalizedPacks) == 0 {
+		normalizedPacks = []installstate.StackPack{installstate.StackPackGeneral}
+	}
+	primaryStack = detect.PrimaryStackForPacks(normalizedPacks, primaryStack)
+
 	layerSet := make(map[string]bool)
 	for _, l := range layers {
 		layerSet[l] = true
@@ -70,10 +84,10 @@ func BuildFilteredCatalog(stack detect.Stack, layers []string) []Component {
 	}
 
 	if layerSet["copilot-instructions"] {
-		catalog = append(catalog, systemInstructions(stack)...)
+		catalog = append(catalog, systemInstructions(primaryStack)...)
 	}
 	if layerSet["setup-steps"] {
-		catalog = append(catalog, setupSteps(stack)...)
+		catalog = append(catalog, setupSteps(primaryStack)...)
 	}
 	if layerSet["mcp-servers"] {
 		catalog = append(catalog, mcpConfig()...)
@@ -93,10 +107,10 @@ func BuildFilteredCatalog(stack detect.Stack, layers []string) []Component {
 		catalog = append(catalog, skillComponents(selectedSkillDirs)...)
 	}
 	if layerSet["universal-agents"] || layerSet["stack-agents"] {
-		catalog = append(catalog, agents(stack)...)
+		catalog = append(catalog, agentsForPacks(normalizedPacks, layerSet["universal-agents"], layerSet["stack-agents"])...)
 	}
 	if layerSet["file-instructions"] {
-		catalog = append(catalog, fileInstructions(stack)...)
+		catalog = append(catalog, fileInstructionsForPacks(normalizedPacks)...)
 	}
 	if layerSet["vscode-extensions"] {
 		catalog = append(catalog, vscodeConfig()...)
@@ -205,6 +219,18 @@ func skillComponents(selected map[string]bool) []Component {
 }
 
 func agents(stack detect.Stack) []Component {
+	return agentsForPacks([]installstate.StackPack{detect.StackPackForStack(stack)}, true, true)
+}
+
+func agentsForPacks(packs []installstate.StackPack, includeUniversal bool, includeStackSpecific bool) []Component {
+	selectedStacks := make(map[detect.Stack]bool)
+	for _, pack := range packs {
+		stack := detect.StackForPack(pack)
+		if stack != detect.StackGeneral {
+			selectedStacks[stack] = true
+		}
+	}
+
 	var comps []Component
 
 	if err := fs.WalkDir(templateFS, "templates/agents", func(path string, d fs.DirEntry, err error) error {
@@ -215,7 +241,15 @@ func agents(stack detect.Stack) []Component {
 		relPath := strings.TrimPrefix(path, "templates/agents/")
 		destPath := filepath.Join(".github", "agents", relPath)
 
-		if isStackSpecific(relPath) && !isForStack(relPath, stack) {
+		if isStackSpecific(relPath) {
+			if !includeStackSpecific {
+				return nil
+			}
+			agentStack := stackAgents[filepath.Base(relPath)]
+			if !selectedStacks[agentStack] {
+				return nil
+			}
+		} else if !includeUniversal {
 			return nil
 		}
 
@@ -229,16 +263,23 @@ func agents(stack detect.Stack) []Component {
 }
 
 func fileInstructions(stack detect.Stack) []Component {
-	sn := stackName(stack)
-	if sn == "general" {
-		return nil // no file instructions for general stack
+	return fileInstructionsForPacks([]installstate.StackPack{detect.StackPackForStack(stack)})
+}
+
+func fileInstructionsForPacks(packs []installstate.StackPack) []Component {
+	var comps []Component
+	for _, pack := range packs {
+		stack := detect.StackForPack(pack)
+		sn := stackName(stack)
+		if sn == "general" {
+			continue // no file instructions for general stack
+		}
+		filename := fmt.Sprintf("templates/file-instructions/%s.instructions.md", sn)
+		content := mustRead(filename)
+		destName := fmt.Sprintf(".github/%s.instructions.md", sn)
+		comps = append(comps, Component{Path: destName, Content: content, HookType: 6})
 	}
-	filename := fmt.Sprintf("templates/file-instructions/%s.instructions.md", sn)
-	content := mustRead(filename)
-	destName := fmt.Sprintf(".github/%s.instructions.md", sn)
-	return []Component{
-		{Path: destName, Content: content, HookType: 6},
-	}
+	return comps
 }
 
 func vscodeConfig() []Component {
@@ -271,16 +312,16 @@ func stackName(stack detect.Stack) string {
 
 // Stack-specific agent mapping
 var stackAgents = map[string]detect.Stack{
-	"kieran-rails-reviewer.agent.md":              detect.StackRails,
-	"dhh-rails-reviewer.agent.md":                 detect.StackRails,
-	"julik-frontend-races-reviewer.agent.md":      detect.StackRails,
-	"data-integrity-guardian.agent.md":             detect.StackRails,
-	"schema-drift-detector.agent.md":              detect.StackRails,
-	"data-migration-expert.agent.md":              detect.StackRails,
-	"deployment-verification-agent.agent.md":      detect.StackRails,
-	"lint.agent.md":                               detect.StackRails,
-	"kieran-python-reviewer.agent.md":             detect.StackPython,
-	"kieran-typescript-reviewer.agent.md":         detect.StackTypeScript,
+	"kieran-rails-reviewer.agent.md":         detect.StackRails,
+	"dhh-rails-reviewer.agent.md":            detect.StackRails,
+	"julik-frontend-races-reviewer.agent.md": detect.StackRails,
+	"data-integrity-guardian.agent.md":       detect.StackRails,
+	"schema-drift-detector.agent.md":         detect.StackRails,
+	"data-migration-expert.agent.md":         detect.StackRails,
+	"deployment-verification-agent.agent.md": detect.StackRails,
+	"lint.agent.md":                          detect.StackRails,
+	"kieran-python-reviewer.agent.md":        detect.StackPython,
+	"kieran-typescript-reviewer.agent.md":    detect.StackTypeScript,
 }
 
 func isStackSpecific(filename string) bool {

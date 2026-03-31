@@ -7,6 +7,7 @@ import (
 
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/detect"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/gstack"
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/installstate"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/scaffold"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -97,8 +98,29 @@ func (p *Printer) PrintDetection(env detect.Environment) {
 	if env.IsGitRepo {
 		repoType = "existing git repo"
 	}
-	fmt.Printf("  Auto-detected: %s project (%s, %s)\n\n",
+	fmt.Printf("  Auto-detected primary: %s project (%s, %s)\n",
 		titleStyle.Render(string(env.Stack)), env.StackHint, repoType)
+	if len(env.DetectedPacks) > 0 {
+		labels := make([]string, 0, len(env.DetectedPacks))
+		for _, pack := range env.DetectedPacks {
+			labels = append(labels, stackPackTitle(pack))
+		}
+		fmt.Printf("  Likely stack packs: %s\n", titleStyle.Render(strings.Join(labels, ", ")))
+	}
+	fmt.Println()
+}
+
+func stackPackTitle(pack installstate.StackPack) string {
+	switch pack {
+	case installstate.StackPackRails:
+		return "Rails"
+	case installstate.StackPackPython:
+		return "Python"
+	case installstate.StackPackTypeScript:
+		return "TypeScript"
+	default:
+		return "General"
+	}
 }
 
 // PrintResults shows what was created, skipped, or merged.
