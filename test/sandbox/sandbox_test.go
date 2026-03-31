@@ -40,6 +40,11 @@ func TestAutoModeNoGstack(t *testing.T) {
 	if _, err := os.Stat(gstackDir); !os.IsNotExist(err) {
 		t.Error("auto mode should NOT install gstack")
 	}
+
+	manifestPath := filepath.Join(sandboxDir, ".atv", "install-manifest.json")
+	if _, err := os.Stat(manifestPath); !os.IsNotExist(err) {
+		t.Error("auto mode should NOT write a guided install manifest")
+	}
 }
 
 func TestATVFilesCreatedCorrectly(t *testing.T) {

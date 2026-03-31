@@ -240,7 +240,7 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 	result.ATVLayers = atvLayers
 	result.GstackDirs = gstackDirs
 	result.Components = atvLayers
-	result.GstackRuntime = prereqs.HasBun && len(gstackDirs) > 0
+	result.GstackRuntime = preset.ShouldEnableGstackRuntime(gstackDirs, prereqs)
 	result.IncludeAgentBrowser = includeAgentBrowser
 	result.PresetName = preset.Name
 

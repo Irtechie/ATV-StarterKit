@@ -11,17 +11,18 @@ type Preset struct {
 	Detail              string
 	ATVLayers           []string
 	GstackDirs          []string
+	EnableGstackRuntime bool
 	IncludeAgentBrowser bool
 	NeedsBun            bool
 }
 
 // StarterPreset includes core ATV skills only — no network calls, instant install.
 var StarterPreset = Preset{
-	Key:   "starter",
-	Name:  "Starter",
-	Emoji: "⚡",
+	Key:         "starter",
+	Name:        "Starter",
+	Emoji:       "⚡",
 	Description: "Core workflow (13 skills, instant install)",
-	Detail: "Plan, build, review, compound. No browser tools or gstack.",
+	Detail:      "Plan, build, review, compound. No browser tools or gstack.",
 	ATVLayers: []string{
 		LayerCoreSkills,
 		LayerOrchestrators,
@@ -34,17 +35,18 @@ var StarterPreset = Preset{
 		LayerFileInstructions,
 		LayerDocsStructure,
 	},
+	EnableGstackRuntime: false,
 	GstackDirs:          nil,
 	IncludeAgentBrowser: false,
 }
 
 // ProPreset adds gstack text-only sprint skills — no browser QA.
 var ProPreset = Preset{
-	Key:   "pro",
-	Name:  "Pro",
-	Emoji: "🚀",
+	Key:         "pro",
+	Name:        "Pro",
+	Emoji:       "🚀",
 	Description: "Full sprint process (35+ skills)",
-	Detail: "+ gstack: review, ship, safety guardrails, security, debugging, retro",
+	Detail:      "+ gstack: review, ship, safety guardrails, security, debugging, retro",
 	ATVLayers: []string{
 		LayerCoreSkills,
 		LayerOrchestrators,
@@ -68,16 +70,17 @@ var ProPreset = Preset{
 		"retro",
 		"learn",
 	},
-	IncludeAgentBrowser: true,
+	EnableGstackRuntime: false,
+	IncludeAgentBrowser: false,
 }
 
 // FullPreset installs everything — all gstack skills including browser QA.
 var FullPreset = Preset{
-	Key:   "full",
-	Name:  "Full",
-	Emoji: "🔥",
+	Key:         "full",
+	Name:        "Full",
+	Emoji:       "🔥",
 	Description: "Complete engineering team (45+ skills)",
-	Detail: "+ browser QA, benchmarks, agent-browser + Chrome. Requires Bun, ~2min",
+	Detail:      "+ browser QA, benchmarks, agent-browser + Chrome. Requires Bun, ~2min",
 	ATVLayers: []string{
 		LayerCoreSkills,
 		LayerOrchestrators,
@@ -90,9 +93,15 @@ var FullPreset = Preset{
 		LayerFileInstructions,
 		LayerDocsStructure,
 	},
+	EnableGstackRuntime: true,
 	GstackDirs:          allGstackDirs(),
 	IncludeAgentBrowser: true,
 	NeedsBun:            true,
+}
+
+// ShouldEnableGstackRuntime returns whether the guided flow should enable gstack runtime work.
+func (p Preset) ShouldEnableGstackRuntime(selectedDirs []string, prereqs gstack.Prerequisites) bool {
+	return p.EnableGstackRuntime && prereqs.HasBun && len(selectedDirs) > 0
 }
 
 // AllPresets returns the ordered list of presets.
