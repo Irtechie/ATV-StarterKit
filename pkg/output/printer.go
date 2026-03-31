@@ -44,6 +44,14 @@ var (
 	mergeStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("214")) // orange-yellow
 
+	warningStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("214")).
+			Bold(true)
+
+	failureStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("196")).
+			Bold(true)
+
 	dimStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("136")) // dim gold for decorative lines
 
@@ -144,6 +152,8 @@ func (p *Printer) PrintResults(results []scaffold.WriteResult) {
 		case scaffold.StatusDirCreated:
 			fmt.Printf("  %s %s\n", successStyle.Render("📁"), r.Path)
 			dirs++
+		case scaffold.StatusFailed:
+			fmt.Printf("  %s %s — %s\n", failureStyle.Render("❌"), r.Path, r.Error)
 		}
 	}
 
@@ -154,11 +164,20 @@ func (p *Printer) PrintResults(results []scaffold.WriteResult) {
 	if merged > 0 {
 		fmt.Printf("  %s\n", mergeStyle.Render(fmt.Sprintf("🔀 Merged %d JSON configs", merged)))
 	}
+	failed := scaffold.SummarizeResults(results).Failed
+	if failed > 0 {
+		fmt.Printf("  %s\n", failureStyle.Render(fmt.Sprintf("❌ %d writes failed", failed)))
+	}
 	fmt.Printf("  %s\n", successStyle.Render(fmt.Sprintf("✅ Created %d files, %d directories", created, dirs)))
 }
 
+// PrintGuidedSummary shows the structured result of a guided install.
+func (p *Printer) PrintGuidedSummary(outcomes []installstate.InstallOutcome, manifestPath string) {
+	fmt.Print(guidedSummaryText(outcomes, manifestPath))
+}
+
 // PrintNextSteps shows post-install guidance.
-func (p *Printer) PrintNextSteps(hasGstack bool, hasAgentBrowser bool) {
+func (p *Printer) PrintNextSteps(hasGstack bool, hasAgentBrowser bool, manifestPath string) {
 	fmt.Println()
 	fmt.Println(successStyle.Render("  🎉 ATV Starter Kit ready!"))
 	fmt.Println()
@@ -178,7 +197,58 @@ func (p *Printer) PrintNextSteps(hasGstack bool, hasAgentBrowser bool) {
 	if hasGstack {
 		fmt.Println(dimStyle.Render("  Note: gstack creates ~/.gstack/ for session tracking and config."))
 	}
+	if manifestPath != "" {
+		fmt.Println(dimStyle.Render("  Install state saved to " + manifestPath + " for future reopen/launchpad work."))
+	}
 	fmt.Println()
+}
+
+func guidedSummaryText(outcomes []installstate.InstallOutcome, manifestPath string) string {
+	var b strings.Builder
+	b.WriteString("\n")
+	b.WriteString(titleStyle.Render("  Guided install summary"))
+	b.WriteString("\n\n")
+	for _, outcome := range outcomes {
+		b.WriteString(fmt.Sprintf("  %s %s", guidedOutcomeIcon(outcome.Status), outcome.Step))
+		detailParts := make([]string, 0, 2)
+		if outcome.Detail != "" {
+			detailParts = append(detailParts, outcome.Detail)
+		}
+		if outcome.Duration != "" {
+			detailParts = append(detailParts, outcome.Duration)
+		}
+		if len(detailParts) > 0 {
+			b.WriteString(" (")
+			b.WriteString(strings.Join(detailParts, " · "))
+			b.WriteString(")")
+		}
+		if outcome.Reason != "" {
+			b.WriteString(" — ")
+			b.WriteString(outcome.Reason)
+		}
+		b.WriteString("\n")
+	}
+	if manifestPath != "" {
+		b.WriteString("\n")
+		b.WriteString(dimStyle.Render("  Install manifest: "))
+		b.WriteString(manifestPath)
+		b.WriteString("\n")
+	}
+	b.WriteString("\n")
+	return b.String()
+}
+
+func guidedOutcomeIcon(status installstate.InstallStepStatus) string {
+	switch status {
+	case installstate.InstallStepWarning:
+		return warningStyle.Render("⚠️ ")
+	case installstate.InstallStepFailed:
+		return failureStyle.Render("❌")
+	case installstate.InstallStepSkipped:
+		return skipStyle.Render("⏭️ ")
+	default:
+		return successStyle.Render("✅")
+	}
 }
 
 // PrintGstackStart shows the beginning of gstack installation.

@@ -93,6 +93,7 @@ const (
 type InstallOutcome struct {
 	Step     string            `json:"step"`
 	Status   InstallStepStatus `json:"status"`
+	Detail   string            `json:"detail,omitempty"`
 	Reason   string            `json:"reason,omitempty"`
 	Duration string            `json:"duration,omitempty"`
 }

@@ -126,13 +126,13 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 
 **Tasks**
 
-- [ ] Redesign `pkg/tui/progress.go` around `InstallEvent` or equivalent structured event messages
+- [x] Redesign `pkg/tui/progress.go` around `InstallEvent` or equivalent structured event messages
 - [ ] Emit parent and substep events from scaffold, gstack, and agent-browser flows
 - [ ] Distinguish success, warning, failure, user-skip, prereq-skip, already-installed, and dependency-skipped outcomes
 - [ ] Capture durations, reasons, and actionable next steps for each major operation
-- [ ] Write an atomic, versioned install manifest after guided installs
-- [ ] Ensure the manifest records requested vs installed vs skipped vs failed, not just intent
-- [ ] Upgrade the completion summary in `pkg/output/printer.go` to show what was installed, what was skipped, and how to reopen the next experience later
+- [x] Write an atomic, versioned install manifest after guided installs
+- [x] Ensure the manifest records requested vs installed vs skipped vs failed, not just intent
+- [x] Upgrade the completion summary in `pkg/output/printer.go` to show what was installed, what was skipped, and how to reopen the next experience later
 
 **Explicitly excluded in this phase**
 
@@ -141,9 +141,9 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 
 **Success criteria**
 
-- [ ] Guided install shows structured telemetry with meaningful warnings and failure reasons
-- [ ] Manifest writes are atomic, versioned, and survive partial success
-- [ ] Completion output provides a better handoff even before a full launchpad exists
+- [x] Guided install shows structured telemetry with meaningful warnings and failure reasons
+- [x] Manifest writes are atomic, versioned, and survive partial success
+- [x] Completion output provides a better handoff even before a full launchpad exists
 
 #### Phase 3: Deterministic launchpad MVP
 
@@ -267,15 +267,15 @@ Equivalent surfaces that must stay aligned:
 - [x] Detection acts as a recommendation/preselection layer rather than silently choosing for the user
 - [x] Preset previews clearly state capability scope, install/runtime expectations, and downgrade behavior
 - [x] Customization presents grouped, understandable capability choices
-- [ ] Install progress includes first-class warnings, skips, failures, and reasons
-- [ ] Guided install writes a versioned manifest describing requested, installed, skipped, and failed outcomes
+- [x] Install progress includes first-class warnings, skips, failures, and reasons
+- [x] Guided install writes a versioned manifest describing requested, installed, skipped, and failed outcomes
 - [ ] A deterministic launchpad MVP can read repo memory and manifest state to recommend next actions
 - [ ] GitHub Copilot SDK remains optional and non-blocking
 
 ### Non-Functional Requirements
 
 - [x] Multi-stack composition is deterministic for the same set of selected packs
-- [ ] Manifest writes are atomic and recover cleanly from partial install failures
+- [x] Manifest writes are atomic and recover cleanly from partial install failures
 - [x] Non-guided mode remains behaviorally unchanged during Phase 1 and Phase 2
 - [ ] Launchpad recommendations are deterministic and offline-friendly
 - [ ] Headless/no-GUI environments degrade gracefully to a strong terminal summary and reopen instructions

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // WriteStatus indicates what happened when writing a file.
@@ -15,12 +16,23 @@ const (
 	StatusSkipped
 	StatusMerged
 	StatusDirCreated
+	StatusFailed
 )
 
 // WriteResult records what happened with a single file.
 type WriteResult struct {
 	Path   string
 	Status WriteStatus
+	Error  string
+}
+
+// WriteSummary is a coarse aggregate of scaffold write results.
+type WriteSummary struct {
+	Created     int
+	Skipped     int
+	Merged      int
+	Directories int
+	Failed      int
 }
 
 // WriteAll writes all catalog components to the target directory.
@@ -57,13 +69,70 @@ func WriteAll(targetDir string, catalog []Component) []WriteResult {
 	return results
 }
 
+// SummarizeResults returns aggregate counts for a scaffold write batch.
+func SummarizeResults(results []WriteResult) WriteSummary {
+	var summary WriteSummary
+	for _, result := range results {
+		switch result.Status {
+		case StatusCreated:
+			summary.Created++
+		case StatusSkipped:
+			summary.Skipped++
+		case StatusMerged:
+			summary.Merged++
+		case StatusDirCreated:
+			summary.Directories++
+		case StatusFailed:
+			summary.Failed++
+		}
+	}
+	return summary
+}
+
+// Detail returns a human-readable summary of the write batch.
+func (s WriteSummary) Detail() string {
+	parts := make([]string, 0, 5)
+	if s.Created > 0 {
+		parts = append(parts, fmt.Sprintf("%d files created", s.Created))
+	}
+	if s.Directories > 0 {
+		parts = append(parts, fmt.Sprintf("%d directories created", s.Directories))
+	}
+	if s.Merged > 0 {
+		parts = append(parts, fmt.Sprintf("%d JSON configs merged", s.Merged))
+	}
+	if s.Skipped > 0 {
+		parts = append(parts, fmt.Sprintf("%d existing paths skipped", s.Skipped))
+	}
+	if s.Failed > 0 {
+		parts = append(parts, fmt.Sprintf("%d writes failed", s.Failed))
+	}
+	if len(parts) == 0 {
+		return "no file changes"
+	}
+	return strings.Join(parts, ", ")
+}
+
+// FailureReason returns a short failure summary when writes fail.
+func (s WriteSummary) FailureReason() string {
+	if s.Failed == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%d scaffold writes failed", s.Failed)
+}
+
+// Successful reports whether no write operations failed.
+func (s WriteSummary) Successful() bool {
+	return s.Failed == 0
+}
+
 func ensureDir(fullPath, relPath string) WriteResult {
 	if _, err := os.Stat(fullPath); err == nil {
 		return WriteResult{Path: relPath, Status: StatusSkipped}
 	}
 	if err := os.MkdirAll(fullPath, 0755); err != nil {
 		fmt.Fprintf(os.Stderr, "  ❌ Failed to create dir %s: %v\n", relPath, err)
-		return WriteResult{Path: relPath, Status: StatusSkipped}
+		return WriteResult{Path: relPath, Status: StatusFailed, Error: err.Error()}
 	}
 	return WriteResult{Path: relPath, Status: StatusDirCreated}
 }
@@ -74,7 +143,7 @@ func writeIfNotExists(fullPath, relPath string, content []byte) WriteResult {
 	}
 	if err := os.WriteFile(fullPath, content, 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "  ❌ Failed to write %s: %v\n", relPath, err)
-		return WriteResult{Path: relPath, Status: StatusSkipped}
+		return WriteResult{Path: relPath, Status: StatusFailed, Error: err.Error()}
 	}
 	return WriteResult{Path: relPath, Status: StatusCreated}
 }
@@ -82,10 +151,13 @@ func writeIfNotExists(fullPath, relPath string, content []byte) WriteResult {
 func writeOrMergeJSON(fullPath, relPath string, newContent []byte) WriteResult {
 	existingData, err := os.ReadFile(fullPath)
 	if err != nil {
+		if !os.IsNotExist(err) {
+			return WriteResult{Path: relPath, Status: StatusFailed, Error: err.Error()}
+		}
 		// File doesn't exist — write new
 		if err := os.WriteFile(fullPath, newContent, 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "  ❌ Failed to write %s: %v\n", relPath, err)
-			return WriteResult{Path: relPath, Status: StatusSkipped}
+			return WriteResult{Path: relPath, Status: StatusFailed, Error: err.Error()}
 		}
 		return WriteResult{Path: relPath, Status: StatusCreated}
 	}
@@ -93,20 +165,20 @@ func writeOrMergeJSON(fullPath, relPath string, newContent []byte) WriteResult {
 	// File exists — merge JSON objects
 	var existing, incoming map[string]interface{}
 	if err := json.Unmarshal(existingData, &existing); err != nil {
-		return WriteResult{Path: relPath, Status: StatusSkipped}
+		return WriteResult{Path: relPath, Status: StatusFailed, Error: err.Error()}
 	}
 	if err := json.Unmarshal(newContent, &incoming); err != nil {
-		return WriteResult{Path: relPath, Status: StatusSkipped}
+		return WriteResult{Path: relPath, Status: StatusFailed, Error: err.Error()}
 	}
 
 	merged := mergeJSONMaps(existing, incoming)
 	mergedBytes, err := json.MarshalIndent(merged, "", "  ")
 	if err != nil {
-		return WriteResult{Path: relPath, Status: StatusSkipped}
+		return WriteResult{Path: relPath, Status: StatusFailed, Error: err.Error()}
 	}
 
 	if err := os.WriteFile(fullPath, append(mergedBytes, '\n'), 0644); err != nil {
-		return WriteResult{Path: relPath, Status: StatusSkipped}
+		return WriteResult{Path: relPath, Status: StatusFailed, Error: err.Error()}
 	}
 	return WriteResult{Path: relPath, Status: StatusMerged}
 }
