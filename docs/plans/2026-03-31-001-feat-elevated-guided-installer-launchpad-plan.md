@@ -154,10 +154,10 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 - [ ] Implement a memory index that classifies durable repo memory, installed intelligence, and runtime health
 - [x] Add deterministic recommendation rules based on repo state, manifest state, and runtime checks
 - [x] Limit primary recommendations to a small set with clear rationale
-- [ ] Define a reopen path, likely a new CLI command and/or guided completion affordance
-- [ ] Deliver the first launchpad UI as a dashboard-first experience
+- [x] Define a reopen path, likely a new CLI command and/or guided completion affordance
+- [x] Deliver the first launchpad UI as a dashboard-first experience
 - [ ] Keep the terminal as a secondary execution surface, not the home screen
-- [ ] Ensure graceful fallback in headless/no-GUI environments
+- [x] Ensure graceful fallback in headless/no-GUI environments
 
 **Candidate information architecture**
 
@@ -168,9 +168,9 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 
 **Success criteria**
 
-- [ ] Same `RepoState` always produces the same ordered top recommendations
-- [ ] Launchpad remains useful without network or Copilot auth
-- [ ] Users can reopen the launchpad after install without rerunning the whole setup flow
+- [x] Same `RepoState` always produces the same ordered top recommendations
+- [x] Launchpad remains useful without network or Copilot auth
+- [x] Users can reopen the launchpad after install without rerunning the whole setup flow
 
 #### Phase 4: Optional GitHub Copilot SDK concierge
 
@@ -269,7 +269,7 @@ Equivalent surfaces that must stay aligned:
 - [x] Customization presents grouped, understandable capability choices
 - [x] Install progress includes first-class warnings, skips, failures, and reasons
 - [x] Guided install writes a versioned manifest describing requested, installed, skipped, and failed outcomes
-- [ ] A deterministic launchpad MVP can read repo memory and manifest state to recommend next actions
+- [x] A deterministic launchpad MVP can read repo memory and manifest state to recommend next actions
 - [ ] GitHub Copilot SDK remains optional and non-blocking
 
 ### Non-Functional Requirements
@@ -277,8 +277,8 @@ Equivalent surfaces that must stay aligned:
 - [x] Multi-stack composition is deterministic for the same set of selected packs
 - [x] Manifest writes are atomic and recover cleanly from partial install failures
 - [x] Non-guided mode remains behaviorally unchanged during Phase 1 and Phase 2
-- [ ] Launchpad recommendations are deterministic and offline-friendly
-- [ ] Headless/no-GUI environments degrade gracefully to a strong terminal summary and reopen instructions
+- [x] Launchpad recommendations are deterministic and offline-friendly
+- [x] Headless/no-GUI environments degrade gracefully to a strong terminal summary and reopen instructions
 
 ### Quality Gates
 

@@ -3,6 +3,7 @@ package output
 import (
 	_ "embed"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/detect"
@@ -191,6 +192,11 @@ func (p *Printer) PrintRecommendations(recommendations []installstate.Recommenda
 	fmt.Println()
 }
 
+// PrintLaunchpad renders the reopenable terminal launchpad for the current repository.
+func (p *Printer) PrintLaunchpad(snapshot installstate.LaunchpadSnapshot) {
+	fmt.Print(launchpadText(snapshot))
+}
+
 // PrintNextSteps shows post-install guidance.
 func (p *Printer) PrintNextSteps(hasGstack bool, hasAgentBrowser bool, manifestPath string) {
 	fmt.Println()
@@ -214,8 +220,84 @@ func (p *Printer) PrintNextSteps(hasGstack bool, hasAgentBrowser bool, manifestP
 	}
 	if manifestPath != "" {
 		fmt.Println(dimStyle.Render("  Install state saved to " + manifestPath + " for future reopen/launchpad work."))
+		fmt.Println(dimStyle.Render("  Reopen later with: atv-installer launchpad"))
 	}
 	fmt.Println()
+}
+
+func launchpadText(snapshot installstate.LaunchpadSnapshot) string {
+	var b strings.Builder
+	b.WriteString("\n")
+	b.WriteString(titleStyle.Render("  ATV Launchpad"))
+	b.WriteString("\n")
+	b.WriteString(dimStyle.Render("  Local memory + install intelligence for this repo"))
+	b.WriteString("\n\n")
+
+	b.WriteString(titleStyle.Render("  Installed intelligence"))
+	b.WriteString("\n")
+	if snapshot.HasManifest {
+		b.WriteString(fmt.Sprintf("  %s Guided manifest found at %s\n", successStyle.Render("✅"), snapshot.ManifestPath))
+		if !snapshot.GeneratedAt.IsZero() {
+			b.WriteString(fmt.Sprintf("  %s Last guided run: %s\n", dimStyle.Render("•"), snapshot.GeneratedAt.Format("2006-01-02 15:04 MST")))
+		}
+		if snapshot.Requested.PresetName != "" {
+			b.WriteString(fmt.Sprintf("  %s Preset: %s\n", dimStyle.Render("•"), snapshot.Requested.PresetName))
+		}
+		if labels := snapshot.StackPackLabels(); len(labels) > 0 {
+			b.WriteString(fmt.Sprintf("  %s Stack packs: %s\n", dimStyle.Render("•"), strings.Join(labels, ", ")))
+		}
+		if snapshot.HasGstack() {
+			mode := "markdown-only"
+			if snapshot.Requested.GstackRuntime {
+				mode = "runtime requested"
+			}
+			b.WriteString(fmt.Sprintf("  %s gstack: %d skill dirs requested (%s)\n", dimStyle.Render("•"), len(snapshot.Requested.GstackDirs), mode))
+		} else {
+			b.WriteString(fmt.Sprintf("  %s gstack: not requested in the last guided run\n", dimStyle.Render("•")))
+		}
+		if snapshot.HasAgentBrowser() {
+			b.WriteString(fmt.Sprintf("  %s agent-browser: requested in the last guided run\n", dimStyle.Render("•")))
+		} else {
+			b.WriteString(fmt.Sprintf("  %s agent-browser: not requested in the last guided run\n", dimStyle.Render("•")))
+		}
+		b.WriteString(fmt.Sprintf("  %s Outcomes: %d done, %d warnings, %d failed, %d skipped\n", dimStyle.Render("•"), snapshot.OutcomeSummary.Done, snapshot.OutcomeSummary.Warning, snapshot.OutcomeSummary.Failed, snapshot.OutcomeSummary.Skipped))
+	} else {
+		b.WriteString(fmt.Sprintf("  %s No guided manifest found yet. Run %q to capture install state.\n", warningStyle.Render("⚠️"), "atv-installer init --guided"))
+	}
+
+	b.WriteString("\n")
+	b.WriteString(titleStyle.Render("  Repo memory snapshot"))
+	b.WriteString("\n")
+	b.WriteString(fmt.Sprintf("  %s brainstorms: %d\n", dimStyle.Render("•"), snapshot.RepoState.BrainstormCount))
+	b.WriteString(fmt.Sprintf("  %s plans: %d\n", dimStyle.Render("•"), snapshot.RepoState.PlanCount))
+	b.WriteString(fmt.Sprintf("  %s solutions: %d\n", dimStyle.Render("•"), snapshot.RepoState.SolutionCount))
+	if snapshot.RepoState.HasUncheckedPlan {
+		b.WriteString(fmt.Sprintf("  %s active plan state: unchecked work remains\n", dimStyle.Render("•")))
+	} else if snapshot.RepoState.HasCompletedPlan {
+		b.WriteString(fmt.Sprintf("  %s active plan state: at least one completed plan found\n", dimStyle.Render("•")))
+	}
+
+	b.WriteString("\n")
+	b.WriteString(titleStyle.Render("  Recommended next moves"))
+	b.WriteString("\n")
+	if len(snapshot.Recommendations) == 0 {
+		b.WriteString(fmt.Sprintf("  %s No recommendations yet. Add repo memory or rerun guided install.\n", dimStyle.Render("•")))
+	} else {
+		for i, recommendation := range snapshot.CloneRecommendations() {
+			b.WriteString(fmt.Sprintf("  %s %s\n", titleStyle.Render(fmt.Sprintf("%d.", i+1)), recommendation.Title))
+			b.WriteString(fmt.Sprintf("     %s\n", dimStyle.Render(recommendation.Reason)))
+		}
+	}
+
+	b.WriteString("\n")
+	b.WriteString(dimStyle.Render("  Reopen this dashboard any time with: atv-installer launchpad"))
+	if snapshot.HasManifest {
+		b.WriteString("\n")
+		b.WriteString(dimStyle.Render("  Manifest path: "))
+		b.WriteString(filepath.ToSlash(snapshot.ManifestPath))
+	}
+	b.WriteString("\n\n")
+	return b.String()
 }
 
 func guidedSummaryText(outcomes []installstate.InstallOutcome, manifestPath string) string {

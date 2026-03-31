@@ -47,6 +47,41 @@ func TestBuildRecommendationsPrioritizesInstallProblems(t *testing.T) {
 	}
 }
 
+func TestBuildRecommendationsIsDeterministicAndCapped(t *testing.T) {
+	root := t.TempDir()
+	mustWriteMarkdown(t, filepath.Join(root, "docs", "brainstorms", "idea.md"), "# Idea")
+	mustWriteMarkdown(t, filepath.Join(root, "docs", "plans", "work.md"), "status: active\n- [ ] keep going\n")
+
+	manifest := InstallManifest{
+		Requested: RequestedState{
+			GstackDirs:          []string{"review"},
+			IncludeAgentBrowser: true,
+		},
+		Outcomes: []InstallOutcome{
+			{Step: "Installing agent-browser", Status: InstallStepWarning, Reason: "npm not found"},
+			{Step: "Syncing gstack skills", Status: InstallStepDone},
+		},
+	}
+
+	first := BuildRecommendations(root, manifest)
+	second := BuildRecommendations(root, manifest)
+
+	if len(first) != len(second) {
+		t.Fatalf("recommendation lengths differ: %d vs %d", len(first), len(second))
+	}
+	if len(first) != 3 {
+		t.Fatalf("expected recommendations to be capped at 3, got %d: %+v", len(first), first)
+	}
+	for i := range first {
+		if first[i].ID != second[i].ID {
+			t.Fatalf("recommendation order differs at %d: %+v vs %+v", i, first, second)
+		}
+	}
+	if first[0].ID != "fix-install-issues" || first[1].ID != "execute-active-plan" || first[2].ID != "start-gstack-sprint" {
+		t.Fatalf("unexpected recommendation order: %+v", first)
+	}
+}
+
 func mustWriteMarkdown(t *testing.T, path, content string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
