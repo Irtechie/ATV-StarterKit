@@ -232,7 +232,7 @@ func copyGeneratedSkills(gstackDir, targetSkillsDir string) (bool, []string) {
 // This mirrors what gstack's ./setup creates for Codex at .agents/skills/gstack/.
 func createSidecar(gstackDir, targetSkillsDir string) {
 	sidecar := filepath.Join(targetSkillsDir, "gstack")
-	os.MkdirAll(sidecar, 0755)
+	_ = os.MkdirAll(sidecar, 0755)
 
 	// Copy root SKILL.md (the meta-skill for browse)
 	copyFileIfExists(filepath.Join(gstackDir, "SKILL.md"), filepath.Join(sidecar, "SKILL.md"))
@@ -249,28 +249,28 @@ func createSidecar(gstackDir, targetSkillsDir string) {
 	// Symlink or copy browse/dist/ (compiled browse binary)
 	browseDist := filepath.Join(gstackDir, "browse", "dist")
 	if _, err := os.Stat(browseDist); err == nil {
-		os.MkdirAll(filepath.Join(sidecar, "browse"), 0755)
+		_ = os.MkdirAll(filepath.Join(sidecar, "browse"), 0755)
 		linkOrCopyDir(browseDist, filepath.Join(sidecar, "browse", "dist"))
 	}
 
 	// Symlink or copy browse/bin/ (helper scripts)
 	browseBin := filepath.Join(gstackDir, "browse", "bin")
 	if _, err := os.Stat(browseBin); err == nil {
-		os.MkdirAll(filepath.Join(sidecar, "browse"), 0755)
+		_ = os.MkdirAll(filepath.Join(sidecar, "browse"), 0755)
 		linkOrCopyDir(browseBin, filepath.Join(sidecar, "browse", "bin"))
 	}
 
 	// Symlink or copy design/dist/ (design binary)
 	designDist := filepath.Join(gstackDir, "design", "dist")
 	if _, err := os.Stat(designDist); err == nil {
-		os.MkdirAll(filepath.Join(sidecar, "design"), 0755)
+		_ = os.MkdirAll(filepath.Join(sidecar, "design"), 0755)
 		linkOrCopyDir(designDist, filepath.Join(sidecar, "design", "dist"))
 	}
 
 	// Copy review runtime assets (checklists, not the SKILL.md)
 	reviewAssets := []string{"checklist.md", "design-checklist.md", "greptile-triage.md", "TODOS-format.md"}
 	reviewDir := filepath.Join(sidecar, "review")
-	os.MkdirAll(reviewDir, 0755)
+	_ = os.MkdirAll(reviewDir, 0755)
 	for _, f := range reviewAssets {
 		copyFileIfExists(filepath.Join(gstackDir, "review", f), filepath.Join(reviewDir, f))
 	}
@@ -299,7 +299,7 @@ func linkOrCopyDir(src, dst string) {
 }
 
 func copyDir(src, dst string) {
-	os.MkdirAll(dst, 0755)
+	_ = os.MkdirAll(dst, 0755)
 	entries, err := os.ReadDir(src)
 	if err != nil {
 		return

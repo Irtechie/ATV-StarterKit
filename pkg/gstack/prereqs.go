@@ -79,8 +79,6 @@ func getVersion(cmd string, args ...string) string {
 	}
 	version := strings.TrimSpace(string(out))
 	// git --version returns "git version 2.x.x", extract just the version
-	if strings.HasPrefix(version, "git version ") {
-		version = strings.TrimPrefix(version, "git version ")
-	}
+	version = strings.TrimPrefix(version, "git version ")
 	return version
 }

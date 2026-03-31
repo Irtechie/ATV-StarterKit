@@ -136,7 +136,7 @@ func (p *Printer) PrintResults(results []scaffold.WriteResult) {
 }
 
 // PrintNextSteps shows post-install guidance.
-func (p *Printer) PrintNextSteps(stack detect.Stack, hasGstack bool, hasAgentBrowser bool) {
+func (p *Printer) PrintNextSteps(hasGstack bool, hasAgentBrowser bool) {
 	fmt.Println()
 	fmt.Println(successStyle.Render("  🎉 ATV Starter Kit ready!"))
 	fmt.Println()
@@ -146,12 +146,11 @@ func (p *Printer) PrintNextSteps(stack detect.Stack, hasGstack bool, hasAgentBro
 	fmt.Println(titleStyle.Render("    3.") + ` Try: /ce-brainstorm "your first feature idea"`)
 	step := 4
 	if hasGstack {
-		fmt.Println(titleStyle.Render(fmt.Sprintf("    %d.", step)) + ` Try: /office-hours to start a gstack sprint`)
+		fmt.Println(titleStyle.Render(fmt.Sprintf("    %d.", step)) + ` Try: /gstack-office-hours to start a gstack sprint`)
 		step++
 	}
 	if hasAgentBrowser {
 		fmt.Println(titleStyle.Render(fmt.Sprintf("    %d.", step)) + ` Try: agent-browser open https://yourapp.com`)
-		step++
 	}
 	fmt.Println()
 	if hasGstack {
