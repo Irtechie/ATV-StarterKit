@@ -96,6 +96,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 			},
 			Outcomes: outcomes,
 		}
+		manifest.Recommendations = installstate.BuildRecommendations(targetDir, manifest)
 		if err := installstate.WriteManifest(targetDir, manifest); err != nil {
 			printer.Info(fmt.Sprintf("⚠️  Failed to write guided install manifest: %v", err))
 		} else {
@@ -104,6 +105,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 		// Print summary after progress completes
 		printer.PrintGuidedSummary(outcomes, manifestPath)
+		printer.PrintRecommendations(manifest.Recommendations)
 		printer.PrintNextSteps(hasUsableOutcome(outcomes, gstackStepName), hasUsableOutcome(outcomes, agentBrowserStepName), manifestPath)
 	} else {
 		// One-click mode — install everything for detected stack (ATV only, no gstack)

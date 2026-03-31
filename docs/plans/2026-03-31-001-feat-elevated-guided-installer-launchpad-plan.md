@@ -152,8 +152,8 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 **Tasks**
 
 - [ ] Implement a memory index that classifies durable repo memory, installed intelligence, and runtime health
-- [ ] Add deterministic recommendation rules based on repo state, manifest state, and runtime checks
-- [ ] Limit primary recommendations to a small set with clear rationale
+- [x] Add deterministic recommendation rules based on repo state, manifest state, and runtime checks
+- [x] Limit primary recommendations to a small set with clear rationale
 - [ ] Define a reopen path, likely a new CLI command and/or guided completion affordance
 - [ ] Deliver the first launchpad UI as a dashboard-first experience
 - [ ] Keep the terminal as a secondary execution surface, not the home screen
@@ -284,7 +284,7 @@ Equivalent surfaces that must stay aligned:
 
 - [x] Add test coverage for guided flow state transitions or extracted planning logic
 - [x] Add regression coverage for non-guided mode behavior
-- [ ] Document manifest schema and recommendation heuristics
+- [x] Document manifest schema and recommendation heuristics
 - [x] Resolve preset drift between docs and code before shipping the new guided presets publicly
 
 ## Success Metrics

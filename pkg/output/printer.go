@@ -176,6 +176,21 @@ func (p *Printer) PrintGuidedSummary(outcomes []installstate.InstallOutcome, man
 	fmt.Print(guidedSummaryText(outcomes, manifestPath))
 }
 
+// PrintRecommendations shows the deterministic next-step recommendations derived from local state.
+func (p *Printer) PrintRecommendations(recommendations []installstate.Recommendation) {
+	if len(recommendations) == 0 {
+		return
+	}
+
+	fmt.Println(titleStyle.Render("  Recommended next moves"))
+	fmt.Println()
+	for i, recommendation := range recommendations {
+		fmt.Println(titleStyle.Render(fmt.Sprintf("    %d.", i+1)) + " " + recommendation.Title)
+		fmt.Println(dimStyle.Render("       " + recommendation.Reason))
+	}
+	fmt.Println()
+}
+
 // PrintNextSteps shows post-install guidance.
 func (p *Printer) PrintNextSteps(hasGstack bool, hasAgentBrowser bool, manifestPath string) {
 	fmt.Println()
