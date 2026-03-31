@@ -95,8 +95,7 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 	selectedPreset := "starter" // default to starter so all 3 are visible
 	presetOptions := make([]huh.Option[string], 0, 3)
 	for _, p := range AllPresets() {
-		label := fmt.Sprintf("%s %s — %s", p.Emoji, p.Name, p.Description)
-		opt := huh.NewOption(label, p.Key)
+		opt := huh.NewOption(p.PreviewLabel(prereqs), p.Key)
 		presetOptions = append(presetOptions, opt)
 	}
 
@@ -104,7 +103,7 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 		huh.NewGroup(
 			huh.NewSelect[string]().
 				Title("Choose your setup level").
-				Description(fmt.Sprintf("Prerequisites: %s", prereqs.Summary())).
+				Description(presetSelectionDescription(prereqs)).
 				Options(presetOptions...).
 				Value(&selectedPreset),
 		),
@@ -130,7 +129,7 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 		huh.NewGroup(
 			huh.NewConfirm().
 				Title("Want to customize individual skills?").
-				Description(fmt.Sprintf("Selected: %s %s — %s", preset.Emoji, preset.Name, preset.Detail)).
+				Description(preset.SelectionSummary(prereqs) + "\n\nPresets stay the fast path. Customize only if you want to add or remove specific capabilities.").
 				Affirmative("Yes, let me pick").
 				Negative("No, install preset as-is").
 				Value(&wantCustomize),
@@ -156,61 +155,57 @@ func RunWizard(detected detect.Environment) (*WizardResult, error) {
 			presetGstackSet[d] = true
 		}
 
-		var skillOptions []huh.Option[string]
-		for _, group := range groups {
-			for _, skill := range group.Skills {
-				label := skill.Label
-				if skill.IsGstack {
-					label = fmt.Sprintf("[gstack] %s", label)
-				}
-				if skill.RequiresBun && !prereqs.HasBun {
-					label = fmt.Sprintf("%s ⚠️ (requires Bun)", label)
-				}
+		var infraOptions []huh.Option[string]
+		selectedSkillsByGroup := make([][]string, len(groups))
+		formGroups := make([]*huh.Group, 0, len(groups)+1)
 
-				opt := huh.NewOption(label, skill.Key)
-				// Pre-select based on preset
-				if skill.IsGstack {
-					dir := skill.Key
-					if len(dir) > 7 && dir[:7] == "gstack:" {
-						dir = dir[7:]
-					}
-					if presetGstackSet[dir] && (!skill.RequiresBun || prereqs.HasBun) {
-						opt = opt.Selected(true)
-					}
-				} else {
-					opt = opt.Selected(true) // ATV skills always pre-selected
-				}
-				skillOptions = append(skillOptions, opt)
+		for i, group := range groups {
+			selectedSkillsByGroup[i] = defaultSelectedSkillKeys(group, presetGstackSet, prereqs)
+			options := make([]huh.Option[string], 0, len(group.Skills))
+			for _, skill := range group.Skills {
+				options = append(options, huh.NewOption(skillOptionLabel(skill, prereqs), skill.Key))
 			}
+
+			description := group.Description
+			if i == 0 {
+				description = "Preset path stays the happy path. You're only here because you chose to customize.\n\n" + description
+			}
+
+			formGroups = append(formGroups, huh.NewGroup(
+				huh.NewMultiSelect[string]().
+					Title(group.Label).
+					Description(description).
+					Options(options...).
+					Value(&selectedSkillsByGroup[i]),
+			))
 		}
 
-		var infraOptions []huh.Option[string]
 		for _, infra := range InfraLayers {
 			infraOptions = append(infraOptions, huh.NewOption(infra.Label, infra.Key).Selected(true))
 		}
 
-		var selectedSkills []string
 		var selectedInfra []string
+		for _, infra := range InfraLayers {
+			selectedInfra = append(selectedInfra, infra.Key)
+		}
 
-		customForm := huh.NewForm(
-			huh.NewGroup(
-				huh.NewMultiSelect[string]().
-					Title("Workflow skills").
-					Description("Toggle individual skills on/off.").
-					Options(skillOptions...).
-					Value(&selectedSkills),
-			),
-			huh.NewGroup(
-				huh.NewMultiSelect[string]().
-					Title("Infrastructure & configuration").
-					Description("All selected by default. Deselect any you don't need.").
-					Options(infraOptions...).
-					Value(&selectedInfra),
-			),
-		).WithTheme(huh.ThemeCatppuccin())
+		formGroups = append(formGroups, huh.NewGroup(
+			huh.NewMultiSelect[string]().
+				Title("🧱 Repo scaffolding & configuration").
+				Description(infraSelectionDescription()).
+				Options(infraOptions...).
+				Value(&selectedInfra),
+		))
+
+		customForm := huh.NewForm(formGroups...).WithTheme(huh.ThemeCatppuccin())
 
 		if err := customForm.Run(); err != nil {
 			return nil, fmt.Errorf("wizard cancelled: %w", err)
+		}
+
+		var selectedSkills []string
+		for _, groupSelections := range selectedSkillsByGroup {
+			selectedSkills = append(selectedSkills, groupSelections...)
 		}
 
 		parsedATV, parsedGstack := ParseSelections(selectedSkills)
@@ -274,4 +269,34 @@ func stackPackLabel(pack installstate.StackPack) string {
 	default:
 		return "General"
 	}
+}
+
+func defaultSelectedSkillKeys(group CategoryGroup, presetGstackSet map[string]bool, prereqs gstack.Prerequisites) []string {
+	selected := make([]string, 0, len(group.Skills))
+	for _, skill := range group.Skills {
+		if skill.IsGstack {
+			dir := strings.TrimPrefix(skill.Key, "gstack:")
+			if presetGstackSet[dir] && (!skill.RequiresBun || prereqs.HasBun) {
+				selected = append(selected, skill.Key)
+			}
+			continue
+		}
+		selected = append(selected, skill.Key)
+	}
+	return selected
+}
+
+func skillOptionLabel(skill CategorySkill, prereqs gstack.Prerequisites) string {
+	label := skill.Label
+	if skill.IsGstack {
+		label = fmt.Sprintf("[gstack] %s", label)
+	}
+	if skill.RequiresBun {
+		if prereqs.HasBun {
+			label = fmt.Sprintf("%s · runtime ready", label)
+		} else {
+			label = fmt.Sprintf("%s ⚠️ requires Bun for runtime", label)
+		}
+	}
+	return label
 }

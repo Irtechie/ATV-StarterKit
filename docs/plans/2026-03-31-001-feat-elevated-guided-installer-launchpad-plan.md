@@ -104,9 +104,9 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 - [x] Redefine `WizardResult` to hold multiple stack packs and richer preset/customization state
 - [x] Refactor `pkg/scaffold/catalog.go` / `BuildFilteredCatalog(...)` to support multi-pack composition deterministically
 - [x] Fix current preset drift in `pkg/tui/presets.go`, especially Pro vs Full browser/runtime behavior
-- [ ] Improve preset previews so downgrade behavior and prerequisites are obvious
-- [ ] Upgrade grouped category descriptions in `pkg/tui/categories.go` so users can tell what each capability does before selection
-- [ ] Preserve progressive disclosure: preset-first path remains the happy path; customization is optional
+- [x] Improve preset previews so downgrade behavior and prerequisites are obvious
+- [x] Upgrade grouped category descriptions in `pkg/tui/categories.go` so users can tell what each capability does before selection
+- [x] Preserve progressive disclosure: preset-first path remains the happy path; customization is optional
 
 **Explicitly excluded in this phase**
 
@@ -117,7 +117,7 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 **Success criteria**
 
 - [x] Guided mode supports additive multi-stack selection with deterministic outcomes regardless of toggle order
-- [ ] Preset and customization flows clearly explain what will be installed and what prerequisites are needed
+- [x] Preset and customization flows clearly explain what will be installed and what prerequisites are needed
 - [x] Auto / non-guided mode remains behaviorally unchanged
 
 #### Phase 2: Structured install telemetry and manifest foundation
@@ -265,8 +265,8 @@ Equivalent surfaces that must stay aligned:
 
 - [x] `init --guided` supports additive stack-pack selection and no longer forces one primary stack
 - [x] Detection acts as a recommendation/preselection layer rather than silently choosing for the user
-- [ ] Preset previews clearly state capability scope, install/runtime expectations, and downgrade behavior
-- [ ] Customization presents grouped, understandable capability choices
+- [x] Preset previews clearly state capability scope, install/runtime expectations, and downgrade behavior
+- [x] Customization presents grouped, understandable capability choices
 - [ ] Install progress includes first-class warnings, skips, failures, and reasons
 - [ ] Guided install writes a versioned manifest describing requested, installed, skipped, and failed outcomes
 - [ ] A deterministic launchpad MVP can read repo memory and manifest state to recommend next actions

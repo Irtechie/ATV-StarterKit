@@ -18,17 +18,18 @@ type CategorySkill struct {
 
 // CategoryGroup holds the skills for one functional category in the TUI.
 type CategoryGroup struct {
-	Category string
-	Label    string
-	Skills   []CategorySkill
+	Category    string
+	Label       string
+	Description string
+	Skills      []CategorySkill
 }
 
 // ATVSkillsByCategory maps ATV layer keys to functional categories.
 var atvCategoryMapping = map[string][]CategorySkill{
 	gstack.CategoryPlanning: {
 		{Label: "Brainstorming — explore what to build", Key: "core-skills:brainstorming", Source: "atv"},
-		{Label: "Plan — structured implementation plans", Key: "core-skills:ce-plan", Source: "atv"},
-		{Label: "Deepen Plan — parallel research enhancement", Key: "core-skills:deepen-plan", Source: "atv"},
+		{Label: "Plan — turn ideas into an implementation plan", Key: "core-skills:ce-plan", Source: "atv"},
+		{Label: "Deepen Plan — parallel research to harden the plan", Key: "core-skills:deepen-plan", Source: "atv"},
 	},
 	gstack.CategoryReview: {
 		{Label: "CE Review — multi-agent code review", Key: "core-skills:ce-review", Source: "atv"},
@@ -40,7 +41,7 @@ var atvCategoryMapping = map[string][]CategorySkill{
 		{Label: "CE Compound — document solutions", Key: "core-skills:ce-compound", Source: "atv"},
 	},
 	gstack.CategoryQATesting: {
-		{Label: "agent-browser — Vercel's headless browser CLI for AI agents", Key: "agent-browser", Source: "atv"},
+		{Label: "agent-browser — real browser automation with screenshots and form fills", Key: "agent-browser", Source: "atv"},
 	},
 }
 
@@ -52,8 +53,9 @@ func BuildCategoryGroups(prereqs gstack.Prerequisites) []CategoryGroup {
 
 	for _, cat := range gstack.AllCategories() {
 		group := CategoryGroup{
-			Category: cat,
-			Label:    gstack.CategoryLabel(cat),
+			Category:    cat,
+			Label:       gstack.CategoryLabel(cat),
+			Description: categoryDescription(cat, prereqs),
 		}
 
 		// Add ATV skills for this category first (ATV overrides)
@@ -83,16 +85,46 @@ func BuildCategoryGroups(prereqs gstack.Prerequisites) []CategoryGroup {
 	return groups
 }
 
+func categoryDescription(cat string, prereqs gstack.Prerequisites) string {
+	switch cat {
+	case gstack.CategoryPlanning:
+		return "Shape the work before coding: brainstorms, plans, architecture review, and design direction."
+	case gstack.CategoryReview:
+		return "Catch issues early with code, design, and independent review passes."
+	case gstack.CategoryQATesting:
+		if prereqs.HasBun {
+			return "Browser and performance workflows. Bun is available, so runtime QA flows can be preselected and built."
+		}
+		return "Browser and performance workflows. Bun is missing, so runtime-heavy QA stays docs-only until Bun is installed."
+	case gstack.CategorySecurity:
+		return "Threat modeling and security review guardrails for higher-risk work."
+	case gstack.CategoryShipping:
+		return "PR, release, deploy, and post-deploy follow-through once the work is ready to ship."
+	case gstack.CategorySafety:
+		return "Reduce destructive mistakes during risky debugging or production work."
+	case gstack.CategoryDebugging:
+		return "Systematic investigation patterns that push the agent toward root cause before fixes."
+	case gstack.CategoryRetrospective:
+		return "Capture learnings after shipping so the repo compounds team knowledge over time."
+	default:
+		return "Additional workflow capabilities for this repo."
+	}
+}
+
+func infraSelectionDescription() string {
+	return "Repo files and configuration scaffolding. Everything starts selected; deselect only the artifacts you know you do not want written into the repo."
+}
+
 // InfraLayers returns the non-skill infrastructure layer options (unchanged from original).
 var InfraLayers = []CategorySkill{
-	{Label: "MCP servers (GitHub, Azure, Terraform, Context7)", Key: LayerMCPServers, Source: "atv"},
-	{Label: "VS Code extensions.json", Key: LayerVSCodeExtensions, Source: "atv"},
-	{Label: "Copilot instructions (.github/copilot-instructions.md)", Key: LayerCopilotInstructions, Source: "atv"},
-	{Label: "Copilot setup steps (.github/copilot-setup-steps.yml)", Key: LayerSetupSteps, Source: "atv"},
-	{Label: "File-scoped instructions (applyTo globs)", Key: LayerFileInstructions, Source: "atv"},
-	{Label: "docs/ structure (plans, brainstorms, solutions)", Key: LayerDocsStructure, Source: "atv"},
-	{Label: "Universal agents (security, performance, architecture)", Key: LayerUniversalAgents, Source: "atv"},
-	{Label: "Stack-specific agents (language reviewers)", Key: LayerStackAgents, Source: "atv"},
+	{Label: "MCP server config — GitHub, Azure, Terraform, Context7 connectors", Key: LayerMCPServers, Source: "atv"},
+	{Label: "VS Code recommendations — .vscode/extensions.json", Key: LayerVSCodeExtensions, Source: "atv"},
+	{Label: "Copilot system instructions — .github/copilot-instructions.md", Key: LayerCopilotInstructions, Source: "atv"},
+	{Label: "Copilot setup steps — .github/copilot-setup-steps.yml", Key: LayerSetupSteps, Source: "atv"},
+	{Label: "File-scoped instructions — applyTo rules for stack/tool guidance", Key: LayerFileInstructions, Source: "atv"},
+	{Label: "Documentation folders — docs/plans, brainstorms, and solutions", Key: LayerDocsStructure, Source: "atv"},
+	{Label: "Universal reviewer agents — security, performance, architecture", Key: LayerUniversalAgents, Source: "atv"},
+	{Label: "Stack reviewers — language/framework specific agents", Key: LayerStackAgents, Source: "atv"},
 }
 
 // ParseSelections splits the selected keys into ATV layers and gstack skill dirs.
