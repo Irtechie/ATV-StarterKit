@@ -11,13 +11,14 @@
        <a href="https://opensource.org/licenses/MIT"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-ffd700?style=flat-square"></a>
        <a href="https://github.com/features/copilot"><img alt="GitHub Copilot Ready" src="https://img.shields.io/badge/GitHub%20Copilot-Ready-8957e5?style=flat-square&logo=github"></a>
        <a href="#the-full-sprint"><img alt="45 skills" src="https://img.shields.io/badge/Skills-45-ff8c00?style=flat-square"></a>
-       <a href="#the-agent-roster"><img alt="28 agents" src="https://img.shields.io/badge/Agents-28-f97316?style=flat-square"></a>
+       <a href="#the-agent-roster"><img alt="29 agents" src="https://img.shields.io/badge/Agents-29-f97316?style=flat-square"></a>
 </p>
 
 <p align="center">
        <a href="#quick-start">Quick start</a> ·
        <a href="#the-three-pillars">Three pillars</a> ·
        <a href="#the-guided-experience">Guided experience</a> ·
+       <a href="#the-launchpad">Launchpad</a> ·
        <a href="#the-full-sprint">Full sprint</a> ·
        <a href="#development">Development</a>
 </p>
@@ -32,7 +33,7 @@ ATV 2.0 is a one-command installer that wires together three open-source systems
 - **gstack** — the sprint execution engine
 - **agent-browser** — the browser automation layer
 
-Each brings a distinct philosophy. Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45 skills, 28 agents, and a memory system that makes your repo smarter with every PR.
+Each brings a distinct philosophy. Together they cover the full software lifecycle — from \"what should I build?\" through \"is it healthy in production?\" — with 45 skills, 29 agents, a memory-aware launchpad, and a knowledge system that makes your repo smarter with every PR.
 
 ---
 
@@ -95,6 +96,7 @@ Most agentic coding setups are stateless. You install some skills, run some comm
 | **Institutional knowledge** | Solved problems, gotchas, patterns | `docs/solutions/*.md` (git-tracked) | `learnings-researcher` agent during `/ce-plan` and `/ce-review` |
 | **Design decisions** | Why we chose approach A over B | `docs/brainstorms/*.md` (git-tracked) | `/ce-plan` auto-discovers recent brainstorms |
 | **Implementation plans** | What to build, acceptance criteria, checkboxes | `docs/plans/*.md` (git-tracked) | `/ce-work` reads and checks off items as it implements |
+| **Install manifest** | What the installer intended, attempted, skipped, failed | `.atv/install-manifest.json` (repo-local) | `atv-installer launchpad`, concierge tools |
 | **Project config** | Which review agents to run, stack settings | `compound-engineering.local.md` | `/ce-review`, `/ce-work` |
 | **gstack session state** | Active sessions, user preferences, prefix choice | `~/.gstack/` (user-global) | Every gstack skill preamble |
 | **gstack project learning** | Per-project self-learning data | `.gstack/` (gitignored) | `/gstack-learn` |
@@ -121,9 +123,9 @@ cd your-project
 npx atv-starterkit init
 ```
 
-Auto-detects your stack. Installs 13 core ATV skills, 28 agents, MCP servers, and docs structure. Done in seconds.
+Auto-detects your stack. Installs 13 core ATV skills, 29 agents, MCP servers, and docs structure. Done in seconds.
 
-Want to choose your preset? Use `npx atv-starterkit init --guided` for the interactive TUI.
+Want to choose your preset and stack packs? Use `npx atv-starterkit init --guided` for the interactive TUI with multi-stack selection.
 
 ### 2. Use
 
@@ -143,7 +145,15 @@ Or skip the steps and run the full pipeline in one shot:
 /lfg             →  Plan → deepen → build → review → test → compound
 ```
 
-### 3. Compound
+### 3. Reopen the Launchpad
+
+```bash
+atv-installer launchpad
+```
+
+Shows your memory dashboard: installed intelligence, repo memory snapshot, and deterministic next-step recommendations. Reopenable any time — no reinstall needed.
+
+### 4. Compound
 
 Every time you run `/ce-compound`, solved problems get saved to `docs/solutions/`. Next time `/ce-plan` runs, the `learnings-researcher` agent searches those files first — so your repo gets smarter with every PR.
 
@@ -153,17 +163,17 @@ Every time you run `/ce-compound`, solved problems get saved to `docs/solutions/
 
 The guided installer walks you through four screens:
 
-### Screen 1: Stack
+### Screen 1: Stack Packs
 
 ```text
-┃ What's your primary stack?
-┃ > TypeScript
-┃   Python
-┃   Rails
-┃   General
+┃ Which stack packs should be included?
+┃ [✓] General
+┃ [✓] TypeScript    (tsconfig.json detected)
+┃ [ ] Python
+┃ [ ] Rails
 ```
 
-Auto-detected from your project files. Override if needed.
+Multi-select — choose as many stacks as your project uses. Auto-detected packs are pre-selected. Stack packs are additive: selecting both TypeScript and Rails installs agents and file instructions for both.
 
 ### Screen 2: Preset
 
@@ -195,15 +205,91 @@ Power users can drill into category-grouped multi-select. Beginners skip straigh
 ### Screen 4: Install Progress
 
 ```text
-  Installing Full preset for typescript...
+  Installing Pro preset for typescript...
 
-  ✅ Scaffolding ATV files
-  ⣾  Cloning gstack...
-  ○  Generating gstack skill docs
-  ○  Installing agent-browser + Chrome
+  ✅ Scaffolding ATV files (24 files created, 8 directories) · 340ms
+  ⚠️  Syncing gstack skills — setup failed, fell back to docs · 2.1s
+  ✅ Installing agent-browser (CLI ready, skill copied) · 1.8s
 ```
 
-Real-time animated spinners. Each step shows pending → running → done/failed.
+Real-time animated spinners. Each step shows pending → running → done/warned/failed with structured telemetry: durations, reasons, skip explanations. Substep events track individual file writes, git clone vs build stages, and npm operations.
+
+### Screen 5: Summary + Recommendations
+
+```text
+  Guided install summary
+
+  ✅ Scaffolding ATV files (24 files created) · 340ms
+  ⚠️  Syncing gstack skills — fell back to markdown-only · 2.1s
+  ✅ Installing agent-browser (CLI ready, skill copied) · 1.8s
+
+  Recommended next moves
+
+    1. Fix installer warnings before relying on every capability
+       fell back to markdown-only sync
+    2. Start with /ce-brainstorm to shape the first feature
+       No brainstorms were found in docs/brainstorms yet.
+
+  🎉 ATV Starter Kit ready!
+  Install state saved to .atv/install-manifest.json
+  Reopen later with: atv-installer launchpad
+```
+
+The installer writes a versioned manifest to `.atv/install-manifest.json` recording requested vs installed vs skipped vs failed outcomes. Deterministic recommendations derive from local repo state — no network required.
+
+---
+
+## The Launchpad
+
+After install, run `atv-installer launchpad` to see your repo's memory dashboard:
+
+```text
+  ATV Launchpad
+  Local memory + install intelligence for this repo
+
+  Installed intelligence
+  ✅ Guided manifest found at .atv/install-manifest.json
+  • Last guided run: 2026-04-01 14:30 UTC
+  • Preset: Pro
+  • Stack packs: General, TypeScript
+  • gstack: 2 skill dirs requested (markdown-only)
+  • agent-browser: requested in the last guided run
+  • Outcomes: 2 done, 1 warnings, 0 failed, 0 skipped
+
+  Repo memory snapshot
+  • brainstorms: 3
+  • plans: 2
+  • solutions: 1
+  • active plan state: unchecked work remains
+  • agents: 18, skills: 12
+  • copilot-instructions.md: present
+  • gstack staging: present (.gstack/)
+  • agent-browser skill: installed
+
+  Recommended next moves
+  1. Continue the active plan with /ce-work
+     At least one plan still has unchecked items.
+  2. Use /gstack-office-hours for a deeper sprint kickoff
+     gstack skills were requested and synced successfully enough to use.
+  3. Open the app in a real browser with agent-browser
+     Browser automation tooling was installed or partially prepared.
+```
+
+The launchpad is **deterministic** — same repo state always produces the same recommendations. It works fully offline, requires no auth, and reads only local filesystem state.
+
+### Concierge Agent
+
+The `atv-concierge` agent (scaffolded to `.github/agents/atv-concierge.agent.md`) lets Copilot Chat navigate the launchpad data:
+
+| Command | Purpose |
+|---|---|
+| `atv-installer concierge memory-summary` | Full repo memory + install intelligence as JSON |
+| `atv-installer concierge list-recommendations` | Deterministic next-step recommendations |
+| `atv-installer concierge explain-recommendation [id]` | Why a recommendation exists + suggested command |
+| `atv-installer concierge open-artifact [name]` | Resolve "plans" / "manifest" / "skills" to filesystem paths |
+| `atv-installer concierge run-suggested-action [id]` | Describe the command (never auto-executes) |
+
+The concierge is **secondary** — it explains and navigates the deterministic local model but never overrides it. All tools work without network or Copilot auth.
 
 ---
 
@@ -364,6 +450,7 @@ ATV covers the complete software lifecycle:
 | **Research** | `repo-research-analyst`, `best-practices-researcher`, `framework-docs-researcher`, `learnings-researcher`, `git-history-analyzer` |
 | **Process** | `pr-comment-resolver`, `spec-flow-analyzer`, `bug-reproduction-validator`, `pattern-recognition-specialist` |
 | **Meta** | `agent-native-reviewer`, `ankane-readme-writer` |
+| **Launchpad** | `atv-concierge` |
 | **Ops** | `lint` |
 
 ---
@@ -410,20 +497,33 @@ atv-installer init --guided
  Detect stack + prerequisites (git, bun, node)
         │
         ▼
- Screen 1: Stack → Screen 2: Preset → Screen 3: Customize?
+ Screen 1: Stack Packs (multi-select) → Screen 2: Preset → Screen 3: Customize?
         │
         ▼
- Install with animated progress:
+ Install with structured telemetry:
         │
         ├── ATV scaffold ──► Embedded templates → .github/skills/*/SKILL.md
+        │                    └── Substep events per file (created/skipped/merged)
         │
         ├── gstack ──► git clone → .gstack/ (staging)
         │               ├── gen:skill-docs → .agents/skills/gstack-*/
         │               ├── Copy SKILL.md → .github/skills/gstack-*/
-        │               └── Sidecar: .github/skills/gstack/ (bin, browse, ETHOS.md)
+        │               └── Substeps: clone → build/doc-gen → copy skills
         │
         └── agent-browser ──► npm install -g → agent-browser install (Chrome)
-                              └── .github/skills/agent-browser/SKILL.md
+                              ├── .github/skills/agent-browser/SKILL.md
+                              └── Substeps: npm install → copy SKILL.md
+        │
+        ▼
+ Write manifest to .atv/install-manifest.json
+        │
+        ├── Requested state (packs, layers, preset)
+        ├── Outcomes with substeps + skip reasons
+        └── Deterministic recommendations
+        │
+        ▼
+ atv-installer launchpad  ──► Reopenable memory dashboard
+ atv-installer concierge  ──► JSON API for Copilot SDK assistant
 ```
 
 - `.gstack/` is gitignored — staging area with the full repo and runtime
@@ -470,13 +570,20 @@ cd ATV-StarterKit && go build -o atv-installer .
 ```bash
 go build -o atv-installer .             # build
 go test ./...                            # all tests
-go test ./pkg/gstack/ -v                 # gstack tests
-go test ./test/sandbox/ -v               # integration tests
+go test ./pkg/concierge/ -v              # concierge tool tests
+go test ./pkg/installstate/ -v           # manifest + recommendations tests
+go test ./test/sandbox/ -v               # integration tests (22 E2E scenarios)
+go test ./test/sandbox/ -v -run E2E      # comprehensive lifecycle tests only
 
 # sandbox test
 mkdir /tmp/test && cd /tmp/test
 echo '{}' > tsconfig.json && git init
 /path/to/atv-installer init --guided
+
+# verify launchpad + concierge
+/path/to/atv-installer launchpad
+/path/to/atv-installer concierge memory-summary
+/path/to/atv-installer concierge list-recommendations
 ```
 
 ## Limitations
