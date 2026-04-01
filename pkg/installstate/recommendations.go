@@ -32,7 +32,7 @@ func ScanRepoState(root string) RepoState {
 	state.SolutionCount = countMarkdownFiles(filepath.Join(root, "docs", "solutions"))
 
 	// Classify installed intelligence
-	state.InstalledAgents = countSubdirs(filepath.Join(root, ".github", "agents"))
+	state.InstalledAgents = countFilesWithSuffix(filepath.Join(root, ".github", "agents"), ".agent.md")
 	state.InstalledSkills = countSubdirs(filepath.Join(root, ".github", "skills"))
 	state.HasCopilotInstructions = fileExists(filepath.Join(root, ".github", "copilot-instructions.md"))
 	state.HasGstackStaging = dirExists(filepath.Join(root, ".gstack"))
@@ -204,6 +204,20 @@ func countSubdirs(dir string) int {
 	count := 0
 	for _, entry := range entries {
 		if entry.IsDir() {
+			count++
+		}
+	}
+	return count
+}
+
+func countFilesWithSuffix(dir string, suffix string) int {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return 0
+	}
+	count := 0
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasSuffix(entry.Name(), suffix) {
 			count++
 		}
 	}

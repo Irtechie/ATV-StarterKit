@@ -50,7 +50,7 @@ func TestGetMemorySummaryIncludesRepoState(t *testing.T) {
 	root := t.TempDir()
 	mustWrite(t, filepath.Join(root, "docs", "brainstorms", "idea.md"), "# Idea")
 	mustWrite(t, filepath.Join(root, ".github", "copilot-instructions.md"), "# Instructions")
-	os.MkdirAll(filepath.Join(root, ".github", "agents", "reviewer"), 0o755)
+	mustWrite(t, filepath.Join(root, ".github", "agents", "reviewer.agent.md"), "---\ndescription: test\n---")
 	os.MkdirAll(filepath.Join(root, ".github", "skills", "brainstorming"), 0o755)
 
 	summary := GetMemorySummary(root)
