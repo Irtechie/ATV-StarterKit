@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.0.1] — 2026-04-01
+
+Patch release to fix npm distribution. The v2.0.0 npm package was published before the corresponding GitHub release existed, so the postinstall binary download would fail. This release creates the GitHub release with pre-built binaries and publishes a new npm version that resolves correctly.
+
+### Fixed
+
+- **npm install works end-to-end** — v2.0.0 GitHub release now exists with goreleaser binaries for all platforms (macOS, Linux, Windows on amd64/arm64)
+- **Version alignment** — VERSION file, npm package, and GitHub release tag are now all in sync at 2.0.1
+
 ## [2.0.0] — 2026-03-29
 
 ATV 2.0 — **All The Vibes** becomes a unified installer combining Compound Engineering, gstack, and agent-browser into one agentic coding setup for GitHub Copilot.
