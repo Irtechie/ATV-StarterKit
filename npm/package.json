@@ -1,6 +1,6 @@
 {
   "name": "atv-starterkit",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "ATV Starter Kit — scaffold a complete GitHub Copilot agentic coding environment into any project",
   "license": "MIT",
   "repository": {
