@@ -178,16 +178,16 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 
 **Tasks**
 
-- [ ] Define typed tools for the assistant (e.g. `getMemorySummary`, `listRecommendations`, `explainRecommendation`, `openArtifact`, `runSuggestedAction`)
-- [ ] Expose the local memory index and recommendations through those tools instead of raw file scraping
-- [ ] Add clear degraded behavior for no-auth, offline, or slow-response cases
-- [ ] Keep the assistant in an explanation/navigation role rather than a truth-owning role
-- [ ] Ensure assistant recommendations cannot silently override deterministic ranking without explanation
+- [x] Define typed tools for the assistant (e.g. `getMemorySummary`, `listRecommendations`, `explainRecommendation`, `openArtifact`, `runSuggestedAction`)
+- [x] Expose the local memory index and recommendations through those tools instead of raw file scraping
+- [x] Add clear degraded behavior for no-auth, offline, or slow-response cases
+- [x] Keep the assistant in an explanation/navigation role rather than a truth-owning role
+- [x] Ensure assistant recommendations cannot silently override deterministic ranking without explanation
 
 **Success criteria**
 
-- [ ] Core launchpad value is unchanged when the assistant is disabled
-- [ ] The assistant improves explanation and navigation without becoming mandatory
+- [x] Core launchpad value is unchanged when the assistant is disabled
+- [x] The assistant improves explanation and navigation without becoming mandatory
 
 ## Alternative Approaches Considered
 
