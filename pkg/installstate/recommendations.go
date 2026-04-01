@@ -15,6 +15,13 @@ type RepoState struct {
 	SolutionCount    int
 	HasUncheckedPlan bool
 	HasCompletedPlan bool
+
+	// Installed intelligence classification
+	InstalledAgents        int
+	InstalledSkills        int
+	HasCopilotInstructions bool
+	HasGstackStaging       bool
+	HasAgentBrowserSkill   bool
 }
 
 // ScanRepoState inspects the local docs tree to find brainstorms, plans, and solutions.
@@ -23,6 +30,14 @@ func ScanRepoState(root string) RepoState {
 	state.BrainstormCount = countMarkdownFiles(filepath.Join(root, "docs", "brainstorms"))
 	state.PlanCount, state.HasUncheckedPlan, state.HasCompletedPlan = scanPlans(filepath.Join(root, "docs", "plans"))
 	state.SolutionCount = countMarkdownFiles(filepath.Join(root, "docs", "solutions"))
+
+	// Classify installed intelligence
+	state.InstalledAgents = countSubdirs(filepath.Join(root, ".github", "agents"))
+	state.InstalledSkills = countSubdirs(filepath.Join(root, ".github", "skills"))
+	state.HasCopilotInstructions = fileExists(filepath.Join(root, ".github", "copilot-instructions.md"))
+	state.HasGstackStaging = dirExists(filepath.Join(root, ".gstack"))
+	state.HasAgentBrowserSkill = dirExists(filepath.Join(root, ".github", "skills", "agent-browser"))
+
 	return state
 }
 
@@ -179,4 +194,28 @@ func WalkMarkdownFiles(root string) int {
 		return nil
 	})
 	return count
+}
+
+func countSubdirs(dir string) int {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return 0
+	}
+	count := 0
+	for _, entry := range entries {
+		if entry.IsDir() {
+			count++
+		}
+	}
+	return count
+}
+
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
+}
+
+func dirExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
 }

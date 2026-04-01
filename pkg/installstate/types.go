@@ -89,13 +89,26 @@ const (
 	InstallStepSkipped InstallStepStatus = "skipped"
 )
 
+// SkipReason classifies why an install step was skipped for deterministic recommendations.
+type SkipReason string
+
+const (
+	SkipReasonNone             SkipReason = ""
+	SkipReasonUserSkip         SkipReason = "user-skip"
+	SkipReasonPrereqMissing    SkipReason = "prereq-missing"
+	SkipReasonAlreadyInstalled SkipReason = "already-installed"
+	SkipReasonDependencyFailed SkipReason = "dependency-failed"
+)
+
 // InstallOutcome captures the machine-readable result of one installer action.
 type InstallOutcome struct {
-	Step     string            `json:"step"`
-	Status   InstallStepStatus `json:"status"`
-	Detail   string            `json:"detail,omitempty"`
-	Reason   string            `json:"reason,omitempty"`
-	Duration string            `json:"duration,omitempty"`
+	Step       string            `json:"step"`
+	Status     InstallStepStatus `json:"status"`
+	Detail     string            `json:"detail,omitempty"`
+	Reason     string            `json:"reason,omitempty"`
+	Duration   string            `json:"duration,omitempty"`
+	SkipReason SkipReason        `json:"skipReason,omitempty"`
+	Substeps   []InstallOutcome  `json:"substeps,omitempty"`
 }
 
 // RequestedState records what the guided installer attempted to install.

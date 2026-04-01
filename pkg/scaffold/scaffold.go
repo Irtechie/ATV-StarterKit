@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/installstate"
 )
 
 // WriteStatus indicates what happened when writing a file.
@@ -221,4 +223,29 @@ func mergeArrays(dst, src []interface{}) []interface{} {
 		}
 	}
 	return dst
+}
+
+// ResultsToSubsteps converts scaffold write results into structured install substeps.
+func ResultsToSubsteps(results []WriteResult) []installstate.InstallOutcome {
+	substeps := make([]installstate.InstallOutcome, 0, len(results))
+	for _, r := range results {
+		substep := installstate.InstallOutcome{Step: r.Path}
+		switch r.Status {
+		case StatusCreated, StatusDirCreated:
+			substep.Status = installstate.InstallStepDone
+			substep.Detail = "created"
+		case StatusMerged:
+			substep.Status = installstate.InstallStepDone
+			substep.Detail = "merged"
+		case StatusSkipped:
+			substep.Status = installstate.InstallStepSkipped
+			substep.Detail = "exists"
+			substep.SkipReason = installstate.SkipReasonAlreadyInstalled
+		case StatusFailed:
+			substep.Status = installstate.InstallStepFailed
+			substep.Reason = r.Error
+		}
+		substeps = append(substeps, substep)
+	}
+	return substeps
 }

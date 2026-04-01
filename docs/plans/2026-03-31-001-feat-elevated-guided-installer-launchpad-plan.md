@@ -1,7 +1,7 @@
 ---
 title: "feat: Elevated Guided Installer and Launchpad Foundations"
 type: feat
-status: active
+status: completed
 date: 2026-03-31
 origin: docs/brainstorms/2026-03-31-elevated-guided-installer-experience-brainstorm.md
 ---
@@ -127,9 +127,9 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 **Tasks**
 
 - [x] Redesign `pkg/tui/progress.go` around `InstallEvent` or equivalent structured event messages
-- [ ] Emit parent and substep events from scaffold, gstack, and agent-browser flows
-- [ ] Distinguish success, warning, failure, user-skip, prereq-skip, already-installed, and dependency-skipped outcomes
-- [ ] Capture durations, reasons, and actionable next steps for each major operation
+- [x] Emit parent and substep events from scaffold, gstack, and agent-browser flows
+- [x] Distinguish success, warning, failure, user-skip, prereq-skip, already-installed, and dependency-skipped outcomes
+- [x] Capture durations, reasons, and actionable next steps for each major operation
 - [x] Write an atomic, versioned install manifest after guided installs
 - [x] Ensure the manifest records requested vs installed vs skipped vs failed, not just intent
 - [x] Upgrade the completion summary in `pkg/output/printer.go` to show what was installed, what was skipped, and how to reopen the next experience later
@@ -151,12 +151,12 @@ The launchpad should not be smuggled into the guided-flow work as “just one mo
 
 **Tasks**
 
-- [ ] Implement a memory index that classifies durable repo memory, installed intelligence, and runtime health
+- [x] Implement a memory index that classifies durable repo memory, installed intelligence, and runtime health
 - [x] Add deterministic recommendation rules based on repo state, manifest state, and runtime checks
 - [x] Limit primary recommendations to a small set with clear rationale
 - [x] Define a reopen path, likely a new CLI command and/or guided completion affordance
 - [x] Deliver the first launchpad UI as a dashboard-first experience
-- [ ] Keep the terminal as a secondary execution surface, not the home screen
+- [x] Keep the terminal as a secondary execution surface, not the home screen
 - [x] Ensure graceful fallback in headless/no-GUI environments
 
 **Candidate information architecture**
@@ -254,10 +254,10 @@ Equivalent surfaces that must stay aligned:
 ### Integration Test Scenarios
 
 - [x] Guided multi-stack selection produces deterministic file output regardless of selection order
-- [ ] Missing prerequisites downgrade or skip runtime-dependent capabilities with clear telemetry and manifest output
-- [ ] Partial install success still writes a valid manifest and useful completion summary
-- [ ] Re-running guided mode after a prior install preserves or updates state according to the chosen rerun model
-- [ ] Launchpad recommendation output matches manifest + repo memory for empty, partial, and mature repos
+- [x] Missing prerequisites downgrade or skip runtime-dependent capabilities with clear telemetry and manifest output
+- [x] Partial install success still writes a valid manifest and useful completion summary
+- [x] Re-running guided mode after a prior install preserves or updates state according to the chosen rerun model
+- [x] Launchpad recommendation output matches manifest + repo memory for empty, partial, and mature repos
 
 ## Acceptance Criteria
 
@@ -270,7 +270,7 @@ Equivalent surfaces that must stay aligned:
 - [x] Install progress includes first-class warnings, skips, failures, and reasons
 - [x] Guided install writes a versioned manifest describing requested, installed, skipped, and failed outcomes
 - [x] A deterministic launchpad MVP can read repo memory and manifest state to recommend next actions
-- [ ] GitHub Copilot SDK remains optional and non-blocking
+- [x] GitHub Copilot SDK remains optional and non-blocking
 
 ### Non-Functional Requirements
 

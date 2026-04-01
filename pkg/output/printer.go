@@ -276,6 +276,18 @@ func launchpadText(snapshot installstate.LaunchpadSnapshot) string {
 	} else if snapshot.RepoState.HasCompletedPlan {
 		b.WriteString(fmt.Sprintf("  %s active plan state: at least one completed plan found\n", dimStyle.Render("•")))
 	}
+	if snapshot.RepoState.InstalledAgents > 0 || snapshot.RepoState.InstalledSkills > 0 || snapshot.RepoState.HasCopilotInstructions {
+		b.WriteString(fmt.Sprintf("  %s agents: %d, skills: %d\n", dimStyle.Render("•"), snapshot.RepoState.InstalledAgents, snapshot.RepoState.InstalledSkills))
+		if snapshot.RepoState.HasCopilotInstructions {
+			b.WriteString(fmt.Sprintf("  %s copilot-instructions.md: present\n", dimStyle.Render("•")))
+		}
+	}
+	if snapshot.RepoState.HasGstackStaging {
+		b.WriteString(fmt.Sprintf("  %s gstack staging: present (.gstack/)\n", dimStyle.Render("•")))
+	}
+	if snapshot.RepoState.HasAgentBrowserSkill {
+		b.WriteString(fmt.Sprintf("  %s agent-browser skill: installed\n", dimStyle.Render("•")))
+	}
 
 	b.WriteString("\n")
 	b.WriteString(titleStyle.Render("  Recommended next moves"))

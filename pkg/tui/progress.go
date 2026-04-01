@@ -25,10 +25,12 @@ const (
 
 // InstallStepResult is the structured result produced by one install action.
 type InstallStepResult struct {
-	Status installstate.InstallStepStatus
-	Detail string
-	Reason string
-	Error  error
+	Status     installstate.InstallStepStatus
+	Detail     string
+	Reason     string
+	SkipReason installstate.SkipReason
+	Substeps   []installstate.InstallOutcome
+	Error      error
 }
 
 // InstallStep defines a single step in the install process.
@@ -117,11 +119,13 @@ func (m ProgressModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		m.outcomes = append(m.outcomes, installstate.InstallOutcome{
-			Step:     m.steps[msg.index].Name,
-			Status:   result.Status,
-			Detail:   m.steps[msg.index].Detail,
-			Reason:   m.steps[msg.index].Reason,
-			Duration: m.steps[msg.index].Duration,
+			Step:       m.steps[msg.index].Name,
+			Status:     result.Status,
+			Detail:     m.steps[msg.index].Detail,
+			Reason:     m.steps[msg.index].Reason,
+			Duration:   m.steps[msg.index].Duration,
+			SkipReason: result.SkipReason,
+			Substeps:   result.Substeps,
 		})
 
 		// Advance to next step

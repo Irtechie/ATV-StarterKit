@@ -137,6 +137,7 @@ func buildInstallSteps(targetDir string, catalog []scaffold.Component, gstackDir
 		Action: func() tui.InstallStepResult {
 			results := scaffold.WriteAll(targetDir, catalog)
 			summary := scaffold.SummarizeResults(results)
+			substeps := scaffold.ResultsToSubsteps(results)
 			status := installstate.InstallStepDone
 			if !summary.Successful() {
 				status = installstate.InstallStepWarning
@@ -145,9 +146,10 @@ func buildInstallSteps(targetDir string, catalog []scaffold.Component, gstackDir
 				}
 			}
 			return tui.InstallStepResult{
-				Status: status,
-				Detail: summary.Detail(),
-				Reason: summary.FailureReason(),
+				Status:   status,
+				Detail:   summary.Detail(),
+				Reason:   summary.FailureReason(),
+				Substeps: substeps,
 			}
 		},
 	})
@@ -177,14 +179,58 @@ func buildInstallSteps(targetDir string, catalog []scaffold.Component, gstackDir
 				}
 				status := installstate.InstallStepDone
 				reason := ""
+				var skipReason installstate.SkipReason
 				if result.Warning != "" {
 					status = installstate.InstallStepWarning
 					reason = result.Warning
 					if result.Copied && strings.Contains(result.Warning, "already cloned") {
 						status = installstate.InstallStepSkipped
+						skipReason = installstate.SkipReasonAlreadyInstalled
 					}
 				}
-				return tui.InstallStepResult{Status: status, Detail: detail, Reason: reason}
+
+				// Build substeps for clone, build/doc-gen, and skill copy
+				var substeps []installstate.InstallOutcome
+				if result.Cloned {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "git clone", Status: installstate.InstallStepDone, Detail: "shallow clone completed",
+					})
+				} else if result.Copied {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "git clone", Status: installstate.InstallStepSkipped,
+						Detail: "already cloned", SkipReason: installstate.SkipReasonAlreadyInstalled,
+					})
+				}
+				if result.Built {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "runtime build", Status: installstate.InstallStepDone, Detail: "setup completed",
+					})
+				} else if mode == gstack.ModeFullRuntime {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "runtime build", Status: installstate.InstallStepWarning, Detail: "build failed, fell back to docs",
+						Reason: result.Warning,
+					})
+				} else {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "runtime build", Status: installstate.InstallStepSkipped,
+						Detail: "markdown-only mode", SkipReason: installstate.SkipReasonUserSkip,
+					})
+				}
+				if result.Copied {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step:   "copy skills",
+						Status: installstate.InstallStepDone,
+						Detail: fmt.Sprintf("%d skill dirs", len(result.SkillDirs)),
+					})
+				}
+
+				return tui.InstallStepResult{
+					Status:     status,
+					Detail:     detail,
+					Reason:     reason,
+					SkipReason: skipReason,
+					Substeps:   substeps,
+				}
 			},
 		})
 	}
@@ -220,7 +266,31 @@ func buildInstallSteps(targetDir string, catalog []scaffold.Component, gstackDir
 					status = installstate.InstallStepWarning
 				}
 
-				return tui.InstallStepResult{Status: status, Detail: detail, Reason: result.Warning}
+				// Build substeps for npm install, chrome download, and skill copy
+				var substeps []installstate.InstallOutcome
+				if result.Installed {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "npm install", Status: installstate.InstallStepDone, Detail: "agent-browser CLI available",
+					})
+				} else {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "npm install", Status: installstate.InstallStepWarning,
+						Detail: "install skipped or failed", Reason: result.Warning,
+						SkipReason: installstate.SkipReasonPrereqMissing,
+					})
+				}
+				if result.SkillCopied {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "copy SKILL.md", Status: installstate.InstallStepDone, Detail: "skill registered",
+					})
+				}
+
+				return tui.InstallStepResult{
+					Status:   status,
+					Detail:   detail,
+					Reason:   result.Warning,
+					Substeps: substeps,
+				}
 			},
 		})
 	}
