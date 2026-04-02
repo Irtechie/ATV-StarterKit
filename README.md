@@ -124,7 +124,7 @@ npx atv-starterkit@latest init
 
 Auto-detects your stack. Installs 13 core ATV skills, 28 agents, MCP servers, and docs structure. Done in seconds.
 
-Want to choose your preset? Use `npx atv-starterkit init --guided` for the interactive TUI.
+Want to choose your preset? Use `npx atv-starterkit@latest init --guided` for the interactive TUI.
 
 ### 2. Use
 
@@ -451,7 +451,7 @@ Without Bun, text-based gstack skills still work. `agent-browser` works independ
 ### npm (recommended)
 
 ```bash
-npx atv-starterkit init              # quick run — downloads binary automatically
+npx atv-starterkit@latest init       # quick run — downloads binary automatically
 npm install -g atv-starterkit        # global install
 atv-starterkit init                  # then run from anywhere
 ```

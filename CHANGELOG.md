@@ -6,11 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [2.0.1] — 2026-04-01
 
-Patch release to fix npm distribution. The v2.0.0 npm package was published before the corresponding GitHub release existed, so the postinstall binary download would fail. This release creates the GitHub release with pre-built binaries and publishes a new npm version that resolves correctly.
+Patch release to fix npm distribution. The v2.0.0 npm package was published before any corresponding GitHub release with goreleaser binaries existed, so the postinstall binary download would fail. This release publishes a GitHub release for v2.0.1 with pre-built binaries and a matching npm version that resolves correctly via `releases/latest`.
 
 ### Fixed
 
-- **npm install works end-to-end** — v2.0.0 GitHub release now exists with goreleaser binaries for all platforms (macOS, Linux, Windows on amd64/arm64)
+- **npm install works end-to-end** — the latest GitHub release (v2.0.1) now ships goreleaser binaries for all platforms (macOS, Linux, Windows on amd64/arm64), and the npm package points installers at this release
 - **Version alignment** — VERSION file, npm package, and GitHub release tag are now all in sync at 2.0.1
 
 ## [2.0.0] — 2026-03-29
