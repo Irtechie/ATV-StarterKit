@@ -19,6 +19,7 @@
        <a href="#quick-start">Quick start</a> ·
        <a href="#the-three-pillars">Three pillars</a> ·
        <a href="#the-guided-experience">Guided experience</a> ·
+       <a href="#the-launchpad">Launchpad</a> ·
        <a href="#the-full-sprint">Full sprint</a> ·
        <a href="#development">Development</a>
 </p>
@@ -33,7 +34,7 @@ ATV 2.0 is a one-command installer that wires together three open-source systems
 - **gstack** — the sprint execution engine
 - **agent-browser** — the browser automation layer
 
-Each brings a distinct philosophy. Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45 skills, 28 agents, and a memory system that makes your repo smarter with every PR.
+Each brings a distinct philosophy. Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45 skills, 28 agents, a memory-aware launchpad, and a knowledge system that makes your repo smarter with every PR.
 
 ---
 
@@ -96,6 +97,7 @@ Most agentic coding setups are stateless. You install some skills, run some comm
 | **Institutional knowledge** | Solved problems, gotchas, patterns | `docs/solutions/*.md` (git-tracked) | `learnings-researcher` agent during `/ce-plan` and `/ce-review` |
 | **Design decisions** | Why we chose approach A over B | `docs/brainstorms/*.md` (git-tracked) | `/ce-plan` auto-discovers recent brainstorms |
 | **Implementation plans** | What to build, acceptance criteria, checkboxes | `docs/plans/*.md` (git-tracked) | `/ce-work` reads and checks off items as it implements |
+| **Install manifest** | What the installer intended, attempted, skipped, failed | `.atv/install-manifest.json` (repo-local) | `atv-installer launchpad` |
 | **Project config** | Which review agents to run, stack settings | `compound-engineering.local.md` | `/ce-review`, `/ce-work` |
 | **gstack session state** | Active sessions, user preferences, prefix choice | `~/.gstack/` (user-global) | Every gstack skill preamble |
 | **gstack project learning** | Per-project self-learning data | `.gstack/` (gitignored) | `/gstack-learn` |
@@ -122,9 +124,9 @@ cd your-project
 npx atv-starterkit@latest init
 ```
 
-Auto-detects your stack. Installs 13 core ATV skills, 28 agents, MCP servers, and docs structure. Done in seconds.
+Auto-detects your stack. Installs 13 core ATV skills, 29 agents, MCP servers, and docs structure. Done in seconds.
 
-Want to choose your preset? Use `npx atv-starterkit@latest init --guided` for the interactive TUI.
+Want to choose your preset and stack packs? Use `npx atv-starterkit@latest init --guided` for the interactive TUI with multi-stack selection.
 
 ### 2. Use
 
@@ -144,7 +146,15 @@ Or skip the steps and run the full pipeline in one shot:
 /lfg             →  Plan → deepen → build → review → test → compound
 ```
 
-### 3. Compound
+### 3. Reopen the Launchpad
+
+```bash
+atv-installer launchpad
+```
+
+Shows your memory dashboard: installed intelligence, repo memory snapshot, and deterministic next-step recommendations. Reopenable any time — no reinstall needed.
+
+### 4. Compound
 
 Every time you run `/ce-compound`, solved problems get saved to `docs/solutions/`. Next time `/ce-plan` runs, the `learnings-researcher` agent searches those files first — so your repo gets smarter with every PR.
 
@@ -154,17 +164,17 @@ Every time you run `/ce-compound`, solved problems get saved to `docs/solutions/
 
 The guided installer walks you through four screens:
 
-### Screen 1: Stack
+### Screen 1: Stack Packs
 
 ```text
-┃ What's your primary stack?
-┃ > TypeScript
-┃   Python
-┃   Rails
-┃   General
+┃ Which stack packs should be included?
+┃ [✓] General
+┃ [✓] TypeScript    (tsconfig.json detected)
+┃ [ ] Python
+┃ [ ] Rails
 ```
 
-Auto-detected from your project files. Override if needed.
+Multi-select — choose as many stacks as your project uses. Auto-detected packs are pre-selected. Stack packs are additive: selecting both TypeScript and Rails installs agents and file instructions for both.
 
 ### Screen 2: Preset
 
@@ -196,15 +206,89 @@ Power users can drill into category-grouped multi-select. Beginners skip straigh
 ### Screen 4: Install Progress
 
 ```text
-  Installing Full preset for typescript...
+  Installing Pro preset for typescript...
 
-  ✅ Scaffolding ATV files
-  ⣾  Cloning gstack...
-  ○  Generating gstack skill docs
-  ○  Installing agent-browser + Chrome
+  ✅ Scaffolding ATV files (24 files created, 8 directories) · 340ms
+  ⚠️  Syncing gstack skills — setup failed, fell back to docs · 2.1s
+  ✅ Installing agent-browser (CLI ready, skill copied) · 1.8s
 ```
 
-Real-time animated spinners. Each step shows pending → running → done/failed.
+Real-time animated spinners. Each step shows pending → running → done/warned/failed with structured telemetry: durations, reasons, skip explanations. Substep events track individual file writes, git clone vs build stages, and npm operations.
+
+### Screen 5: Summary + Recommendations
+
+```text
+  Guided install summary
+
+  ✅ Scaffolding ATV files (24 files created) · 340ms
+  ⚠️  Syncing gstack skills — fell back to markdown-only · 2.1s
+  ✅ Installing agent-browser (CLI ready, skill copied) · 1.8s
+
+  Recommended next moves
+
+    1. Fix installer warnings before relying on every capability
+       fell back to markdown-only sync
+    2. Start with /ce-brainstorm to shape the first feature
+       No brainstorms were found in docs/brainstorms yet.
+
+  🎉 ATV Starter Kit ready!
+  Install state saved to .atv/install-manifest.json
+  Reopen later with: atv-installer launchpad
+```
+
+The installer writes a versioned manifest to `.atv/install-manifest.json` recording requested vs installed vs skipped vs failed outcomes. Deterministic recommendations derive from local repo state — no network required.
+
+---
+
+## The Launchpad
+
+After install, run `atv-installer launchpad` to see your repo's memory dashboard:
+
+```text
+  ⚡ ATV Launchpad ⚡  Live dashboard · auto-refreshes every 3s
+
+  [ 1:Overview ] 2:Copilot  3:CE  4:Gstack  5:Moves
+
+  Install Intelligence
+
+  ● Manifest    .atv/install-manifest.json
+  │ Last run    2026-04-01 14:30 UTC
+  │ Preset      Pro
+  │ Stacks      General, TypeScript
+  ╰ Outcomes    2 done  1 warn  0 fail  0 skip
+
+  Capability Matrix
+
+  18 agents   12 skills   3 instructions   2 prompts
+  3 brainstorms   2 plans   1 solutions
+  4 MCP servers   8 extensions   32 gstack skills   1 memory files
+
+  Health
+
+  ● copilot-instructions.md
+  ● copilot-setup-steps.yml
+  ● MCP server config
+  ● compound-engineering.local.md
+  ● .gstack staging
+  ○ gstack runtime (browse)
+  ● agent-browser skill
+  ● ~/.gstack/ user config
+  ● ~/.agent-browser/ sessions
+
+  ⚠ Active plan has unchecked work
+```
+
+The launchpad is a **live terminal dashboard** — it auto-refreshes every 3 seconds, has 5 tabbed views (Overview, Copilot, CE, Gstack, Moves), and monitors all 8 memory layers from the three pillars. Navigate with arrow keys or number keys, press `r` to refresh, `q` to quit.
+
+**What each tab shows:**
+
+| Tab | Contents |
+|---|---|
+| **Overview** | Install manifest, capability matrix (agents/skills/instructions/prompts/MCP/extensions/gstack/memory), health indicators for all 8 memory layers |
+| **Copilot** | All 6 Copilot lifecycle hooks: instructions, setup steps, file instructions, prompts, agents, MCP servers, VS Code extensions |
+| **CE** | Compound Engineering workflow stage (brainstorm → plan → work → compound), file listings, project config with review agent count |
+| **Gstack** | Runtime status, user-global session state (~/.gstack/), agent-browser sessions (~/.agent-browser/), gstack + core skill listings |
+| **Moves** | Up to 5 priority-sorted recommendations based on deterministic local state analysis |
 
 ---
 
@@ -411,20 +495,32 @@ atv-installer init --guided
  Detect stack + prerequisites (git, bun, node)
         │
         ▼
- Screen 1: Stack → Screen 2: Preset → Screen 3: Customize?
+ Screen 1: Stack Packs (multi-select) → Screen 2: Preset → Screen 3: Customize?
         │
         ▼
- Install with animated progress:
+ Install with structured telemetry:
         │
         ├── ATV scaffold ──► Embedded templates → .github/skills/*/SKILL.md
+        │                    └── Substep events per file (created/skipped/merged)
         │
         ├── gstack ──► git clone → .gstack/ (staging)
         │               ├── gen:skill-docs → .agents/skills/gstack-*/
         │               ├── Copy SKILL.md → .github/skills/gstack-*/
-        │               └── Sidecar: .github/skills/gstack/ (bin, browse, ETHOS.md)
+        │               └── Substeps: clone → build/doc-gen → copy skills
         │
         └── agent-browser ──► npm install -g → agent-browser install (Chrome)
-                              └── .github/skills/agent-browser/SKILL.md
+                              ├── .github/skills/agent-browser/SKILL.md
+                              └── Substeps: npm install → copy SKILL.md
+        │
+        ▼
+ Write manifest to .atv/install-manifest.json
+        │
+        ├── Requested state (packs, layers, preset)
+        ├── Outcomes with substeps + skip reasons
+        └── Deterministic recommendations
+        │
+        ▼
+ atv-installer launchpad    ──► Live terminal dashboard (5 tabs, auto-refresh)
 ```
 
 - `.gstack/` is gitignored — staging area with the full repo and runtime
@@ -474,13 +570,17 @@ cd ATV-StarterKit && go build -o atv-installer .
 ```bash
 go build -o atv-installer .             # build
 go test ./...                            # all tests
-go test ./pkg/gstack/ -v                 # gstack tests
-go test ./test/sandbox/ -v               # integration tests
+go test ./pkg/installstate/ -v           # manifest + recommendations tests
+go test ./test/sandbox/ -v               # integration tests (E2E scenarios)
+go test ./test/sandbox/ -v -run E2E      # comprehensive lifecycle tests only
 
 # sandbox test
 mkdir /tmp/test && cd /tmp/test
 echo '{}' > tsconfig.json && git init
 /path/to/atv-installer init --guided
+
+# verify launchpad
+/path/to/atv-installer launchpad
 ```
 
 ## Limitations

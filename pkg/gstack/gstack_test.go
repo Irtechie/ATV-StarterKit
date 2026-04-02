@@ -3,6 +3,8 @@ package gstack
 import (
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -169,6 +171,25 @@ func TestInstallIdempotent(t *testing.T) {
 	}
 	if result.Cloned {
 		t.Error("should not clone when already installed")
+	}
+}
+
+func TestFindBashSkipsWSL(t *testing.T) {
+	bashPath := findBash()
+	if bashPath == "" {
+		t.Skip("no bash found on this system")
+	}
+	t.Logf("findBash() returned: %s", bashPath)
+
+	// On Windows, findBash must NOT return WSL bash (System32) or WindowsApps bash
+	if runtime.GOOS == "windows" {
+		norm := strings.ToLower(filepath.Clean(bashPath))
+		if strings.Contains(norm, "system32") {
+			t.Errorf("findBash() returned WSL bash at %s — should prefer Git Bash", bashPath)
+		}
+		if strings.Contains(norm, "windowsapps") {
+			t.Errorf("findBash() returned WindowsApps bash at %s — should prefer Git Bash", bashPath)
+		}
 	}
 }
 

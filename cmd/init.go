@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/agentbrowser"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/detect"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/gstack"
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/installstate"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/output"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/scaffold"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/tui"
@@ -16,6 +18,12 @@ import (
 )
 
 const installerModulePath = "module github.com/All-The-Vibes/ATV-StarterKit"
+
+const (
+	scaffoldStepName     = "Scaffolding ATV files"
+	gstackStepName       = "Syncing gstack skills"
+	agentBrowserStepName = "Installing agent-browser"
+)
 
 var guided bool
 
@@ -61,7 +69,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		catalog = scaffold.BuildFilteredCatalog(result.Stack, result.Components)
+		catalog = scaffold.BuildFilteredCatalogForPacks(result.StackPacks, result.Stack, result.Components)
 		gstackDirs = result.GstackDirs
 		gstackRuntime = result.GstackRuntime
 		installAgentBrowser = result.IncludeAgentBrowser
@@ -71,12 +79,34 @@ func runInit(cmd *cobra.Command, args []string) error {
 		steps := buildInstallSteps(targetDir, catalog, gstackDirs, gstackRuntime, installAgentBrowser)
 
 		// Run with animated progress
-		if err := tui.RunProgress(steps, presetName, string(result.Stack)); err != nil {
+		outcomes, err := tui.RunProgress(steps, presetName, string(result.Stack))
+		if err != nil {
 			return fmt.Errorf("install failed: %w", err)
 		}
 
+		manifestPath := ""
+		manifest := installstate.InstallManifest{
+			Requested: installstate.RequestedState{
+				StackPacks:          result.StackPacks,
+				ATVLayers:           result.ATVLayers,
+				GstackDirs:          result.GstackDirs,
+				GstackRuntime:       result.GstackRuntime,
+				IncludeAgentBrowser: result.IncludeAgentBrowser,
+				PresetName:          result.PresetName,
+			},
+			Outcomes: outcomes,
+		}
+		manifest.Recommendations = installstate.BuildRecommendations(targetDir, manifest)
+		if err := installstate.WriteManifest(targetDir, manifest); err != nil {
+			printer.Info(fmt.Sprintf("⚠️  Failed to write guided install manifest: %v", err))
+		} else {
+			manifestPath = filepath.ToSlash(filepath.Join(".atv", "install-manifest.json"))
+		}
+
 		// Print summary after progress completes
-		printer.PrintNextSteps(len(gstackDirs) > 0, installAgentBrowser)
+		printer.PrintGuidedSummary(outcomes, manifestPath)
+		printer.PrintRecommendations(manifest.Recommendations)
+		printer.PrintNextSteps(hasUsableOutcome(outcomes, gstackStepName), hasUsableOutcome(outcomes, agentBrowserStepName), manifestPath)
 	} else {
 		// One-click mode — install everything for detected stack (ATV only, no gstack)
 		catalog = scaffold.BuildCatalog(env.Stack)
@@ -86,7 +116,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 		// Phase 4: Print summary
 		printer.PrintResults(results)
-		printer.PrintNextSteps(false, false)
+		printer.PrintNextSteps(false, false, "")
 	}
 
 	// Update plan checkboxes only when running inside the installer repository.
@@ -103,10 +133,24 @@ func buildInstallSteps(targetDir string, catalog []scaffold.Component, gstackDir
 
 	// Step 1: ATV scaffold (always)
 	steps = append(steps, tui.InstallStep{
-		Name: "Scaffolding ATV files",
-		Action: func() error {
-			scaffold.WriteAll(targetDir, catalog)
-			return nil
+		Name: scaffoldStepName,
+		Action: func() tui.InstallStepResult {
+			results := scaffold.WriteAll(targetDir, catalog)
+			summary := scaffold.SummarizeResults(results)
+			substeps := scaffold.ResultsToSubsteps(results)
+			status := installstate.InstallStepDone
+			if !summary.Successful() {
+				status = installstate.InstallStepWarning
+				if summary.Created == 0 && summary.Merged == 0 && summary.Directories == 0 {
+					status = installstate.InstallStepFailed
+				}
+			}
+			return tui.InstallStepResult{
+				Status:   status,
+				Detail:   summary.Detail(),
+				Reason:   summary.FailureReason(),
+				Substeps: substeps,
+			}
 		},
 	})
 
@@ -117,13 +161,76 @@ func buildInstallSteps(targetDir string, catalog []scaffold.Component, gstackDir
 			mode = gstack.ModeFullRuntime
 		}
 		steps = append(steps, tui.InstallStep{
-			Name: "Cloning gstack",
-			Action: func() error {
+			Name: gstackStepName,
+			Action: func() tui.InstallStepResult {
 				result := gstack.Install(targetDir, mode)
 				if result.Error != nil {
-					return result.Error
+					return tui.InstallStepResult{
+						Status: installstate.InstallStepFailed,
+						Reason: result.Error.Error(),
+						Error:  result.Error,
+					}
 				}
-				return nil
+				detail := fmt.Sprintf("%d skills synced", len(result.SkillDirs))
+				if result.Built {
+					detail = detail + ", runtime ready"
+				} else if mode == gstack.ModeMarkdownOnly {
+					detail = detail + ", markdown-only"
+				}
+				status := installstate.InstallStepDone
+				reason := ""
+				var skipReason installstate.SkipReason
+				if result.Warning != "" {
+					status = installstate.InstallStepWarning
+					reason = result.Warning
+					if result.Copied && strings.Contains(result.Warning, "already cloned") {
+						status = installstate.InstallStepSkipped
+						skipReason = installstate.SkipReasonAlreadyInstalled
+					}
+				}
+
+				// Build substeps for clone, build/doc-gen, and skill copy
+				var substeps []installstate.InstallOutcome
+				if result.Cloned {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "git clone", Status: installstate.InstallStepDone, Detail: "shallow clone completed",
+					})
+				} else if result.Copied {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "git clone", Status: installstate.InstallStepSkipped,
+						Detail: "already cloned", SkipReason: installstate.SkipReasonAlreadyInstalled,
+					})
+				}
+				if result.Built {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "runtime build", Status: installstate.InstallStepDone, Detail: "setup completed",
+					})
+				} else if mode == gstack.ModeFullRuntime {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "runtime build", Status: installstate.InstallStepWarning, Detail: "build failed, fell back to docs",
+						Reason: result.Warning,
+					})
+				} else {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "runtime build", Status: installstate.InstallStepSkipped,
+						Detail: "markdown-only mode", SkipReason: installstate.SkipReasonUserSkip,
+					})
+				}
+				if result.Copied {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step:   "copy skills",
+						Status: installstate.InstallStepDone,
+						Detail: fmt.Sprintf("%d skill dirs", len(result.SkillDirs)),
+					})
+				}
+
+				return tui.InstallStepResult{
+					Status:     status,
+					Detail:     detail,
+					Reason:     reason,
+					SkipReason: skipReason,
+					Substeps:   substeps,
+				}
 			},
 		})
 	}
@@ -131,18 +238,74 @@ func buildInstallSteps(targetDir string, catalog []scaffold.Component, gstackDir
 	// Step 3: agent-browser (if selected)
 	if installAgentBrowser {
 		steps = append(steps, tui.InstallStep{
-			Name: "Installing agent-browser + Chrome",
-			Action: func() error {
+			Name: agentBrowserStepName,
+			Action: func() tui.InstallStepResult {
 				result := agentbrowser.Install(targetDir)
 				if result.Error != nil {
-					return result.Error
+					return tui.InstallStepResult{
+						Status: installstate.InstallStepFailed,
+						Reason: result.Error.Error(),
+						Error:  result.Error,
+					}
 				}
-				return nil
+
+				detailParts := make([]string, 0, 2)
+				if result.Installed {
+					detailParts = append(detailParts, "CLI ready")
+				}
+				if result.SkillCopied {
+					detailParts = append(detailParts, "skill copied")
+				}
+				detail := strings.Join(detailParts, ", ")
+				if detail == "" {
+					detail = "no local changes"
+				}
+
+				status := installstate.InstallStepDone
+				if result.Warning != "" {
+					status = installstate.InstallStepWarning
+				}
+
+				// Build substeps for npm install, chrome download, and skill copy
+				var substeps []installstate.InstallOutcome
+				if result.Installed {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "npm install", Status: installstate.InstallStepDone, Detail: "agent-browser CLI available",
+					})
+				} else {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "npm install", Status: installstate.InstallStepWarning,
+						Detail: "install skipped or failed", Reason: result.Warning,
+						SkipReason: installstate.SkipReasonPrereqMissing,
+					})
+				}
+				if result.SkillCopied {
+					substeps = append(substeps, installstate.InstallOutcome{
+						Step: "copy SKILL.md", Status: installstate.InstallStepDone, Detail: "skill registered",
+					})
+				}
+
+				return tui.InstallStepResult{
+					Status:   status,
+					Detail:   detail,
+					Reason:   result.Warning,
+					Substeps: substeps,
+				}
 			},
 		})
 	}
 
 	return steps
+}
+
+func hasUsableOutcome(outcomes []installstate.InstallOutcome, stepName string) bool {
+	for _, outcome := range outcomes {
+		if outcome.Step != stepName {
+			continue
+		}
+		return outcome.Status != installstate.InstallStepFailed
+	}
+	return false
 }
 
 func isInstallerRepo(dir string) bool {
