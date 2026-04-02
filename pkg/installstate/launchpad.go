@@ -106,3 +106,53 @@ func stackPackLabel(pack StackPack) string {
 		return "General"
 	}
 }
+
+// ListBrainstorms returns the names of brainstorm files in docs/brainstorms/.
+func ListMarkdownNames(dir string) []string {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	var names []string
+	for _, entry := range entries {
+		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".md" {
+			names = append(names, entry.Name())
+		}
+	}
+	return names
+}
+
+// ListAgentNames returns the names of installed agent files (.agent.md).
+func ListAgentNames(dir string) []string {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	var names []string
+	for _, entry := range entries {
+		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".md" {
+			name := entry.Name()
+			// Strip .agent.md suffix for cleaner display
+			if len(name) > 9 && name[len(name)-9:] == ".agent.md" {
+				name = name[:len(name)-9]
+			}
+			names = append(names, name)
+		}
+	}
+	return names
+}
+
+// ListSkillDirs returns the names of installed skill directories.
+func ListSkillDirs(dir string) []string {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	var names []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			names = append(names, entry.Name())
+		}
+	}
+	return names
+}

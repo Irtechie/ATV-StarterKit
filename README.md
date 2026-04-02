@@ -11,7 +11,7 @@
        <a href="https://opensource.org/licenses/MIT"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-ffd700?style=flat-square"></a>
        <a href="https://github.com/features/copilot"><img alt="GitHub Copilot Ready" src="https://img.shields.io/badge/GitHub%20Copilot-Ready-8957e5?style=flat-square&logo=github"></a>
        <a href="#the-full-sprint"><img alt="45 skills" src="https://img.shields.io/badge/Skills-45-ff8c00?style=flat-square"></a>
-       <a href="#the-agent-roster"><img alt="29 agents" src="https://img.shields.io/badge/Agents-29-f97316?style=flat-square"></a>
+       <a href="#the-agent-roster"><img alt="28 agents" src="https://img.shields.io/badge/Agents-28-f97316?style=flat-square"></a>
 </p>
 
 <p align="center">
@@ -33,7 +33,7 @@ ATV 2.0 is a one-command installer that wires together three open-source systems
 - **gstack** — the sprint execution engine
 - **agent-browser** — the browser automation layer
 
-Each brings a distinct philosophy. Together they cover the full software lifecycle — from \"what should I build?\" through \"is it healthy in production?\" — with 45 skills, 29 agents, a memory-aware launchpad, and a knowledge system that makes your repo smarter with every PR.
+Each brings a distinct philosophy. Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45 skills, 28 agents, a memory-aware launchpad, and a knowledge system that makes your repo smarter with every PR.
 
 ---
 
@@ -96,7 +96,7 @@ Most agentic coding setups are stateless. You install some skills, run some comm
 | **Institutional knowledge** | Solved problems, gotchas, patterns | `docs/solutions/*.md` (git-tracked) | `learnings-researcher` agent during `/ce-plan` and `/ce-review` |
 | **Design decisions** | Why we chose approach A over B | `docs/brainstorms/*.md` (git-tracked) | `/ce-plan` auto-discovers recent brainstorms |
 | **Implementation plans** | What to build, acceptance criteria, checkboxes | `docs/plans/*.md` (git-tracked) | `/ce-work` reads and checks off items as it implements |
-| **Install manifest** | What the installer intended, attempted, skipped, failed | `.atv/install-manifest.json` (repo-local) | `atv-installer launchpad`, concierge tools |
+| **Install manifest** | What the installer intended, attempted, skipped, failed | `.atv/install-manifest.json` (repo-local) | `atv-installer launchpad` |
 | **Project config** | Which review agents to run, stack settings | `compound-engineering.local.md` | `/ce-review`, `/ce-work` |
 | **gstack session state** | Active sessions, user preferences, prefix choice | `~/.gstack/` (user-global) | Every gstack skill preamble |
 | **gstack project learning** | Per-project self-learning data | `.gstack/` (gitignored) | `/gstack-learn` |
@@ -275,21 +275,7 @@ After install, run `atv-installer launchpad` to see your repo's memory dashboard
      Browser automation tooling was installed or partially prepared.
 ```
 
-The launchpad is **deterministic** — same repo state always produces the same recommendations. It works fully offline, requires no auth, and reads only local filesystem state.
-
-### Concierge Agent
-
-The `atv-concierge` agent (scaffolded to `.github/agents/atv-concierge.agent.md`) lets Copilot Chat navigate the launchpad data:
-
-| Command | Purpose |
-|---|---|
-| `atv-installer concierge memory-summary` | Full repo memory + install intelligence as JSON |
-| `atv-installer concierge list-recommendations` | Deterministic next-step recommendations |
-| `atv-installer concierge explain-recommendation [id]` | Why a recommendation exists + suggested command |
-| `atv-installer concierge open-artifact [name]` | Resolve "plans" / "manifest" / "skills" to filesystem paths |
-| `atv-installer concierge run-suggested-action [id]` | Describe the command (never auto-executes) |
-
-The concierge is **secondary** — it explains and navigates the deterministic local model but never overrides it. All tools work without network or Copilot auth.
+The launchpad is a **live terminal dashboard** — it auto-refreshes every 3 seconds, has 5 tabbed views (Overview, Memory, Agents, Skills, Moves), and shows real file listings. Navigate with arrow keys or number keys, press `r` to refresh, `q` to quit.
 
 ---
 
@@ -450,7 +436,6 @@ ATV covers the complete software lifecycle:
 | **Research** | `repo-research-analyst`, `best-practices-researcher`, `framework-docs-researcher`, `learnings-researcher`, `git-history-analyzer` |
 | **Process** | `pr-comment-resolver`, `spec-flow-analyzer`, `bug-reproduction-validator`, `pattern-recognition-specialist` |
 | **Meta** | `agent-native-reviewer`, `ankane-readme-writer` |
-| **Launchpad** | `atv-concierge` |
 | **Ops** | `lint` |
 
 ---
@@ -522,8 +507,7 @@ atv-installer init --guided
         └── Deterministic recommendations
         │
         ▼
- atv-installer launchpad  ──► Reopenable memory dashboard
- atv-installer concierge  ──► JSON API for Copilot SDK assistant
+ atv-installer launchpad    ──► Live terminal dashboard (5 tabs, auto-refresh)
 ```
 
 - `.gstack/` is gitignored — staging area with the full repo and runtime
@@ -570,9 +554,8 @@ cd ATV-StarterKit && go build -o atv-installer .
 ```bash
 go build -o atv-installer .             # build
 go test ./...                            # all tests
-go test ./pkg/concierge/ -v              # concierge tool tests
 go test ./pkg/installstate/ -v           # manifest + recommendations tests
-go test ./test/sandbox/ -v               # integration tests (22 E2E scenarios)
+go test ./test/sandbox/ -v               # integration tests (E2E scenarios)
 go test ./test/sandbox/ -v -run E2E      # comprehensive lifecycle tests only
 
 # sandbox test
@@ -580,10 +563,8 @@ mkdir /tmp/test && cd /tmp/test
 echo '{}' > tsconfig.json && git init
 /path/to/atv-installer init --guided
 
-# verify launchpad + concierge
+# verify launchpad
 /path/to/atv-installer launchpad
-/path/to/atv-installer concierge memory-summary
-/path/to/atv-installer concierge list-recommendations
 ```
 
 ## Limitations
