@@ -1,8 +1,11 @@
 package installstate
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -83,4 +86,25 @@ func ReadManifest(root string) (InstallManifest, error) {
 	}
 
 	return manifest, nil
+}
+
+// ComputeFileChecksums walks the given file paths (relative to root) and returns
+// a map of path → SHA-256 hex digest for each file that exists.
+func ComputeFileChecksums(root string, relPaths []string) map[string]string {
+	checksums := make(map[string]string, len(relPaths))
+	for _, rel := range relPaths {
+		absPath := filepath.Join(root, rel)
+		f, err := os.Open(absPath)
+		if err != nil {
+			continue
+		}
+		h := sha256.New()
+		_, err = io.Copy(h, f)
+		f.Close()
+		if err != nil {
+			continue
+		}
+		checksums[rel] = hex.EncodeToString(h.Sum(nil))
+	}
+	return checksums
 }

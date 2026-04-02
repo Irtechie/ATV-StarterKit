@@ -10,10 +10,8 @@ import (
 type DriftStatus string
 
 const (
-	DriftMissing      DriftStatus = "missing"       // in catalog, not on disk, not in manifest
-	DriftStale        DriftStatus = "stale"          // on disk matches install-time hash, but catalog changed
-	DriftUserModified DriftStatus = "user-modified"  // on disk differs from install-time hash (user customized)
-	DriftExtra        DriftStatus = "extra"          // on disk but not in catalog
+	DriftMissing      DriftStatus = "missing"       // in manifest but not on disk
+	DriftUserModified DriftStatus = "user-modified"  // on disk differs from install-time hash
 )
 
 // ActionType classifies the kind of executable action.
@@ -47,7 +45,6 @@ type ArtifactEntry struct {
 type DriftEntry struct {
 	Path        string      `json:"path"`
 	Status      DriftStatus `json:"status"`
-	CatalogHash string      `json:"catalogHash,omitempty"`
 	DiskHash    string      `json:"diskHash,omitempty"`
 	InstallHash string      `json:"installHash,omitempty"`
 }
