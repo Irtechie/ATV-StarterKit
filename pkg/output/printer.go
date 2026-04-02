@@ -227,77 +227,98 @@ func (p *Printer) PrintNextSteps(hasGstack bool, hasAgentBrowser bool, manifestP
 
 func launchpadText(snapshot installstate.LaunchpadSnapshot) string {
 	var b strings.Builder
+	s := snapshot.RepoState
+
 	b.WriteString("\n")
-	b.WriteString(titleStyle.Render("  ATV Launchpad"))
+	b.WriteString(titleStyle.Render("  ⚡ ATV Launchpad"))
 	b.WriteString("\n")
-	b.WriteString(dimStyle.Render("  Local memory + install intelligence for this repo"))
+	b.WriteString(dimStyle.Render("  Comprehensive memory + install intelligence for this repo"))
 	b.WriteString("\n\n")
 
-	b.WriteString(titleStyle.Render("  Installed intelligence"))
+	// ── Install Intelligence ────────────────────────────────────────────
+	b.WriteString(titleStyle.Render("  Install Intelligence"))
 	b.WriteString("\n")
 	if snapshot.HasManifest {
-		b.WriteString(fmt.Sprintf("  %s Guided manifest found at %s\n", successStyle.Render("✅"), snapshot.ManifestPath))
+		b.WriteString(fmt.Sprintf("  %s Manifest    %s\n", successStyle.Render("●"), dimStyle.Render(snapshot.ManifestPath)))
 		if !snapshot.GeneratedAt.IsZero() {
-			b.WriteString(fmt.Sprintf("  %s Last guided run: %s\n", dimStyle.Render("•"), snapshot.GeneratedAt.Format("2006-01-02 15:04 MST")))
+			b.WriteString(fmt.Sprintf("  %s Last run    %s\n", dimStyle.Render("│"), snapshot.GeneratedAt.Format("2006-01-02 15:04 MST")))
 		}
 		if snapshot.Requested.PresetName != "" {
-			b.WriteString(fmt.Sprintf("  %s Preset: %s\n", dimStyle.Render("•"), snapshot.Requested.PresetName))
+			b.WriteString(fmt.Sprintf("  %s Preset      %s\n", dimStyle.Render("│"), snapshot.Requested.PresetName))
 		}
 		if labels := snapshot.StackPackLabels(); len(labels) > 0 {
-			b.WriteString(fmt.Sprintf("  %s Stack packs: %s\n", dimStyle.Render("•"), strings.Join(labels, ", ")))
+			b.WriteString(fmt.Sprintf("  %s Stacks      %s\n", dimStyle.Render("│"), strings.Join(labels, ", ")))
 		}
-		if snapshot.HasGstack() {
-			mode := "markdown-only"
-			if snapshot.Requested.GstackRuntime {
-				mode = "runtime requested"
-			}
-			b.WriteString(fmt.Sprintf("  %s gstack: %d skill dirs requested (%s)\n", dimStyle.Render("•"), len(snapshot.Requested.GstackDirs), mode))
-		} else {
-			b.WriteString(fmt.Sprintf("  %s gstack: not requested in the last guided run\n", dimStyle.Render("•")))
-		}
-		if snapshot.HasAgentBrowser() {
-			b.WriteString(fmt.Sprintf("  %s agent-browser: requested in the last guided run\n", dimStyle.Render("•")))
-		} else {
-			b.WriteString(fmt.Sprintf("  %s agent-browser: not requested in the last guided run\n", dimStyle.Render("•")))
-		}
-		b.WriteString(fmt.Sprintf("  %s Outcomes: %d done, %d warnings, %d failed, %d skipped\n", dimStyle.Render("•"), snapshot.OutcomeSummary.Done, snapshot.OutcomeSummary.Warning, snapshot.OutcomeSummary.Failed, snapshot.OutcomeSummary.Skipped))
+		b.WriteString(fmt.Sprintf("  %s Outcomes    %d done  %d warn  %d fail  %d skip\n",
+			dimStyle.Render("╰"),
+			snapshot.OutcomeSummary.Done,
+			snapshot.OutcomeSummary.Warning,
+			snapshot.OutcomeSummary.Failed,
+			snapshot.OutcomeSummary.Skipped,
+		))
 	} else {
-		b.WriteString(fmt.Sprintf("  %s No guided manifest found yet. Run %q to capture install state.\n", warningStyle.Render("⚠️"), "atv-installer init --guided"))
+		b.WriteString(fmt.Sprintf("  %s No manifest yet. Run: atv-installer init --guided\n", warningStyle.Render("⚠")))
 	}
 
+	// ── Capability Matrix ───────────────────────────────────────────────
 	b.WriteString("\n")
-	b.WriteString(titleStyle.Render("  Repo memory snapshot"))
+	b.WriteString(titleStyle.Render("  Capability Matrix"))
 	b.WriteString("\n")
-	b.WriteString(fmt.Sprintf("  %s brainstorms: %d\n", dimStyle.Render("•"), snapshot.RepoState.BrainstormCount))
-	b.WriteString(fmt.Sprintf("  %s plans: %d\n", dimStyle.Render("•"), snapshot.RepoState.PlanCount))
-	b.WriteString(fmt.Sprintf("  %s solutions: %d\n", dimStyle.Render("•"), snapshot.RepoState.SolutionCount))
-	if snapshot.RepoState.HasUncheckedPlan {
-		b.WriteString(fmt.Sprintf("  %s active plan state: unchecked work remains\n", dimStyle.Render("•")))
-	} else if snapshot.RepoState.HasCompletedPlan {
-		b.WriteString(fmt.Sprintf("  %s active plan state: at least one completed plan found\n", dimStyle.Render("•")))
-	}
-	if snapshot.RepoState.InstalledAgents > 0 || snapshot.RepoState.InstalledSkills > 0 || snapshot.RepoState.HasCopilotInstructions {
-		b.WriteString(fmt.Sprintf("  %s agents: %d, skills: %d\n", dimStyle.Render("•"), snapshot.RepoState.InstalledAgents, snapshot.RepoState.InstalledSkills))
-		if snapshot.RepoState.HasCopilotInstructions {
-			b.WriteString(fmt.Sprintf("  %s copilot-instructions.md: present\n", dimStyle.Render("•")))
-		}
-	}
-	if snapshot.RepoState.HasGstackStaging {
-		b.WriteString(fmt.Sprintf("  %s gstack staging: present (.gstack/)\n", dimStyle.Render("•")))
-	}
-	if snapshot.RepoState.HasAgentBrowserSkill {
-		b.WriteString(fmt.Sprintf("  %s agent-browser skill: installed\n", dimStyle.Render("•")))
+	b.WriteString(fmt.Sprintf("  %d agents   %d skills   %d instructions   %d prompts\n",
+		s.InstalledAgents, s.InstalledSkills, s.InstructionFileCount, s.PromptFileCount))
+	b.WriteString(fmt.Sprintf("  %d brainstorms   %d plans   %d solutions\n",
+		s.BrainstormCount, s.PlanCount, s.SolutionCount))
+	b.WriteString(fmt.Sprintf("  %d MCP servers   %d extensions   %d gstack skills   %d memory files\n",
+		s.MCPServerCount, s.ExtensionRecommendationCount, s.GstackSkillCount, s.MemoryFileCount))
+
+	// ── Health (all 8 memory layers) ────────────────────────────────────
+	b.WriteString("\n")
+	b.WriteString(titleStyle.Render("  Health"))
+	b.WriteString("\n")
+	writeStatus(&b, s.HasCopilotInstructions, "copilot-instructions.md")
+	writeStatus(&b, s.HasSetupSteps, "copilot-setup-steps.yml")
+	writeStatus(&b, s.HasMCPConfig, "MCP server config")
+	writeStatus(&b, s.HasCELocalConfig, "compound-engineering.local.md")
+	writeStatus(&b, s.HasGstackStaging, ".gstack/ project learning")
+	writeStatus(&b, s.HasGstackRuntime, "gstack runtime (browse)")
+	writeStatus(&b, s.HasAgentBrowserSkill, "agent-browser skill")
+	writeStatus(&b, s.HasGstackUserConfig, "~/.gstack/ user sessions")
+	writeStatus(&b, s.HasAgentBrowserSessions, "~/.agent-browser/ sessions")
+
+	// CE config detail
+	if s.HasCELocalConfig && s.CEReviewAgentCount > 0 {
+		b.WriteString(fmt.Sprintf("  %s %d review agents configured\n", dimStyle.Render("  ╰"), s.CEReviewAgentCount))
 	}
 
+	// Memory files
+	memFiles := installstate.ListMemoryFiles(snapshot.Root)
+	if len(memFiles) > 0 {
+		b.WriteString("\n")
+		b.WriteString(titleStyle.Render(fmt.Sprintf("  Memory Files (%d)", len(memFiles))))
+		b.WriteString("\n")
+		for _, f := range memFiles {
+			b.WriteString(fmt.Sprintf("    • %s\n", f))
+		}
+	}
+
+	// Plan status
+	if s.HasUncheckedPlan {
+		b.WriteString(fmt.Sprintf("\n  %s Active plan has unchecked work\n", warningStyle.Render("⚠")))
+	} else if s.HasCompletedPlan {
+		b.WriteString(fmt.Sprintf("\n  %s Completed plan — ready for /ce-compound\n", successStyle.Render("✓")))
+	}
+
+	// ── Recommended Next Moves ──────────────────────────────────────────
 	b.WriteString("\n")
-	b.WriteString(titleStyle.Render("  Recommended next moves"))
+	b.WriteString(titleStyle.Render("  Recommended Next Moves"))
 	b.WriteString("\n")
-	if len(snapshot.Recommendations) == 0 {
-		b.WriteString(fmt.Sprintf("  %s No recommendations yet. Add repo memory or rerun guided install.\n", dimStyle.Render("•")))
+	recs := snapshot.CloneRecommendations()
+	if len(recs) == 0 {
+		b.WriteString(fmt.Sprintf("  %s All clear — no recommended actions.\n", successStyle.Render("✓")))
 	} else {
-		for i, recommendation := range snapshot.CloneRecommendations() {
-			b.WriteString(fmt.Sprintf("  %s %s\n", titleStyle.Render(fmt.Sprintf("%d.", i+1)), recommendation.Title))
-			b.WriteString(fmt.Sprintf("     %s\n", dimStyle.Render(recommendation.Reason)))
+		for i, rec := range recs {
+			b.WriteString(fmt.Sprintf("  %s %s\n", titleStyle.Render(fmt.Sprintf("%d.", i+1)), rec.Title))
+			b.WriteString(fmt.Sprintf("     %s\n", dimStyle.Render(rec.Reason)))
 		}
 	}
 
@@ -310,6 +331,14 @@ func launchpadText(snapshot installstate.LaunchpadSnapshot) string {
 	}
 	b.WriteString("\n\n")
 	return b.String()
+}
+
+func writeStatus(b *strings.Builder, ok bool, label string) {
+	if ok {
+		b.WriteString(fmt.Sprintf("  %s %s\n", successStyle.Render("●"), label))
+	} else {
+		b.WriteString(fmt.Sprintf("  %s %s\n", dimStyle.Render("○"), label))
+	}
 }
 
 func guidedSummaryText(outcomes []installstate.InstallOutcome, manifestPath string) string {

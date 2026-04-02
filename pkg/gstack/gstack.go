@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 const (
@@ -46,6 +47,10 @@ func Install(projectDir string, mode InstallMode) *InstallResult {
 	stagingDir := filepath.Join(projectDir, ".gstack")
 	skillsTargetDir := filepath.Join(projectDir, ".github", "skills")
 
+	// Fix BOM-encoded package.json in the project root. Bun traverses up from
+	// .gstack/ and will fail with "Unexpected ■" if it finds a UTF-16 BOM.
+	stripBOMFromPackageJSON(filepath.Join(projectDir, "package.json"))
+
 	// Idempotent: skip if .gstack/ already exists with SKILL.md
 	if _, err := os.Stat(filepath.Join(stagingDir, "SKILL.md")); err == nil {
 		// Already cloned — just re-copy skills
@@ -66,7 +71,7 @@ func Install(projectDir string, mode InstallMode) *InstallResult {
 	// Step 2: Run gstack's ./setup (full runtime) or just generate docs (markdown-only)
 	if mode == ModeFullRuntime {
 		if err := runSetup(stagingDir); err != nil {
-			result.Warning = fmt.Sprintf("./setup failed (%v), falling back to doc generation only", err)
+			result.Warning = fmt.Sprintf("runtime build failed (%v); fell back to docs only", err)
 			// Fallback: try generating docs without full build
 			_ = generateDocs(stagingDir)
 		} else {
@@ -111,22 +116,78 @@ func runSetup(gstackDir string) error {
 
 	setupPath := filepath.Join(gstackDir, "setup")
 
-	// Find bash — on Windows it comes with Git
+	// Find bash — on Windows it comes with Git (not WSL)
 	bashPath := findBash()
 	if bashPath == "" {
 		return fmt.Errorf("bash not found; gstack's setup requires bash (included with Git for Windows)")
 	}
 
+	var stderr bytes.Buffer
 	cmd := exec.Command(bashPath, setupPath, "--host", "codex")
 	cmd.Dir = gstackDir
 	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Env = append(os.Environ(), "NONINTERACTIVE=1")
+	cmd.Stderr = &stderr
+	// Prevent bun from walking up to the parent project's package.json.
+	// Without this, a BOM-encoded or malformed package.json in the project root
+	// causes bun to fail inside .gstack/ even though .gstack has its own package.json.
+	cmd.Env = append(os.Environ(), "NONINTERACTIVE=1", "BUN_WORKSPACE_ROOT="+gstackDir)
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("gstack setup failed: %w", err)
+		errDetail := firstLine(stderr.String())
+		// Exit 127 = "command not found" inside bash — usually means bun is missing
+		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 127 {
+			hint := "a required command was not found (likely 'bun'); install bun: https://bun.sh"
+			if runtime.GOOS == "windows" {
+				hint += " (verify Git Bash is being used, not WSL)"
+			}
+			return fmt.Errorf("%s", hint)
+		}
+		if errDetail != "" {
+			return fmt.Errorf("%s", errDetail)
+		}
+		return fmt.Errorf("exit status %d", exitErrorCode(err))
 	}
 	return nil
+}
+
+// firstLine returns the first meaningful error line from stderr output.
+// Skips blank lines, caret markers (^), and code context lines (e.g. "1 |").
+// Prefers lines starting with "error:" if present.
+func firstLine(s string) string {
+	var fallback string
+	for _, line := range strings.Split(s, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || line == "^" {
+			continue
+		}
+		// Strip null bytes that appear in BOM-related errors
+		clean := strings.Map(func(r rune) rune {
+			if r == 0 {
+				return -1
+			}
+			return r
+		}, line)
+		clean = strings.TrimSpace(clean)
+		if clean == "" {
+			continue
+		}
+		// Prefer actual error messages over code context dump lines
+		if strings.HasPrefix(clean, "error:") {
+			return clean
+		}
+		if fallback == "" {
+			fallback = clean
+		}
+	}
+	return fallback
+}
+
+// exitErrorCode extracts the exit code from an error, or returns -1.
+func exitErrorCode(err error) int {
+	if exitErr, ok := err.(*exec.ExitError); ok {
+		return exitErr.ExitCode()
+	}
+	return -1
 }
 
 // generateDocs runs bun install + bun run gen:skill-docs without the full build.
@@ -315,13 +376,13 @@ func copyDir(src, dst string) {
 	}
 }
 
-// findBash locates bash executable — on Windows it ships with Git.
+// findBash locates a suitable bash executable.
+// On Windows, Git Bash is preferred over WSL bash because gstack's setup script
+// depends on native tools (bun, node) that are typically not installed inside WSL.
 func findBash() string {
-	if path, err := exec.LookPath("bash"); err == nil {
-		return path
-	}
-	// Common Git for Windows locations
 	if runtime.GOOS == "windows" {
+		// Check Git for Windows locations first — these provide MSYS2 bash
+		// which shares the native PATH (bun, node, etc.).
 		candidates := []string{
 			filepath.Join(os.Getenv("ProgramFiles"), "Git", "bin", "bash.exe"),
 			filepath.Join(os.Getenv("ProgramFiles(x86)"), "Git", "bin", "bash.exe"),
@@ -332,6 +393,18 @@ func findBash() string {
 				return c
 			}
 		}
+		// Fallback: try PATH, but skip WSL bash (System32\bash.exe)
+		if path, err := exec.LookPath("bash"); err == nil {
+			norm := strings.ToLower(filepath.Clean(path))
+			if !strings.Contains(norm, "system32") && !strings.Contains(norm, "windowsapps") {
+				return path
+			}
+		}
+		return ""
+	}
+	// Non-Windows: just use PATH
+	if path, err := exec.LookPath("bash"); err == nil {
+		return path
 	}
 	return ""
 }
@@ -375,5 +448,32 @@ func fixCRLFInFile(path string) {
 	fixed := bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
 	if !bytes.Equal(data, fixed) {
 		_ = os.WriteFile(path, fixed, 0644)
+	}
+}
+
+// stripBOMFromPackageJSON removes UTF-16/UTF-8 BOM from a package.json file.
+// PowerShell's echo '{}' > file writes UTF-16 with BOM which breaks bun.
+// Bun traverses up to the project root's package.json from .gstack/, so we
+// need this file to be valid UTF-8 before running gstack's setup.
+func stripBOMFromPackageJSON(path string) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return
+	}
+	// UTF-16 LE BOM: FF FE — need to convert entire file
+	if len(data) >= 2 && data[0] == 0xFF && data[1] == 0xFE {
+		// Decode UTF-16 LE to UTF-8: drop BOM, take every other byte (ASCII content)
+		var utf8 []byte
+		for i := 2; i+1 < len(data); i += 2 {
+			if data[i+1] == 0 { // ASCII range
+				utf8 = append(utf8, data[i])
+			}
+		}
+		_ = os.WriteFile(path, utf8, 0644)
+		return
+	}
+	// UTF-8 BOM: EF BB BF — just strip prefix
+	if len(data) >= 3 && data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF {
+		_ = os.WriteFile(path, data[3:], 0644)
 	}
 }

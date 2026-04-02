@@ -244,38 +244,50 @@ The installer writes a versioned manifest to `.atv/install-manifest.json` record
 After install, run `atv-installer launchpad` to see your repo's memory dashboard:
 
 ```text
-  ATV Launchpad
-  Local memory + install intelligence for this repo
+  ⚡ ATV Launchpad ⚡  Live dashboard · auto-refreshes every 3s
 
-  Installed intelligence
-  ✅ Guided manifest found at .atv/install-manifest.json
-  • Last guided run: 2026-04-01 14:30 UTC
-  • Preset: Pro
-  • Stack packs: General, TypeScript
-  • gstack: 2 skill dirs requested (markdown-only)
-  • agent-browser: requested in the last guided run
-  • Outcomes: 2 done, 1 warnings, 0 failed, 0 skipped
+  [ 1:Overview ] 2:Copilot  3:CE  4:Gstack  5:Moves
 
-  Repo memory snapshot
-  • brainstorms: 3
-  • plans: 2
-  • solutions: 1
-  • active plan state: unchecked work remains
-  • agents: 18, skills: 12
-  • copilot-instructions.md: present
-  • gstack staging: present (.gstack/)
-  • agent-browser skill: installed
+  Install Intelligence
 
-  Recommended next moves
-  1. Continue the active plan with /ce-work
-     At least one plan still has unchecked items.
-  2. Use /gstack-office-hours for a deeper sprint kickoff
-     gstack skills were requested and synced successfully enough to use.
-  3. Open the app in a real browser with agent-browser
-     Browser automation tooling was installed or partially prepared.
+  ● Manifest    .atv/install-manifest.json
+  │ Last run    2026-04-01 14:30 UTC
+  │ Preset      Pro
+  │ Stacks      General, TypeScript
+  ╰ Outcomes    2 done  1 warn  0 fail  0 skip
+
+  Capability Matrix
+
+  18 agents   12 skills   3 instructions   2 prompts
+  3 brainstorms   2 plans   1 solutions
+  4 MCP servers   8 extensions   32 gstack skills   1 memory files
+
+  Health
+
+  ● copilot-instructions.md
+  ● copilot-setup-steps.yml
+  ● MCP server config
+  ● compound-engineering.local.md
+  ● .gstack staging
+  ○ gstack runtime (browse)
+  ● agent-browser skill
+  ● ~/.gstack/ user config
+  ● ~/.agent-browser/ sessions
+
+  ⚠ Active plan has unchecked work
 ```
 
-The launchpad is a **live terminal dashboard** — it auto-refreshes every 3 seconds, has 5 tabbed views (Overview, Memory, Agents, Skills, Moves), and shows real file listings. Navigate with arrow keys or number keys, press `r` to refresh, `q` to quit.
+The launchpad is a **live terminal dashboard** — it auto-refreshes every 3 seconds, has 5 tabbed views (Overview, Copilot, CE, Gstack, Moves), and monitors all 8 memory layers from the three pillars. Navigate with arrow keys or number keys, press `r` to refresh, `q` to quit.
+
+**What each tab shows:**
+
+| Tab | Contents |
+|---|---|
+| **Overview** | Install manifest, capability matrix (agents/skills/instructions/prompts/MCP/extensions/gstack/memory), health indicators for all 8 memory layers |
+| **Copilot** | All 6 Copilot lifecycle hooks: instructions, setup steps, file instructions, prompts, agents, MCP servers, VS Code extensions |
+| **CE** | Compound Engineering workflow stage (brainstorm → plan → work → compound), file listings, project config with review agent count |
+| **Gstack** | Runtime status, user-global session state (~/.gstack/), agent-browser sessions (~/.agent-browser/), gstack + core skill listings |
+| **Moves** | Up to 5 priority-sorted recommendations based on deterministic local state analysis |
 
 ---
 

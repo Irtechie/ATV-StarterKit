@@ -49,9 +49,9 @@ func TestLaunchpadTextIncludesManifestAndRecommendations(t *testing.T) {
 
 	for _, want := range []string{
 		"ATV Launchpad",
-		"Installed intelligence",
-		"Repo memory snapshot",
-		"Recommended next moves",
+		"Install Intelligence",
+		"Capability Matrix",
+		"Recommended Next Moves",
 		"Continue the active plan with /ce-work",
 		"atv-installer launchpad",
 	} {
@@ -74,7 +74,7 @@ func TestLaunchpadTextHandlesMissingManifest(t *testing.T) {
 	})
 
 	for _, want := range []string{
-		"No guided manifest found yet",
+		"No manifest yet",
 		"atv-installer init --guided",
 		"Start with /ce-brainstorm to shape the first feature",
 	} {
