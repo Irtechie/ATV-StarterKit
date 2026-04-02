@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -57,14 +58,18 @@ type LaunchpadModel struct {
 	tab     LaunchpadTab
 
 	// Suggest-then-execute state
-	selectedRec int
+	selectedRec   int
+	pendingAction *monitor.ProposedAction
+	actionResult  *monitor.ActionResult
+	executor      *monitor.Executor
 }
 
 // NewLaunchpadModel creates the live dashboard model backed by a watcher.
 func NewLaunchpadModel(root string, w *monitor.Watcher) LaunchpadModel {
 	return LaunchpadModel{
-		root:    root,
-		watcher: w,
+		root:     root,
+		watcher:  w,
+		executor: monitor.NewExecutor(root),
 	}
 }
 
@@ -99,25 +104,63 @@ func (m LaunchpadModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "tab", "right", "l":
-			m.tab = (m.tab + 1) % tabCount
+			if m.pendingAction == nil {
+				m.tab = (m.tab + 1) % tabCount
+			}
 		case "shift+tab", "left", "h":
-			m.tab = (m.tab - 1 + tabCount) % tabCount
+			if m.pendingAction == nil {
+				m.tab = (m.tab - 1 + tabCount) % tabCount
+			}
 		case "1":
-			m.tab = TabMemory
+			if m.pendingAction == nil {
+				m.tab = TabMemory
+			}
 		case "2":
-			m.tab = TabContext
+			if m.pendingAction == nil {
+				m.tab = TabContext
+			}
 		case "3":
-			m.tab = TabHealth
+			if m.pendingAction == nil {
+				m.tab = TabHealth
+			}
 		case "4":
-			m.tab = TabMoves
+			if m.pendingAction == nil {
+				m.tab = TabMoves
+			}
 		case "j", "down":
-			state := m.watcher.State()
-			if m.tab == TabMoves && m.selectedRec < len(state.LaunchpadSnapshot.Recommendations)-1 {
-				m.selectedRec++
+			if m.pendingAction == nil {
+				state := m.watcher.State()
+				if m.tab == TabMoves && m.selectedRec < len(state.LaunchpadSnapshot.Recommendations)-1 {
+					m.selectedRec++
+				}
 			}
 		case "k", "up":
-			if m.tab == TabMoves && m.selectedRec > 0 {
+			if m.pendingAction == nil && m.tab == TabMoves && m.selectedRec > 0 {
 				m.selectedRec--
+			}
+		case "enter":
+			if m.tab == TabMoves && m.pendingAction == nil {
+				// Check if selected recommendation has an SDK action
+				state := m.watcher.State()
+				if m.selectedRec < len(state.SDKRecommendations) {
+					if pa := state.SDKRecommendations[m.selectedRec].ProposedAction; pa != nil {
+						copied := *pa
+						m.pendingAction = &copied
+						m.actionResult = nil
+					}
+				}
+			} else if m.pendingAction != nil {
+				// Approve and execute
+				ctx := context.Background()
+				result, _ := m.executor.Execute(ctx, *m.pendingAction)
+				m.actionResult = result
+				m.pendingAction = nil
+			}
+		case "esc":
+			if m.pendingAction != nil {
+				m.pendingAction = nil
+			} else if m.actionResult != nil {
+				m.actionResult = nil
 			}
 		case "r":
 			m.watcher.ForceRefresh()
@@ -351,25 +394,97 @@ func (m LaunchpadModel) renderHealth(b *strings.Builder, state *monitor.LiveStat
 // ─── Moves Tab ──────────────────────────────────────────────────────────────
 
 func (m LaunchpadModel) renderMoves(b *strings.Builder, state *monitor.LiveState) {
+	// Show action result feedback
+	if m.actionResult != nil {
+		if m.actionResult.Success {
+			b.WriteString(lpSuccessStyle.Render("  ✓ Action completed successfully"))
+		} else {
+			b.WriteString(lpFailStyle.Render("  ✗ Action failed: " + m.actionResult.Error))
+		}
+		if m.actionResult.Output != "" {
+			lines := strings.Split(strings.TrimSpace(m.actionResult.Output), "\n")
+			for _, line := range lines {
+				if len(line) > 80 {
+					line = line[:80] + "..."
+				}
+				b.WriteString(fmt.Sprintf("\n    %s", lpDimStyle.Render(line)))
+			}
+		}
+		b.WriteString("\n")
+		b.WriteString(lpDimStyle.Render("  Press Esc to dismiss"))
+		b.WriteString("\n\n")
+	}
+
+	// Show pending action confirmation
+	if m.pendingAction != nil {
+		riskStyle := lpSuccessStyle
+		riskLabel := "safe"
+		switch m.pendingAction.RiskLevel {
+		case monitor.ActionRiskCaution:
+			riskStyle = lpWarnStyle
+			riskLabel = "caution"
+		case monitor.ActionRiskDestructive:
+			riskStyle = lpFailStyle
+			riskLabel = "destructive"
+		}
+		b.WriteString(lpHeaderStyle.Render("  Confirm Action"))
+		b.WriteString("\n\n")
+		b.WriteString(fmt.Sprintf("  %s %s\n", lpAccentStyle.Render("▸"), m.pendingAction.Description))
+		b.WriteString(fmt.Sprintf("  Command: %s\n", lpKeyStyle.Render(m.pendingAction.Command)))
+		b.WriteString(fmt.Sprintf("  Risk:    %s\n", riskStyle.Render(riskLabel)))
+		b.WriteString("\n")
+		b.WriteString(fmt.Sprintf("  %s to approve   %s to cancel\n",
+			lpKeyStyle.Render("Enter"),
+			lpDimStyle.Render("Esc"),
+		))
+		b.WriteString("\n")
+		return
+	}
+
 	b.WriteString(lpHeaderStyle.Render("  Recommended Next Moves"))
 	b.WriteString("\n\n")
 
+	// SDK recommendations (with proposed actions)
+	if len(state.SDKRecommendations) > 0 {
+		for i, rec := range state.SDKRecommendations {
+			prefix := "  "
+			if i == m.selectedRec {
+				prefix = lpAccentStyle.Render("▸ ")
+			}
+			actionHint := ""
+			if rec.ProposedAction != nil {
+				actionHint = lpKeyStyle.Render(" [Enter to run]")
+			}
+			b.WriteString(fmt.Sprintf("%s%s %s%s\n",
+				prefix,
+				lpCountStyle.Render(fmt.Sprintf("%d.", i+1)),
+				rec.Title,
+				actionHint,
+			))
+			b.WriteString(fmt.Sprintf("     %s\n", lpDimStyle.Render(rec.Reason)))
+			b.WriteString("\n")
+		}
+	}
+
+	// Static recommendations
 	recs := state.LaunchpadSnapshot.CloneRecommendations()
-	if len(recs) == 0 {
+	if len(recs) == 0 && len(state.SDKRecommendations) == 0 {
 		b.WriteString(lpSuccessStyle.Render("  ✓ All clear — no recommended actions."))
 		b.WriteString("\n")
 		return
 	}
 
+	offset := len(state.SDKRecommendations)
 	for i, rec := range recs {
+		idx := offset + i
 		prefix := "  "
-		if i == m.selectedRec {
+		if idx == m.selectedRec {
 			prefix = lpAccentStyle.Render("▸ ")
 		}
 		priority := lpDimStyle.Render(fmt.Sprintf("P%d", rec.Priority))
 		b.WriteString(fmt.Sprintf("%s%s %s  %s\n",
 			prefix,
-			lpCountStyle.Render(fmt.Sprintf("%d.", i+1)),
+			lpCountStyle.Render(fmt.Sprintf("%d.", idx+1)),
 			rec.Title,
 			priority,
 		))

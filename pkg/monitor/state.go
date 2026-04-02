@@ -78,6 +78,15 @@ type ProposedAction struct {
 	RiskLevel   ActionRisk `json:"riskLevel"`
 }
 
+// ActionResult captures the outcome of an executed action.
+type ActionResult struct {
+	Action     ProposedAction `json:"action"`
+	Success    bool           `json:"success"`
+	Output     string         `json:"output,omitempty"`
+	Error      string         `json:"error,omitempty"`
+	ExecutedAt time.Time      `json:"executedAt"`
+}
+
 // RuntimeHealthStatus represents the health of a single runtime dependency.
 type RuntimeHealthStatus struct {
 	Available bool      `json:"available"`
