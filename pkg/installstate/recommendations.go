@@ -343,8 +343,12 @@ func dirExists(path string) bool {
 	return err == nil && info.IsDir()
 }
 
-// countJSONKeys counts the number of keys in a top-level JSON object field.
+// CountJSONKeyCount counts the number of keys in a top-level JSON object field.
 // Used to count MCP servers in copilot-mcp-config.json.
+func CountJSONKeyCount(path, field string) int {
+	return countJSONKeys(path, field)
+}
+
 func countJSONKeys(path, field string) int {
 	data, err := os.ReadFile(path)
 	if err != nil {
