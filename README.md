@@ -7,6 +7,7 @@
 <p align="center"><strong>One command. Full agentic coding setup. Maximum tasteful chaos.</strong></p>
 
 <p align="center">
+       <a href="https://www.npmjs.com/package/atv-starterkit"><img alt="npm version" src="https://img.shields.io/npm/v/atv-starterkit?style=flat-square&logo=npm&logoColor=white&color=cb3837"></a>
        <a href="https://go.dev"><img alt="Go 1.26+" src="https://img.shields.io/badge/Go-1.26+-00ADD8?style=flat-square&logo=go&logoColor=white"></a>
        <a href="https://opensource.org/licenses/MIT"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-ffd700?style=flat-square"></a>
        <a href="https://github.com/features/copilot"><img alt="GitHub Copilot Ready" src="https://img.shields.io/badge/GitHub%20Copilot-Ready-8957e5?style=flat-square&logo=github"></a>
@@ -118,12 +119,12 @@ future /ce-plan → learnings-researcher searches docs/solutions/ → avoids pas
 
 ```bash
 cd your-project
-npx atv-starterkit init
+npx atv-starterkit@latest init
 ```
 
 Auto-detects your stack. Installs 13 core ATV skills, 28 agents, MCP servers, and docs structure. Done in seconds.
 
-Want to choose your preset? Use `npx atv-starterkit init --guided` for the interactive TUI.
+Want to choose your preset? Use `npx atv-starterkit@latest init --guided` for the interactive TUI.
 
 ### 2. Use
 
@@ -450,13 +451,16 @@ Without Bun, text-based gstack skills still work. `agent-browser` works independ
 ### npm (recommended)
 
 ```bash
-npx atv-starterkit init              # quick run
+npx atv-starterkit@latest init       # quick run — downloads binary automatically
 npm install -g atv-starterkit        # global install
+atv-starterkit init                  # then run from anywhere
 ```
 
-### Binary
+The npm package downloads the correct platform binary from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases) during install — no Go toolchain needed.
 
-Download from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases).
+### Binary (direct download)
+
+Grab a pre-built binary from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases/latest) for your platform (macOS, Linux, Windows — amd64/arm64).
 
 ### From source
 

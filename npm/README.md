@@ -9,7 +9,7 @@
 <p align="center">Compound Engineering for planning and review. gstack for QA, shipping, safety, and browser-based testing. Vercel <code>agent-browser</code> for direct browser automation.</p>
 
 <p align="center">
-	<a href="https://www.npmjs.com/package/atv-starterkit"><img alt="npm atv-starterkit" src="https://img.shields.io/badge/npm-atv--starterkit-cb3837?style=flat-square&logo=npm&logoColor=white"></a>
+	<a href="https://www.npmjs.com/package/atv-starterkit"><img alt="npm version" src="https://img.shields.io/npm/v/atv-starterkit?style=flat-square&logo=npm&logoColor=white&color=cb3837"></a>
 	<a href="https://opensource.org/licenses/MIT"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-ffd700?style=flat-square"></a>
 	<a href="https://github.com/features/copilot"><img alt="GitHub Copilot Ready" src="https://img.shields.io/badge/GitHub%20Copilot-Ready-8957e5?style=flat-square&logo=github"></a>
 </p>
