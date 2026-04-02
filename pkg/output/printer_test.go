@@ -53,7 +53,7 @@ func TestLaunchpadTextIncludesManifestAndRecommendations(t *testing.T) {
 		"Capability Matrix",
 		"Recommended Next Moves",
 		"Continue the active plan with /ce-work",
-		"atv-installer launchpad",
+		"atv-starterkit launchpad",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("launchpad missing %q in %q", want, text)

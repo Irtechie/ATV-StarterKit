@@ -97,7 +97,7 @@ Most agentic coding setups are stateless. You install some skills, run some comm
 | **Institutional knowledge** | Solved problems, gotchas, patterns | `docs/solutions/*.md` (git-tracked) | `learnings-researcher` agent during `/ce-plan` and `/ce-review` |
 | **Design decisions** | Why we chose approach A over B | `docs/brainstorms/*.md` (git-tracked) | `/ce-plan` auto-discovers recent brainstorms |
 | **Implementation plans** | What to build, acceptance criteria, checkboxes | `docs/plans/*.md` (git-tracked) | `/ce-work` reads and checks off items as it implements |
-| **Install manifest** | What the installer intended, attempted, skipped, failed | `.atv/install-manifest.json` (repo-local) | `atv-installer launchpad` |
+| **Install manifest** | What the installer intended, attempted, skipped, failed | `.atv/install-manifest.json` (repo-local) | `npx atv-starterkit launchpad` |
 | **Project config** | Which review agents to run, stack settings | `compound-engineering.local.md` | `/ce-review`, `/ce-work` |
 | **gstack session state** | Active sessions, user preferences, prefix choice | `~/.gstack/` (user-global) | Every gstack skill preamble |
 | **gstack project learning** | Per-project self-learning data | `.gstack/` (gitignored) | `/gstack-learn` |
@@ -149,7 +149,7 @@ Or skip the steps and run the full pipeline in one shot:
 ### 3. Reopen the Launchpad
 
 ```bash
-atv-installer launchpad
+npx atv-starterkit launchpad
 ```
 
 Shows your memory dashboard: installed intelligence, repo memory snapshot, and deterministic next-step recommendations. Reopenable any time — no reinstall needed.
@@ -233,7 +233,7 @@ Real-time animated spinners. Each step shows pending → running → done/warned
 
   🎉 ATV Starter Kit ready!
   Install state saved to .atv/install-manifest.json
-  Reopen later with: atv-installer launchpad
+  Reopen later with: npx atv-starterkit launchpad
 ```
 
 The installer writes a versioned manifest to `.atv/install-manifest.json` recording requested vs installed vs skipped vs failed outcomes. Deterministic recommendations derive from local repo state — no network required.
@@ -242,7 +242,7 @@ The installer writes a versioned manifest to `.atv/install-manifest.json` record
 
 ## The Launchpad
 
-After install, run `atv-installer launchpad` to see your repo's memory dashboard:
+After install, run `npx atv-starterkit launchpad` to see your repo's memory dashboard:
 
 ```text
   ⚡ ATV Launchpad ⚡  Live dashboard · auto-refreshes every 3s
@@ -520,7 +520,7 @@ atv-installer init --guided
         └── Deterministic recommendations
         │
         ▼
- atv-installer launchpad    ──► Live terminal dashboard (5 tabs, auto-refresh)
+ npx atv-starterkit launchpad ──► Live terminal dashboard (5 tabs, auto-refresh)
 ```
 
 - `.gstack/` is gitignored — staging area with the full repo and runtime
@@ -577,10 +577,10 @@ go test ./test/sandbox/ -v -run E2E      # comprehensive lifecycle tests only
 # sandbox test
 mkdir /tmp/test && cd /tmp/test
 echo '{}' > tsconfig.json && git init
-/path/to/atv-installer init --guided
+npx atv-starterkit init --guided
 
 # verify launchpad
-/path/to/atv-installer launchpad
+npx atv-starterkit launchpad
 ```
 
 ## Limitations

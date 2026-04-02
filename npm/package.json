@@ -22,7 +22,8 @@
     "skills"
   ],
   "bin": {
-    "atv-starterkit": "bin/cli.js"
+    "atv-starterkit": "bin/cli.js",
+    "atv-installer": "bin/cli.js"
   },
   "scripts": {
     "postinstall": "node install.js"

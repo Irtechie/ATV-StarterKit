@@ -220,7 +220,7 @@ func (p *Printer) PrintNextSteps(hasGstack bool, hasAgentBrowser bool, manifestP
 	}
 	if manifestPath != "" {
 		fmt.Println(dimStyle.Render("  Install state saved to " + manifestPath + " for future reopen/launchpad work."))
-		fmt.Println(dimStyle.Render("  Reopen later with: atv-installer launchpad"))
+		fmt.Println(dimStyle.Render("  Reopen later with: npx atv-starterkit launchpad"))
 	}
 	fmt.Println()
 }
@@ -323,7 +323,7 @@ func launchpadText(snapshot installstate.LaunchpadSnapshot) string {
 	}
 
 	b.WriteString("\n")
-	b.WriteString(dimStyle.Render("  Reopen this dashboard any time with: atv-installer launchpad"))
+	b.WriteString(dimStyle.Render("  Reopen this dashboard any time with: npx atv-starterkit launchpad"))
 	if snapshot.HasManifest {
 		b.WriteString("\n")
 		b.WriteString(dimStyle.Render("  Manifest path: "))
