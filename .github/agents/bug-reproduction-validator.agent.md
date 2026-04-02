@@ -1,5 +1,6 @@
 ---
 description: Systematically reproduces and validates bug reports to confirm whether reported behavior is an actual bug. Use when you receive a bug report or issue that needs verification.
+user-invocable: true
 ---
 
 <examples>

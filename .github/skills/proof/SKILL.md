@@ -97,7 +97,7 @@ All operations go to `POST https://www.proofeditor.ai/api/agent/{slug}/ops`
 
 ## Local Bridge (macOS App)
 
-Requires Proof.app running. Bridge at `http://localhost:9847`.
+Requires Proof.app running. Bridge at `http://localhost-9847`.
 
 **Required headers:**
 - `X-Agent-Id: claude` (identity for presence)
