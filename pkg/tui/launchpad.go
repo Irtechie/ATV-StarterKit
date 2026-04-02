@@ -1,12 +1,12 @@
 package tui
 
 import (
+	"context"
 	"fmt"
-	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/All-The-Vibes/ATV-StarterKit/pkg/installstate"
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/monitor"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -23,125 +23,158 @@ var (
 	lpHeaderStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("178")).Bold(true).Underline(true)
 )
 
-// LaunchpadTab represents which section is focused.
+// LaunchpadTab represents which signal panel is focused.
 type LaunchpadTab int
 
 const (
-	TabOverview LaunchpadTab = iota
-	TabCopilot
-	TabCE
-	TabGstack
+	TabMemory LaunchpadTab = iota
+	TabContext
+	TabHealth
 	TabMoves
 	tabCount
 )
 
 func (t LaunchpadTab) String() string {
 	switch t {
-	case TabOverview:
-		return "Overview"
-	case TabCopilot:
-		return "Copilot"
-	case TabCE:
-		return "CE"
-	case TabGstack:
-		return "Gstack"
+	case TabMemory:
+		return "Memory"
+	case TabContext:
+		return "Context"
+	case TabHealth:
+		return "Health"
 	case TabMoves:
 		return "Moves"
 	}
 	return ""
 }
 
-type refreshMsg struct{}
+// stateChangedMsg is sent when the watcher detects filesystem changes.
+type stateChangedMsg struct{}
 
-// LaunchpadModel is a live Bubble Tea dashboard.
+// LaunchpadModel is a live Bubble Tea dashboard backed by the filesystem watcher.
 type LaunchpadModel struct {
-	root     string
-	snapshot installstate.LaunchpadSnapshot
-	tab      LaunchpadTab
-	err      error
+	root    string
+	watcher *monitor.Watcher
+	tab     LaunchpadTab
 
-	// Compound engineering
-	brainstorms []string
-	plans       []string
-	solutions   []string
-
-	// Installed intelligence
-	agents []string
-	skills []string
-
-	// Copilot context
-	instructions []string
-	prompts      []string
-	mcpServers   []string
-	extensions   []string
-
-	// gstack
-	gstackSkills []string
-
-	// Memory
-	memoryFiles []string
+	// Suggest-then-execute state
+	selectedRec   int
+	pendingAction *monitor.ProposedAction
+	actionResult  *monitor.ActionResult
+	executor      *monitor.Executor
 }
 
-// NewLaunchpadModel creates the live dashboard model.
-func NewLaunchpadModel(root string) LaunchpadModel {
-	m := LaunchpadModel{root: root}
-	m.refresh()
-	return m
-}
-
-func (m *LaunchpadModel) refresh() {
-	snapshot, err := installstate.BuildLaunchpadSnapshot(m.root)
-	m.snapshot = snapshot
-	m.err = err
-	m.brainstorms = installstate.ListMarkdownNames(filepath.Join(m.root, "docs", "brainstorms"))
-	m.plans = installstate.ListMarkdownNames(filepath.Join(m.root, "docs", "plans"))
-	m.solutions = installstate.ListMarkdownNames(filepath.Join(m.root, "docs", "solutions"))
-	m.agents = installstate.ListAgentNames(filepath.Join(m.root, ".github", "agents"))
-	m.skills = installstate.ListSkillDirs(filepath.Join(m.root, ".github", "skills"))
-	m.instructions = installstate.ListInstructionFiles(filepath.Join(m.root, ".github"))
-	m.prompts = installstate.ListPromptFiles(filepath.Join(m.root, ".github", "prompts"))
-	m.gstackSkills = installstate.ListGstackSkillNames(filepath.Join(m.root, ".gstack"))
-	m.mcpServers = installstate.ListMCPServerNames(filepath.Join(m.root, ".github", "copilot-mcp-config.json"))
-	m.extensions = installstate.ListExtensionRecommendations(filepath.Join(m.root, ".vscode", "extensions.json"))
-	m.memoryFiles = installstate.ListMemoryFiles(m.root)
+// NewLaunchpadModel creates the live dashboard model backed by a watcher.
+func NewLaunchpadModel(root string, w *monitor.Watcher) LaunchpadModel {
+	return LaunchpadModel{
+		root:     root,
+		watcher:  w,
+		executor: monitor.NewExecutor(root),
+	}
 }
 
 func (m LaunchpadModel) Init() tea.Cmd {
-	return tea.Batch(tickRefresh())
+	// Bridge watcher onChange callback to tea.Msg
+	ch := make(chan struct{}, 1)
+	m.watcher.SetOnChange(func(_ monitor.LiveState) {
+		select {
+		case ch <- struct{}{}:
+		default:
+		}
+	})
+
+	// Wait for watcher events and convert to tea.Msg
+	return func() tea.Msg {
+		<-ch
+		return stateChangedMsg{}
+	}
 }
 
-func tickRefresh() tea.Cmd {
-	return tea.Tick(3*time.Second, func(t time.Time) tea.Msg {
-		return refreshMsg{}
-	})
+func waitForChange(ch chan struct{}) tea.Cmd {
+	return func() tea.Msg {
+		<-ch
+		return stateChangedMsg{}
+	}
 }
 
 func (m LaunchpadModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "q", "ctrl+c", "esc":
+		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "tab", "right", "l":
-			m.tab = (m.tab + 1) % tabCount
+			if m.pendingAction == nil {
+				m.tab = (m.tab + 1) % tabCount
+			}
 		case "shift+tab", "left", "h":
-			m.tab = (m.tab - 1 + tabCount) % tabCount
+			if m.pendingAction == nil {
+				m.tab = (m.tab - 1 + tabCount) % tabCount
+			}
 		case "1":
-			m.tab = TabOverview
+			if m.pendingAction == nil {
+				m.tab = TabMemory
+			}
 		case "2":
-			m.tab = TabCopilot
+			if m.pendingAction == nil {
+				m.tab = TabContext
+			}
 		case "3":
-			m.tab = TabCE
+			if m.pendingAction == nil {
+				m.tab = TabHealth
+			}
 		case "4":
-			m.tab = TabGstack
-		case "5":
-			m.tab = TabMoves
+			if m.pendingAction == nil {
+				m.tab = TabMoves
+			}
+		case "j", "down":
+			if m.pendingAction == nil {
+				state := m.watcher.State()
+				if m.tab == TabMoves && m.selectedRec < len(state.LaunchpadSnapshot.Recommendations)-1 {
+					m.selectedRec++
+				}
+			}
+		case "k", "up":
+			if m.pendingAction == nil && m.tab == TabMoves && m.selectedRec > 0 {
+				m.selectedRec--
+			}
+		case "enter":
+			if m.tab == TabMoves && m.pendingAction == nil {
+				// Check if selected recommendation has an SDK action
+				state := m.watcher.State()
+				if m.selectedRec < len(state.SDKRecommendations) {
+					if pa := state.SDKRecommendations[m.selectedRec].ProposedAction; pa != nil {
+						copied := *pa
+						m.pendingAction = &copied
+						m.actionResult = nil
+					}
+				}
+			} else if m.pendingAction != nil {
+				// Approve and execute
+				ctx := context.Background()
+				result, _ := m.executor.Execute(ctx, *m.pendingAction)
+				m.actionResult = result
+				m.pendingAction = nil
+			}
+		case "esc":
+			if m.pendingAction != nil {
+				m.pendingAction = nil
+			} else if m.actionResult != nil {
+				m.actionResult = nil
+			}
 		case "r":
-			m.refresh()
+			m.watcher.ForceRefresh()
 		}
-	case refreshMsg:
-		m.refresh()
-		return m, tickRefresh()
+	case stateChangedMsg:
+		// Re-subscribe for next change
+		ch := make(chan struct{}, 1)
+		m.watcher.SetOnChange(func(_ monitor.LiveState) {
+			select {
+			case ch <- struct{}{}:
+			default:
+			}
+		})
+		return m, waitForChange(ch)
 	}
 	return m, nil
 }
@@ -149,10 +182,12 @@ func (m LaunchpadModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m LaunchpadModel) View() string {
 	var b strings.Builder
 
-	// Header
+	state := m.watcher.State()
+
+	// Header with online/offline indicator
 	b.WriteString("\n")
 	b.WriteString(lpAccentStyle.Render("  ⚡") + lpTitleStyle.Render(" ATV Launchpad ") + lpAccentStyle.Render("⚡"))
-	b.WriteString(lpDimStyle.Render("  Live dashboard · auto-refreshes every 3s"))
+	b.WriteString(lpDimStyle.Render("  Live dashboard · event-driven"))
 	b.WriteString("\n\n")
 
 	// Tab bar
@@ -170,37 +205,141 @@ func (m LaunchpadModel) View() string {
 	}
 	b.WriteString("\n\n")
 
-	if m.err != nil {
-		b.WriteString(lpFailStyle.Render(fmt.Sprintf("  Error: %v\n", m.err)))
-		b.WriteString(lpDimStyle.Render("  Press r to retry, q to quit\n"))
-		return b.String()
-	}
-
 	switch m.tab {
-	case TabOverview:
-		m.renderOverview(&b)
-	case TabCopilot:
-		m.renderCopilot(&b)
-	case TabCE:
-		m.renderCE(&b)
-	case TabGstack:
-		m.renderGstack(&b)
+	case TabMemory:
+		m.renderMemory(&b, &state)
+	case TabContext:
+		m.renderContext(&b, &state)
+	case TabHealth:
+		m.renderHealth(&b, &state)
 	case TabMoves:
-		m.renderRecommendations(&b)
+		m.renderMoves(&b, &state)
 	}
 
 	// Footer
 	b.WriteString("\n")
-	b.WriteString(lpDimStyle.Render("  ← → tab  1-5 jump  r refresh  q quit"))
+	lastEvent := state.LastFSEvent
+	if lastEvent.IsZero() {
+		b.WriteString(lpDimStyle.Render("  Last FS event: never"))
+	} else {
+		ago := time.Since(lastEvent).Truncate(time.Second)
+		b.WriteString(lpDimStyle.Render(fmt.Sprintf("  Last FS event: %s ago", ago)))
+	}
+	b.WriteString(lpDimStyle.Render("  │  "))
+	b.WriteString(lpDimStyle.Render("← → tab  1-4 jump  j/k navigate  r refresh  q quit"))
 	b.WriteString("\n\n")
 
 	return b.String()
 }
 
-// ─── Overview Tab ───────────────────────────────────────────────────────────
+// ─── Memory Tab ─────────────────────────────────────────────────────────────
 
-func (m LaunchpadModel) renderOverview(b *strings.Builder) {
-	s := m.snapshot
+func (m LaunchpadModel) renderMemory(b *strings.Builder, state *monitor.LiveState) {
+	b.WriteString(lpHeaderStyle.Render("  Repo Memory Artifacts"))
+	b.WriteString("\n\n")
+
+	renderArtifactSection(b, "Brainstorms", state.Brainstorms)
+	renderArtifactSection(b, "Plans", state.Plans)
+	renderArtifactSection(b, "Solutions", state.Solutions)
+
+	// Memory files
+	if state.LaunchpadSnapshot.RepoState.MemoryFileCount > 0 {
+		b.WriteString(lpHeaderStyle.Render(fmt.Sprintf("  Copilot Memory Files (%d)", state.LaunchpadSnapshot.RepoState.MemoryFileCount)))
+		b.WriteString("\n\n")
+	} else {
+		b.WriteString(lpHeaderStyle.Render("  Copilot Memory"))
+		b.WriteString("\n\n")
+		b.WriteString(fmt.Sprintf("  %s No .copilot-memory/ files yet\n", lpDimStyle.Render("○")))
+		b.WriteString(lpDimStyle.Render("    Copilot stores repo-scoped facts here automatically\n"))
+		b.WriteString("\n")
+	}
+
+	// CE workflow stage
+	s := state.LaunchpadSnapshot.RepoState
+	if s.HasUncheckedPlan {
+		b.WriteString(fmt.Sprintf("  %s Active plan has unchecked work\n", lpWarnStyle.Render("⚠")))
+	} else if s.HasCompletedPlan {
+		b.WriteString(fmt.Sprintf("  %s Completed plan — ready for /ce-compound\n", lpSuccessStyle.Render("✓")))
+	}
+}
+
+func renderArtifactSection(b *strings.Builder, title string, artifacts []monitor.ArtifactEntry) {
+	b.WriteString(fmt.Sprintf("  %s (%d)\n", lpTitleStyle.Render(title), len(artifacts)))
+	if len(artifacts) == 0 {
+		b.WriteString(lpDimStyle.Render("    (empty)\n"))
+	} else {
+		for _, a := range artifacts {
+			age := time.Since(a.ModTime).Truncate(time.Minute)
+			ageStr := formatAge(age)
+			b.WriteString(fmt.Sprintf("    %s %s  %s\n",
+				lpDimStyle.Render("•"),
+				a.Name,
+				lpDimStyle.Render(ageStr),
+			))
+		}
+	}
+	b.WriteString("\n")
+}
+
+func formatAge(d time.Duration) string {
+	if d < time.Hour {
+		return fmt.Sprintf("%dm ago", int(d.Minutes()))
+	}
+	if d < 24*time.Hour {
+		return fmt.Sprintf("%dh ago", int(d.Hours()))
+	}
+	return fmt.Sprintf("%dd ago", int(d.Hours()/24))
+}
+
+// ─── Context Tab ────────────────────────────────────────────────────────────
+
+func (m LaunchpadModel) renderContext(b *strings.Builder, state *monitor.LiveState) {
+	s := state.LaunchpadSnapshot
+
+	b.WriteString(lpHeaderStyle.Render("  Context Estimate"))
+	b.WriteString("\n\n")
+
+	ctx := state.ContextEstimate
+	b.WriteString(fmt.Sprintf("  Instruction bytes  %s\n", lpCountStyle.Render(fmt.Sprintf("%d", ctx.TotalInstructionBytes))))
+	b.WriteString(fmt.Sprintf("  Estimated tokens   %s\n", lpCountStyle.Render(fmt.Sprintf("~%d", ctx.EstimatedTokens))))
+	b.WriteString("\n")
+
+	b.WriteString(lpHeaderStyle.Render("  Capability Matrix"))
+	b.WriteString("\n\n")
+
+	b.WriteString(fmt.Sprintf("  %s agents   %s skills   %s instructions   %s prompts\n",
+		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.InstalledAgents)),
+		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.InstalledSkills)),
+		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.InstructionFileCount)),
+		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.PromptFileCount)),
+	))
+	b.WriteString(fmt.Sprintf("  %s MCP servers   %s extensions   %s gstack skills\n",
+		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.MCPServerCount)),
+		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.ExtensionRecommendationCount)),
+		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.GstackSkillCount)),
+	))
+	b.WriteString("\n")
+
+	b.WriteString(lpHeaderStyle.Render("  Copilot Config"))
+	b.WriteString("\n\n")
+	renderStatus(b, s.RepoState.HasCopilotInstructions, "copilot-instructions.md")
+	renderStatus(b, s.RepoState.HasSetupSteps, "copilot-setup-steps.yml")
+	renderStatus(b, s.RepoState.HasMCPConfig, fmt.Sprintf("MCP servers (%d configured)", s.RepoState.MCPServerCount))
+	renderStatus(b, s.RepoState.HasCELocalConfig, "compound-engineering.local.md")
+}
+
+func renderStatus(b *strings.Builder, ok bool, label string) {
+	if ok {
+		b.WriteString(fmt.Sprintf("  %s %s\n", lpSuccessStyle.Render("●"), label))
+	} else {
+		b.WriteString(fmt.Sprintf("  %s %s\n", lpDimStyle.Render("○"), label))
+	}
+}
+
+// ─── Health Tab ─────────────────────────────────────────────────────────────
+
+func (m LaunchpadModel) renderHealth(b *strings.Builder, state *monitor.LiveState) {
+	s := state.LaunchpadSnapshot
 
 	b.WriteString(lpHeaderStyle.Render("  Install Intelligence"))
 	b.WriteString("\n\n")
@@ -209,12 +348,6 @@ func (m LaunchpadModel) renderOverview(b *strings.Builder) {
 		b.WriteString(fmt.Sprintf("  %s Manifest    %s\n", lpSuccessStyle.Render("●"), lpDimStyle.Render(s.ManifestPath)))
 		if !s.GeneratedAt.IsZero() {
 			b.WriteString(fmt.Sprintf("  %s Last run    %s\n", lpDimStyle.Render("│"), s.GeneratedAt.Format("2006-01-02 15:04 MST")))
-		}
-		if s.Requested.PresetName != "" {
-			b.WriteString(fmt.Sprintf("  %s Preset      %s\n", lpDimStyle.Render("│"), lpCountStyle.Render(s.Requested.PresetName)))
-		}
-		if labels := s.StackPackLabels(); len(labels) > 0 {
-			b.WriteString(fmt.Sprintf("  %s Stacks      %s\n", lpDimStyle.Render("│"), strings.Join(labels, ", ")))
 		}
 		b.WriteString(fmt.Sprintf("  %s Outcomes    %s done  %s warn  %s fail  %s skip\n",
 			lpDimStyle.Render("╰"),
@@ -229,275 +362,129 @@ func (m LaunchpadModel) renderOverview(b *strings.Builder) {
 			lpKeyStyle.Render("atv-installer init --guided")))
 	}
 
+	// Drift entries
 	b.WriteString("\n")
-	b.WriteString(lpHeaderStyle.Render("  Capability Matrix"))
+	b.WriteString(lpHeaderStyle.Render("  Install Drift"))
 	b.WriteString("\n\n")
 
-	// Row 1: Intelligence surface
-	b.WriteString(fmt.Sprintf("  %s agents   %s skills   %s instructions   %s prompts\n",
-		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.InstalledAgents)),
-		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.InstalledSkills)),
-		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.InstructionFileCount)),
-		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.PromptFileCount)),
-	))
+	if len(state.DriftEntries) == 0 {
+		b.WriteString(fmt.Sprintf("  %s No drift detected\n", lpSuccessStyle.Render("✓")))
+	} else {
+		for _, d := range state.DriftEntries {
+			icon := lpWarnStyle.Render("⚠")
+			status := string(d.Status)
+			if d.Status == monitor.DriftMissing {
+				icon = lpFailStyle.Render("✗")
+			}
+			b.WriteString(fmt.Sprintf("  %s %s  %s\n", icon, d.Path, lpDimStyle.Render(status)))
+		}
+	}
 
-	// Row 2: Compound engineering
-	b.WriteString(fmt.Sprintf("  %s brainstorms   %s plans   %s solutions\n",
-		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.BrainstormCount)),
-		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.PlanCount)),
-		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.SolutionCount)),
-	))
-
-	// Row 3: Infrastructure
-	b.WriteString(fmt.Sprintf("  %s MCP servers   %s extensions   %s gstack skills   %s memory files\n",
-		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.MCPServerCount)),
-		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.ExtensionRecommendationCount)),
-		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.GstackSkillCount)),
-		lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.MemoryFileCount)),
-	))
-
+	// Runtime health
 	b.WriteString("\n")
-	b.WriteString(lpHeaderStyle.Render("  Health"))
+	b.WriteString(lpHeaderStyle.Render("  Runtime"))
 	b.WriteString("\n\n")
-
-	// Copilot context health
-	renderStatus(b, s.RepoState.HasCopilotInstructions, "copilot-instructions.md")
-	renderStatus(b, s.RepoState.HasSetupSteps, "copilot-setup-steps.yml")
-	renderStatus(b, s.RepoState.HasMCPConfig, "MCP server config")
-	renderStatus(b, s.RepoState.HasCELocalConfig, "compound-engineering.local.md")
-	renderStatus(b, s.RepoState.HasGstackStaging, ".gstack staging")
-	renderStatus(b, s.RepoState.HasGstackRuntime, "gstack runtime (browse)")
+	renderStatus(b, s.RepoState.HasGstackStaging, "gstack staging")
+	renderStatus(b, s.RepoState.HasGstackRuntime, "gstack runtime")
 	renderStatus(b, s.RepoState.HasAgentBrowserSkill, "agent-browser skill")
 	renderStatus(b, s.RepoState.HasGstackUserConfig, "~/.gstack/ user config")
 	renderStatus(b, s.RepoState.HasAgentBrowserSessions, "~/.agent-browser/ sessions")
-	b.WriteString("\n")
+}
 
-	// Memory files
-	if len(m.memoryFiles) > 0 {
-		b.WriteString(lpHeaderStyle.Render(fmt.Sprintf("  Memory Files (%d)", len(m.memoryFiles))))
-		b.WriteString("\n\n")
-		for _, f := range m.memoryFiles {
-			b.WriteString(fmt.Sprintf("    • %s\n", f))
+// ─── Moves Tab ──────────────────────────────────────────────────────────────
+
+func (m LaunchpadModel) renderMoves(b *strings.Builder, state *monitor.LiveState) {
+	// Show action result feedback
+	if m.actionResult != nil {
+		if m.actionResult.Success {
+			b.WriteString(lpSuccessStyle.Render("  ✓ Action completed successfully"))
+		} else {
+			b.WriteString(lpFailStyle.Render("  ✗ Action failed: " + m.actionResult.Error))
+		}
+		if m.actionResult.Output != "" {
+			lines := strings.Split(strings.TrimSpace(m.actionResult.Output), "\n")
+			for _, line := range lines {
+				if len(line) > 80 {
+					line = line[:80] + "..."
+				}
+				b.WriteString(fmt.Sprintf("\n    %s", lpDimStyle.Render(line)))
+			}
 		}
 		b.WriteString("\n")
-	} else {
-		b.WriteString(lpHeaderStyle.Render("  Memory Files"))
+		b.WriteString(lpDimStyle.Render("  Press Esc to dismiss"))
 		b.WriteString("\n\n")
-		b.WriteString(fmt.Sprintf("  %s No .copilot-memory/ files yet\n", lpDimStyle.Render("○")))
-		b.WriteString(lpDimStyle.Render("    Copilot stores repo-scoped facts here automatically\n"))
-		b.WriteString("\n")
 	}
 
-	if s.RepoState.HasUncheckedPlan {
-		b.WriteString(fmt.Sprintf("  %s Active plan has unchecked work\n", lpWarnStyle.Render("⚠")))
-	} else if s.RepoState.HasCompletedPlan {
-		b.WriteString(fmt.Sprintf("  %s Completed plan — ready for /ce-compound\n", lpSuccessStyle.Render("✓")))
-	}
-}
-
-func renderStatus(b *strings.Builder, ok bool, label string) {
-	if ok {
-		b.WriteString(fmt.Sprintf("  %s %s\n", lpSuccessStyle.Render("●"), label))
-	} else {
-		b.WriteString(fmt.Sprintf("  %s %s\n", lpDimStyle.Render("○"), label))
-	}
-}
-
-// ─── Copilot Tab ────────────────────────────────────────────────────────────
-
-func (m LaunchpadModel) renderCopilot(b *strings.Builder) {
-	s := m.snapshot
-
-	// Copilot core config
-	b.WriteString(lpHeaderStyle.Render("  Copilot Config"))
-	b.WriteString("\n\n")
-	renderStatus(b, s.RepoState.HasCopilotInstructions, "copilot-instructions.md")
-	renderStatus(b, s.RepoState.HasSetupSteps, "copilot-setup-steps.yml")
-	renderStatus(b, s.RepoState.HasMCPConfig, fmt.Sprintf("MCP servers (%d configured)", len(m.mcpServers)))
-	b.WriteString("\n")
-
-	// MCP server names (only if any)
-	if len(m.mcpServers) > 0 {
-		renderBulletList(b, "MCP Servers", m.mcpServers)
-		b.WriteString("\n")
-	}
-
-	// File-level instructions
-	renderBulletList(b, fmt.Sprintf("File Instructions (%d)", len(m.instructions)), m.instructions)
-	b.WriteString("\n")
-
-	// Prompts
-	renderBulletList(b, fmt.Sprintf("Prompt Files (%d)", len(m.prompts)), m.prompts)
-	b.WriteString("\n")
-
-	// Agents — use column layout since there can be many
-	b.WriteString(fmt.Sprintf("  %s\n", lpTitleStyle.Render(fmt.Sprintf("Agents (%d)", len(m.agents)))))
-	if len(m.agents) == 0 {
-		b.WriteString(lpDimStyle.Render("    (none)\n"))
-	} else {
-		renderColumnList(b, m.agents)
-	}
-	b.WriteString("\n")
-
-	// VS Code extensions
-	renderBulletList(b, fmt.Sprintf("VS Code Extensions (%d recommended)", len(m.extensions)), m.extensions)
-}
-
-// ─── Compound Engineering Tab ───────────────────────────────────────────────
-
-func (m LaunchpadModel) renderCE(b *strings.Builder) {
-	b.WriteString(lpHeaderStyle.Render("  Compound Engineering Workflow"))
-	b.WriteString("\n\n")
-
-	// Workflow status
-	stage := m.ceStage()
-	b.WriteString(fmt.Sprintf("  Current stage: %s\n\n", lpAccentStyle.Render(stage)))
-
-	renderFileSection(b, "Brainstorms", "docs/brainstorms/", m.brainstorms)
-	renderFileSection(b, "Plans", "docs/plans/", m.plans)
-	renderFileSection(b, "Solutions", "docs/solutions/", m.solutions)
-
-	// CE project config
-	s := m.snapshot
-	b.WriteString(lpHeaderStyle.Render("  Project Config"))
-	b.WriteString("\n\n")
-	if s.RepoState.HasCELocalConfig {
-		b.WriteString(fmt.Sprintf("  %s compound-engineering.local.md\n", lpSuccessStyle.Render("●")))
-		if s.RepoState.CEReviewAgentCount > 0 {
-			b.WriteString(fmt.Sprintf("  %s %s review agents configured\n",
-				lpDimStyle.Render("  ╰"),
-				lpCountStyle.Render(fmt.Sprintf("%d", s.RepoState.CEReviewAgentCount))))
+	// Show pending action confirmation
+	if m.pendingAction != nil {
+		riskStyle := lpSuccessStyle
+		riskLabel := "safe"
+		switch m.pendingAction.RiskLevel {
+		case monitor.ActionRiskCaution:
+			riskStyle = lpWarnStyle
+			riskLabel = "caution"
+		case monitor.ActionRiskDestructive:
+			riskStyle = lpFailStyle
+			riskLabel = "destructive"
 		}
-	} else {
-		b.WriteString(fmt.Sprintf("  %s No compound-engineering.local.md — defaults used\n", lpDimStyle.Render("○")))
-		b.WriteString(lpDimStyle.Render("    Create with /ce-review to configure per-project review agents\n"))
-	}
-	b.WriteString("\n")
-
-	// Workflow hints
-	b.WriteString(lpDimStyle.Render("  Workflow: brainstorm → plan → work → compound"))
-	b.WriteString("\n")
-	switch stage {
-	case "Ready to brainstorm":
-		b.WriteString(fmt.Sprintf("  %s Try: %s\n", lpKeyStyle.Render("→"), lpKeyStyle.Render("/ce-brainstorm \"your feature idea\"")))
-	case "Ready to plan":
-		b.WriteString(fmt.Sprintf("  %s Try: %s\n", lpKeyStyle.Render("→"), lpKeyStyle.Render("/ce-plan")))
-	case "Work in progress":
-		b.WriteString(fmt.Sprintf("  %s Try: %s\n", lpKeyStyle.Render("→"), lpKeyStyle.Render("/ce-work")))
-	case "Ready to compound":
-		b.WriteString(fmt.Sprintf("  %s Try: %s\n", lpKeyStyle.Render("→"), lpKeyStyle.Render("/ce-compound")))
-	}
-}
-
-func (m LaunchpadModel) ceStage() string {
-	s := m.snapshot.RepoState
-	switch {
-	case s.BrainstormCount == 0:
-		return "Ready to brainstorm"
-	case s.PlanCount == 0:
-		return "Ready to plan"
-	case s.HasUncheckedPlan:
-		return "Work in progress"
-	case s.HasCompletedPlan && s.SolutionCount == 0:
-		return "Ready to compound"
-	case s.SolutionCount > 0:
-		return "Compounding knowledge"
-	default:
-		return "Active"
-	}
-}
-
-// ─── Gstack Tab ─────────────────────────────────────────────────────────────
-
-func (m LaunchpadModel) renderGstack(b *strings.Builder) {
-	s := m.snapshot
-
-	b.WriteString(lpHeaderStyle.Render("  Gstack Status"))
-	b.WriteString("\n\n")
-
-	if !s.RepoState.HasGstackStaging {
-		b.WriteString(fmt.Sprintf("  %s Gstack not installed. Run with %s\n",
-			lpDimStyle.Render("○"),
-			lpKeyStyle.Render("atv-installer init --guided")))
+		b.WriteString(lpHeaderStyle.Render("  Confirm Action"))
+		b.WriteString("\n\n")
+		b.WriteString(fmt.Sprintf("  %s %s\n", lpAccentStyle.Render("▸"), m.pendingAction.Description))
+		b.WriteString(fmt.Sprintf("  Command: %s\n", lpKeyStyle.Render(m.pendingAction.Command)))
+		b.WriteString(fmt.Sprintf("  Risk:    %s\n", riskStyle.Render(riskLabel)))
+		b.WriteString("\n")
+		b.WriteString(fmt.Sprintf("  %s to approve   %s to cancel\n",
+			lpKeyStyle.Render("Enter"),
+			lpDimStyle.Render("Esc"),
+		))
+		b.WriteString("\n")
 		return
 	}
 
-	// Runtime status
-	if s.RepoState.HasGstackRuntime {
-		b.WriteString(fmt.Sprintf("  %s Runtime built (browse binary ready)\n", lpSuccessStyle.Render("●")))
-	} else {
-		b.WriteString(fmt.Sprintf("  %s Runtime not built — docs-only mode\n", lpWarnStyle.Render("⚠")))
-		b.WriteString(lpDimStyle.Render("    Re-run installer with --guided to retry build\n"))
-	}
-
-	if s.Requested.GstackRuntime {
-		b.WriteString(fmt.Sprintf("  %s Mode: %s\n", lpDimStyle.Render("│"), lpCountStyle.Render("full runtime")))
-	} else {
-		b.WriteString(fmt.Sprintf("  %s Mode: %s\n", lpDimStyle.Render("│"), lpDimStyle.Render("markdown-only")))
-	}
-
-	if s.RepoState.HasAgentBrowserSkill {
-		b.WriteString(fmt.Sprintf("  %s agent-browser: %s\n", lpDimStyle.Render("╰"), lpSuccessStyle.Render("installed")))
-	} else {
-		b.WriteString(fmt.Sprintf("  %s agent-browser: %s\n", lpDimStyle.Render("╰"), lpDimStyle.Render("not installed")))
-	}
-
-	// Gstack skills (inside .gstack/)
-	b.WriteString("\n")
-
-	// User-global gstack state
-	b.WriteString(lpHeaderStyle.Render("  User State"))
-	b.WriteString("\n\n")
-	if s.RepoState.HasGstackUserConfig {
-		b.WriteString(fmt.Sprintf("  %s ~/.gstack/ %s\n",
-			lpSuccessStyle.Render("●"),
-			lpDimStyle.Render(fmt.Sprintf("(%d session dirs)", s.RepoState.GstackSessionCount))))
-	} else {
-		b.WriteString(fmt.Sprintf("  %s ~/.gstack/ not found\n", lpDimStyle.Render("○")))
-	}
-	if s.RepoState.HasAgentBrowserSessions {
-		b.WriteString(fmt.Sprintf("  %s ~/.agent-browser/sessions/ %s\n",
-			lpSuccessStyle.Render("●"),
-			lpDimStyle.Render(fmt.Sprintf("(%d sessions)", s.RepoState.AgentBrowserSessionCount))))
-	} else {
-		b.WriteString(fmt.Sprintf("  %s ~/.agent-browser/sessions/ not found\n", lpDimStyle.Render("○")))
-	}
-
-	b.WriteString("\n")
-	b.WriteString(fmt.Sprintf("  %s %s\n", lpTitleStyle.Render("Gstack Skills"), lpDimStyle.Render(fmt.Sprintf("(%d in .gstack/)", len(m.gstackSkills)))))
-	if len(m.gstackSkills) == 0 {
-		b.WriteString(lpDimStyle.Render("    (none synced)\n"))
-	} else {
-		renderColumnList(b, m.gstackSkills)
-	}
-
-	// .github/skills (core skills)
-	b.WriteString("\n")
-	b.WriteString(fmt.Sprintf("  %s %s\n", lpTitleStyle.Render("Core Skills"), lpDimStyle.Render(fmt.Sprintf("(%d in .github/skills/)", len(m.skills)))))
-	if len(m.skills) == 0 {
-		b.WriteString(lpDimStyle.Render("    (none installed)\n"))
-	} else {
-		renderColumnList(b, m.skills)
-	}
-}
-
-// ─── Moves (Recommendations) Tab ────────────────────────────────────────────
-
-func (m LaunchpadModel) renderRecommendations(b *strings.Builder) {
 	b.WriteString(lpHeaderStyle.Render("  Recommended Next Moves"))
 	b.WriteString("\n\n")
 
-	recs := m.snapshot.CloneRecommendations()
-	if len(recs) == 0 {
+	// SDK recommendations (with proposed actions)
+	if len(state.SDKRecommendations) > 0 {
+		for i, rec := range state.SDKRecommendations {
+			prefix := "  "
+			if i == m.selectedRec {
+				prefix = lpAccentStyle.Render("▸ ")
+			}
+			actionHint := ""
+			if rec.ProposedAction != nil {
+				actionHint = lpKeyStyle.Render(" [Enter to run]")
+			}
+			b.WriteString(fmt.Sprintf("%s%s %s%s\n",
+				prefix,
+				lpCountStyle.Render(fmt.Sprintf("%d.", i+1)),
+				rec.Title,
+				actionHint,
+			))
+			b.WriteString(fmt.Sprintf("     %s\n", lpDimStyle.Render(rec.Reason)))
+			b.WriteString("\n")
+		}
+	}
+
+	// Static recommendations
+	recs := state.LaunchpadSnapshot.CloneRecommendations()
+	if len(recs) == 0 && len(state.SDKRecommendations) == 0 {
 		b.WriteString(lpSuccessStyle.Render("  ✓ All clear — no recommended actions."))
 		b.WriteString("\n")
 		return
 	}
 
+	offset := len(state.SDKRecommendations)
 	for i, rec := range recs {
+		idx := offset + i
+		prefix := "  "
+		if idx == m.selectedRec {
+			prefix = lpAccentStyle.Render("▸ ")
+		}
 		priority := lpDimStyle.Render(fmt.Sprintf("P%d", rec.Priority))
-		b.WriteString(fmt.Sprintf("  %s %s  %s\n",
-			lpCountStyle.Render(fmt.Sprintf("%d.", i+1)),
+		b.WriteString(fmt.Sprintf("%s%s %s  %s\n",
+			prefix,
+			lpCountStyle.Render(fmt.Sprintf("%d.", idx+1)),
 			rec.Title,
 			priority,
 		))
@@ -507,30 +494,6 @@ func (m LaunchpadModel) renderRecommendations(b *strings.Builder) {
 }
 
 // ─── Shared helpers ─────────────────────────────────────────────────────────
-
-func renderFileSection(b *strings.Builder, title, dir string, files []string) {
-	count := len(files)
-	b.WriteString(fmt.Sprintf("  %s\n", lpTitleStyle.Render(fmt.Sprintf("%s (%d in %s)", title, count, dir))))
-	if count == 0 {
-		b.WriteString(lpDimStyle.Render("    (empty)\n"))
-	} else {
-		for _, f := range files {
-			b.WriteString(fmt.Sprintf("    %s %s\n", lpDimStyle.Render("•"), f))
-		}
-	}
-	b.WriteString("\n")
-}
-
-func renderBulletList(b *strings.Builder, title string, items []string) {
-	b.WriteString(fmt.Sprintf("  %s\n", lpTitleStyle.Render(title)))
-	if len(items) == 0 {
-		b.WriteString(lpDimStyle.Render("    (none)\n"))
-	} else {
-		for _, item := range items {
-			b.WriteString(fmt.Sprintf("    %s %s\n", lpDimStyle.Render("•"), item))
-		}
-	}
-}
 
 func renderColumnList(b *strings.Builder, items []string) {
 	cols := 3
@@ -544,7 +507,6 @@ func renderColumnList(b *strings.Builder, items []string) {
 		if i%cols == 0 {
 			b.WriteString("    ")
 		}
-		// Pad raw item name (not styled text) for correct alignment
 		padded := item
 		for len(padded) < colWidth && cols > 1 && i%cols < cols-1 {
 			padded += " "
@@ -557,8 +519,8 @@ func renderColumnList(b *strings.Builder, items []string) {
 }
 
 // RunLaunchpad starts the live launchpad TUI.
-func RunLaunchpad(root string) error {
-	m := NewLaunchpadModel(root)
+func RunLaunchpad(root string, w *monitor.Watcher) error {
+	m := NewLaunchpadModel(root, w)
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	_, err := p.Run()
 	return err

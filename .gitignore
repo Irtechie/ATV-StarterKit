@@ -35,6 +35,10 @@ Thumbs.db
 # Node
 node_modules/
 
+# VS Code extension build output
+vscode-atv-launchpad/out/
+vscode-atv-launchpad/preview.html
+
 # Env files (keep .env.example)
 .env
 !.env.example

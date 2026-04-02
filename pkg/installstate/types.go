@@ -131,12 +131,14 @@ type Recommendation struct {
 
 // InstallManifest is the canonical installer-state snapshot written after guided installs.
 type InstallManifest struct {
-	Version         int              `json:"version"`
-	GeneratedAt     time.Time        `json:"generatedAt"`
-	RerunPolicy     RerunPolicy      `json:"rerunPolicy"`
-	Requested       RequestedState   `json:"requested"`
-	Outcomes        []InstallOutcome `json:"outcomes,omitempty"`
-	Recommendations []Recommendation `json:"recommendations,omitempty"`
+	Version         int                `json:"version"`
+	GeneratedAt     time.Time          `json:"generatedAt"`
+	RerunPolicy     RerunPolicy        `json:"rerunPolicy"`
+	Requested       RequestedState     `json:"requested"`
+	Outcomes        []InstallOutcome   `json:"outcomes,omitempty"`
+	Recommendations []Recommendation   `json:"recommendations,omitempty"`
+	CatalogVersion  string             `json:"catalogVersion,omitempty"`
+	FileChecksums   map[string]string  `json:"fileChecksums,omitempty"` // path → SHA-256 at install time
 }
 
 var (

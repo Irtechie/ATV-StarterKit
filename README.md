@@ -17,9 +17,9 @@
 
 <p align="center">
        <a href="#quick-start">Quick start</a> ·
-       <a href="#the-three-pillars">Three pillars</a> ·
-       <a href="#the-guided-experience">Guided experience</a> ·
        <a href="#the-launchpad">Launchpad</a> ·
+       <a href="#installation">Installation</a> ·
+       <a href="#the-three-pillars">Three pillars</a> ·
        <a href="#the-full-sprint">Full sprint</a> ·
        <a href="#development">Development</a>
 </p>
@@ -34,84 +34,7 @@ ATV 2.0 is a one-command installer that wires together three open-source systems
 - **gstack** — the sprint execution engine
 - **agent-browser** — the browser automation layer
 
-Each brings a distinct philosophy. Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45 skills, 28 agents, a memory-aware launchpad, and a knowledge system that makes your repo smarter with every PR.
-
----
-
-## The Three Pillars
-
-ATV 2.0 isn't a thing we built from scratch. It's the integration point for three independent projects, each with a philosophy worth understanding.
-
-### Compound Engineering — knowledge compounds
-
-**Origin:** [compound-engineering](https://github.com/EveryInc/compound-engineering-plugin) by Every
-
-**Philosophy:** The first time you solve a problem takes hours of research. If you document it, the second time takes minutes. If you wire that documentation into your planning system, the third time is automatic. *Knowledge compounds.*
-
-**What it provides:**
-- `/ce-brainstorm` → `/ce-plan` → `/ce-work` → `/ce-review` → `/ce-compound` — a gated pipeline where each step produces an artifact the next step consumes
-- `docs/solutions/` — structured solution documents with YAML frontmatter, searchable by the `learnings-researcher` agent during future planning sessions
-- `docs/plans/` and `docs/brainstorms/` — living documents that track decisions, not just code
-- `compound-engineering.local.md` — per-project configuration for which review agents fire
-
-**The key insight:** Most AI coding tools treat every session as a blank slate. Compound Engineering treats every session as an investment. The `/ce-compound` skill writes what you learned into `docs/solutions/`, and the next time `/ce-plan` runs, the `learnings-researcher` agent searches those files first. Your repo accumulates institutional knowledge that prevents repeated mistakes.
-
-### gstack — the AI sprint process
-
-**Origin:** [gstack](https://github.com/garrytan/gstack) by Garry Tan (Y Combinator)
-
-**Philosophy:** A single person with the right AI tooling can ship like a team of twenty. The difference isn't raw code generation speed — it's having a *process*. Think → Plan → Build → Review → Test → Ship → Reflect. Each step feeds the next. Nothing falls through the cracks because every skill knows what came before it.
-
-**What it provides:**
-- 30 slash-command skills covering office hours, engineering review, browser QA, shipping, deploy verification, security audits, safety guardrails, and weekly retros
-- A real Chromium browser that the agent controls — not a mock, not a headless puppeteer script, but a persistent daemon with sub-second commands and cookie state
-- Safety guardrails (`/gstack-careful`, `/gstack-freeze`, `/gstack-guard`) that prevent destructive commands before they execute
-- Session tracking and per-project learning via `~/.gstack/`
-
-**The key insight:** gstack doesn't just give the AI more tools. It gives the AI a *role*. `/gstack-review` acts as a staff engineer. `/gstack-cso` acts as a chief security officer. `/gstack-office-hours` acts as a YC partner challenging your premises. The skills aren't prompts — they're opinionated engineering processes encoded as markdown.
-
-### agent-browser — the eyes of the agent
-
-**Origin:** [agent-browser](https://github.com/vercel-labs/agent-browser) by Vercel
-
-**Philosophy:** AI agents need to see the web the same way users do. Not through DOM dumps or HTML parsing, but through an accessibility tree with stable element references that survive page changes. Give the agent fast, reliable browser control and it can QA, debug, scrape, and test like a human — except at 100ms per command.
-
-**What it provides:**
-- A native Rust CLI that controls Chrome via CDP with ~100ms latency per command
-- Snapshot refs (`@e1`, `@e2`) — deterministic element selection that works like screen coordinates but for the DOM
-- Sessions, profiles, authentication vault, cookie persistence — the plumbing needed for real-world browser automation
-- Security controls: domain allowlists, action policies, content boundaries, output limits
-
-**The key insight:** Most browser automation tools are built for test suites. `agent-browser` is built for AI agents. The snapshot-ref workflow (`open → snapshot → interact → re-snapshot`) is designed to fit cleanly into an LLM's tool-calling loop. The agent doesn't need to write CSS selectors or XPath — it looks at the accessibility tree, picks a ref, and acts.
-
----
-
-## Why Memory Matters
-
-Most agentic coding setups are stateless. You install some skills, run some commands, and every session starts fresh. ATV 2.0 is different because memory is a first-class feature, not an afterthought.
-
-### How memory works across the three pillars
-
-| Layer | What remembers | Where it lives | Who reads it |
-|---|---|---|---|
-| **Institutional knowledge** | Solved problems, gotchas, patterns | `docs/solutions/*.md` (git-tracked) | `learnings-researcher` agent during `/ce-plan` and `/ce-review` |
-| **Design decisions** | Why we chose approach A over B | `docs/brainstorms/*.md` (git-tracked) | `/ce-plan` auto-discovers recent brainstorms |
-| **Implementation plans** | What to build, acceptance criteria, checkboxes | `docs/plans/*.md` (git-tracked) | `/ce-work` reads and checks off items as it implements |
-| **Install manifest** | What the installer intended, attempted, skipped, failed | `.atv/install-manifest.json` (repo-local) | `npx atv-starterkit launchpad` |
-| **Project config** | Which review agents to run, stack settings | `compound-engineering.local.md` | `/ce-review`, `/ce-work` |
-| **gstack session state** | Active sessions, user preferences, prefix choice | `~/.gstack/` (user-global) | Every gstack skill preamble |
-| **gstack project learning** | Per-project self-learning data | `.gstack/` (gitignored) | `/gstack-learn` |
-| **Browser state** | Cookies, localStorage, login sessions | `~/.agent-browser/sessions/` | `agent-browser` session persistence |
-
-The compound engineering memory loop is the most powerful:
-
-```text
-solve problem → /ce-compound documents it → docs/solutions/
-                                                    ↓
-future /ce-plan → learnings-researcher searches docs/solutions/ → avoids past mistakes
-```
-
-**Every PR makes your repo smarter.** Solutions are git-tracked, so they travel with the codebase. New team members get the benefit of every mistake the team already made and solved. This is the opposite of how most AI tools work — instead of losing context at the end of each session, you're building a searchable knowledge base that future sessions mine automatically.
+Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45 skills, 28 agents, a memory-aware launchpad, and a knowledge system that makes your repo smarter with every PR.
 
 ---
 
@@ -124,9 +47,39 @@ cd your-project
 npx atv-starterkit@latest init
 ```
 
-Auto-detects your stack. Installs 13 core ATV skills, 29 agents, MCP servers, and docs structure. Done in seconds.
+Auto-detects your stack. Installs 13 core skills, 29 agents, MCP servers, and docs structure. Done in seconds.
 
-Want to choose your preset and stack packs? Use `npx atv-starterkit@latest init --guided` for the interactive TUI with multi-stack selection.
+For the interactive TUI with multi-stack selection:
+
+```bash
+npx atv-starterkit@latest init --guided
+```
+
+**What `init` does:**
+
+```
+  ⚡ All The Vibes 2.0 ⚡
+  One command. Full agentic coding setup.
+
+  Auto-detected primary: typescript project (tsconfig.json found, existing git repo)
+  Likely stack packs: TypeScript
+
+  📁 .github/skills
+  📁 .github/agents
+  📁 .vscode
+  📁 docs/plans
+  📁 docs/brainstorms
+  📁 docs/solutions
+  ✅ .github/copilot-instructions.md
+  ✅ .github/copilot-setup-steps.yml
+  ✅ .github/copilot-mcp-config.json
+  ✅ .github/skills/ce-brainstorm/SKILL.md
+  ✅ .github/skills/ce-plan/SKILL.md
+  ✅ .github/skills/ce-work/SKILL.md
+  ✅ .github/skills/ce-review/SKILL.md
+  ✅ .github/skills/ce-compound/SKILL.md
+  ...
+```
 
 ### 2. Use
 
@@ -140,29 +93,231 @@ Open **Copilot Chat** in VS Code (⌃⌘I / Ctrl+Shift+I) and run skills as slas
 /ce-compound     →  Document what you learned for future sessions
 ```
 
-Or skip the steps and run the full pipeline in one shot:
+Or run the full pipeline in one shot:
 
 ```text
 /lfg             →  Plan → deepen → build → review → test → compound
 ```
 
-### 3. Reopen the Launchpad
+### 3. Open the Launchpad
 
 ```bash
 npx atv-starterkit launchpad
 ```
 
-Shows your memory dashboard: installed intelligence, repo memory snapshot, and deterministic next-step recommendations. Reopenable any time — no reinstall needed.
+Shows your live memory dashboard with install intelligence and next-step recommendations. Reopenable any time — no reinstall needed.
 
-### 4. Compound
+---
 
-Every time you run `/ce-compound`, solved problems get saved to `docs/solutions/`. Next time `/ce-plan` runs, the `learnings-researcher` agent searches those files first — so your repo gets smarter with every PR.
+## The Launchpad
+
+The launchpad is available in two forms: a **live terminal TUI** and a **VS Code webview extension**. Both show the same four signal-oriented tabs and update in real time when your files change.
+
+### Terminal TUI
+
+Run `npx atv-starterkit launchpad` for the interactive terminal dashboard. Arrow keys or `1`-`4` to switch tabs, `r` to refresh, `q` to quit.
+
+<details>
+<summary><strong>Tab 1: Memory</strong> — repo memory artifacts with timestamps</summary>
+
+```
+  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
+
+  [ 1:Memory ]│  2:Context  │  3:Health  │  4:Moves  
+
+  Repo Memory Artifacts
+
+  Brainstorms (1)
+    • 2026-04-01-my-feature-brainstorm.md  12m ago
+
+  Plans (1)
+    • 2026-04-01-001-feat-my-feature-plan.md  12m ago
+
+  Solutions (1)
+    • 2026-04-01-fixing-the-widget.md  12m ago
+
+  Copilot Memory Files (1)
+    • project-patterns.md
+
+  ⚠ Active plan has unchecked work
+
+  Last FS event: 2s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
+```
+</details>
+
+<details>
+<summary><strong>Tab 2: Context</strong> — instruction budget and capability matrix</summary>
+
+```
+  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
+
+   1:Memory  │[ 2:Context ]│  3:Health  │  4:Moves  
+
+  Context Estimate
+
+  Instruction bytes  24680
+  Estimated tokens   ~6170
+
+  Capability Matrix
+
+  19 agents   14 skills   1 instructions   1 prompts
+  0 MCP servers   5 extensions   0 gstack skills
+
+  Copilot Config
+
+  ● copilot-instructions.md
+  ● copilot-setup-steps.yml
+  ● MCP servers (0 configured)
+  ○ compound-engineering.local.md
+
+  Last FS event: 1s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
+```
+</details>
+
+<details>
+<summary><strong>Tab 3: Health</strong> — install drift detection and runtime status</summary>
+
+```
+  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
+
+   1:Memory  │  2:Context  │[ 3:Health ]│  4:Moves  
+
+  Install Intelligence
+
+  ● Manifest    .atv/install-manifest.json
+  │ Last run    2026-04-02 15:58 UTC
+  │ Preset      Starter
+  │ Stacks      General, TypeScript
+  ╰ Outcomes    1 done  0 warn  0 fail  0 skip
+
+  Install Drift
+
+  ✓ No drift detected
+
+  Runtime
+
+  ○ gstack staging
+  ○ gstack runtime
+  ○ agent-browser skill
+  ● ~/.gstack/ user config
+  ○ ~/.agent-browser/ sessions
+
+  Last FS event: 5s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
+```
+
+When files have been modified or deleted since install, drift is shown:
+
+```
+  Install Drift
+
+  ⚠ .github/copilot-instructions.md  user-modified
+  ✗ .github/copilot-setup-steps.yml  missing
+```
+</details>
+
+<details>
+<summary><strong>Tab 4: Moves</strong> — prioritized next-step recommendations</summary>
+
+```
+  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
+
+   1:Memory  │  2:Context  │  3:Health  │[ 4:Moves ]
+
+  Recommended Next Moves
+
+  ▸ 1. Continue the active plan with /ce-work       [Enter to run]
+    At least one plan still has unchecked items.
+
+    2. Create prompt files for repeatable workflows
+    No .prompt.md files found in .github/prompts/.
+
+    3. Add compound-engineering.local.md
+    Configure CE review agents for structured code review.
+
+  Last FS event: 3s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
+```
+
+Select a recommendation and press Enter to see the confirm dialog:
+
+```
+  Confirm Action
+
+  ▸ Reinitialize ATV files to restore drifted config
+  Command: atv-installer init
+  Risk:    safe
+
+  Enter to approve   Esc to cancel
+```
+</details>
+
+For non-interactive contexts (piped output, CI, VS Code Copilot Chat), use `--static` for a one-shot printable view:
+
+```bash
+npx atv-starterkit launchpad --static
+```
+
+### VS Code Webview Extension
+
+The `vscode-atv-launchpad/` extension provides the same 4-tab dashboard as a VS Code webview panel. It watches `.atv/launchpad-state.json` for live updates from the filesystem watcher and detects active VS Code extensions (GitHub Copilot, Copilot Chat).
+
+| Memory | Context |
+|:---:|:---:|
+| ![Memory tab](docs/screenshots/webview-memory.png) | ![Context tab](docs/screenshots/webview-context.png) |
+
+| Health | Moves |
+|:---:|:---:|
+| ![Health tab](docs/screenshots/webview-health.png) | ![Moves tab](docs/screenshots/webview-moves.png) |
+
+**Tab descriptions:**
+
+| Tab | What it shows |
+|---|---|
+| **Memory** | Brainstorms, plans, solutions, and Copilot memory files with relative timestamps |
+| **Context** | Instruction byte count, estimated tokens, capability matrix (agents/skills/instructions/prompts/MCP/extensions), Copilot config status |
+| **Health** | Install manifest status, outcome summary, install drift detection (modified/missing files), VS Code extension status |
+| **Moves** | Priority-scored recommendations based on local repo state analysis |
+
+---
+
+## Installation
+
+### npm (recommended)
+
+```bash
+npx atv-starterkit@latest init       # quick run — downloads binary automatically
+npm install -g atv-starterkit        # global install
+atv-starterkit init                  # then run from anywhere
+```
+
+The npm package downloads the correct platform binary from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases) during install — no Go toolchain needed.
+
+### Binary (direct download)
+
+Grab a pre-built binary from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases/latest) for your platform (macOS, Linux, Windows — amd64/arm64).
+
+### From source
+
+```bash
+git clone https://github.com/All-The-Vibes/ATV-StarterKit.git
+cd ATV-StarterKit && go build -o atv-installer .
+```
+
+### Prerequisites
+
+**Required:** Git, Node.js 16+
+
+**Optional:**
+- **Bun** — for gstack browser skills (`/gstack-qa`, `/gstack-browse`, `/gstack-benchmark`)
+- **GitHub PAT** — for GitHub MCP server
+- **Azure CLI** — for Azure MCP server
+
+Without Bun, text-based gstack skills still work. `agent-browser` works independently of Bun.
 
 ---
 
 ## The Guided Experience
 
-The guided installer walks you through four screens:
+The guided installer (`--guided`) walks you through:
 
 ### Screen 1: Stack Packs
 
@@ -174,7 +329,7 @@ The guided installer walks you through four screens:
 ┃ [ ] Rails
 ```
 
-Multi-select — choose as many stacks as your project uses. Auto-detected packs are pre-selected. Stack packs are additive: selecting both TypeScript and Rails installs agents and file instructions for both.
+Multi-select — auto-detected packs are pre-selected. Stack packs are additive.
 
 ### Screen 2: Preset
 
@@ -192,14 +347,9 @@ Multi-select — choose as many stacks as your project uses. Auto-detected packs
 ┃     Requires: Bun, ~2min install
 ```
 
-**Starter** is pure Compound Engineering — no network calls, instant install. **Pro** adds the gstack sprint skills (text-only, no browser). **Full** is everything: all 45 skills, gstack browser runtime, agent-browser CLI, and Chrome for Testing.
+**Starter** is pure Compound Engineering — no network calls, instant install. **Pro** adds gstack sprint skills. **Full** is everything: all 45 skills, gstack browser runtime, agent-browser CLI, and Chrome for Testing.
 
 ### Screen 3: Customize?
-
-```text
-┃ Want to customize individual skills?
-┃   Yes, let me pick / No, install preset as-is
-```
 
 Power users can drill into category-grouped multi-select. Beginners skip straight to install.
 
@@ -213,7 +363,7 @@ Power users can drill into category-grouped multi-select. Beginners skip straigh
   ✅ Installing agent-browser (CLI ready, skill copied) · 1.8s
 ```
 
-Real-time animated spinners. Each step shows pending → running → done/warned/failed with structured telemetry: durations, reasons, skip explanations. Substep events track individual file writes, git clone vs build stages, and npm operations.
+Real-time animated spinners with structured telemetry: durations, skip reasons, substep events.
 
 ### Screen 5: Summary + Recommendations
 
@@ -227,74 +377,74 @@ Real-time animated spinners. Each step shows pending → running → done/warned
   Recommended next moves
 
     1. Fix installer warnings before relying on every capability
-       fell back to markdown-only sync
     2. Start with /ce-brainstorm to shape the first feature
-       No brainstorms were found in docs/brainstorms yet.
 
   🎉 ATV Starter Kit ready!
   Install state saved to .atv/install-manifest.json
   Reopen later with: npx atv-starterkit launchpad
 ```
 
-The installer writes a versioned manifest to `.atv/install-manifest.json` recording requested vs installed vs skipped vs failed outcomes. Deterministic recommendations derive from local repo state — no network required.
+---
+
+## The Three Pillars
+
+### Compound Engineering — knowledge compounds
+
+**Origin:** [compound-engineering](https://github.com/EveryInc/compound-engineering-plugin) by Every
+
+A gated pipeline where each step produces an artifact the next step consumes:
+
+- `/ce-brainstorm` → `/ce-plan` → `/ce-work` → `/ce-review` → `/ce-compound`
+- `docs/solutions/` — structured solution docs, searchable by the `learnings-researcher` agent during future planning
+- `docs/plans/` and `docs/brainstorms/` — living documents that track decisions, not just code
+
+**The key insight:** Every time you run `/ce-compound`, solved problems get saved to `docs/solutions/`. Next time `/ce-plan` runs, the `learnings-researcher` agent searches those files first. Your repo gets smarter with every PR.
+
+### gstack — the AI sprint process
+
+**Origin:** [gstack](https://github.com/garrytan/gstack) by Garry Tan (Y Combinator)
+
+- 30 slash-command skills covering office hours, engineering review, browser QA, shipping, deploy verification, security audits, safety guardrails, and weekly retros
+- A real Chromium browser the agent controls with sub-second commands and cookie state
+- Safety guardrails (`/gstack-careful`, `/gstack-freeze`, `/gstack-guard`) that prevent destructive commands
+
+**The key insight:** gstack doesn't just give the AI more tools — it gives the AI a *role*. `/gstack-review` acts as a staff engineer. `/gstack-cso` acts as a chief security officer. The skills are opinionated engineering processes encoded as markdown.
+
+### agent-browser — the eyes of the agent
+
+**Origin:** [agent-browser](https://github.com/vercel-labs/agent-browser) by Vercel
+
+- A native Rust CLI that controls Chrome via CDP with ~100ms latency per command
+- Snapshot refs (`@e1`, `@e2`) — deterministic element selection for AI tool-calling loops
+- Sessions, profiles, authentication vault, cookie persistence
+
+**The key insight:** The snapshot-ref workflow (`open → snapshot → interact → re-snapshot`) fits cleanly into an LLM's tool-calling loop. No CSS selectors or XPath needed.
 
 ---
 
-## The Launchpad
+## Why Memory Matters
 
-After install, run `npx atv-starterkit launchpad` to see your repo's memory dashboard:
+| Layer | What remembers | Where it lives | Who reads it |
+|---|---|---|---|
+| **Institutional knowledge** | Solved problems, gotchas, patterns | `docs/solutions/*.md` | `learnings-researcher` agent during `/ce-plan` and `/ce-review` |
+| **Design decisions** | Why we chose approach A over B | `docs/brainstorms/*.md` | `/ce-plan` auto-discovers recent brainstorms |
+| **Implementation plans** | What to build, acceptance criteria | `docs/plans/*.md` | `/ce-work` reads and checks off items |
+| **Install manifest** | What the installer intended, attempted, skipped, failed | `.atv/install-manifest.json` | `npx atv-starterkit launchpad` |
+| **Project config** | Which review agents to run | `compound-engineering.local.md` | `/ce-review`, `/ce-work` |
+| **gstack session state** | Active sessions, preferences | `~/.gstack/` | Every gstack skill |
+| **Browser state** | Cookies, localStorage, login sessions | `~/.agent-browser/sessions/` | `agent-browser` |
+
+The compound engineering memory loop:
 
 ```text
-  ⚡ ATV Launchpad ⚡  Live dashboard · auto-refreshes every 3s
-
-  [ 1:Overview ] 2:Copilot  3:CE  4:Gstack  5:Moves
-
-  Install Intelligence
-
-  ● Manifest    .atv/install-manifest.json
-  │ Last run    2026-04-01 14:30 UTC
-  │ Preset      Pro
-  │ Stacks      General, TypeScript
-  ╰ Outcomes    2 done  1 warn  0 fail  0 skip
-
-  Capability Matrix
-
-  18 agents   12 skills   3 instructions   2 prompts
-  3 brainstorms   2 plans   1 solutions
-  4 MCP servers   8 extensions   32 gstack skills   1 memory files
-
-  Health
-
-  ● copilot-instructions.md
-  ● copilot-setup-steps.yml
-  ● MCP server config
-  ● compound-engineering.local.md
-  ● .gstack staging
-  ○ gstack runtime (browse)
-  ● agent-browser skill
-  ● ~/.gstack/ user config
-  ● ~/.agent-browser/ sessions
-
-  ⚠ Active plan has unchecked work
+solve problem → /ce-compound documents it → docs/solutions/
+                                                    ↓
+future /ce-plan → learnings-researcher searches docs/solutions/ → avoids past mistakes
 ```
-
-The launchpad is a **live terminal dashboard** — it auto-refreshes every 3 seconds, has 5 tabbed views (Overview, Copilot, CE, Gstack, Moves), and monitors all 8 memory layers from the three pillars. Navigate with arrow keys or number keys, press `r` to refresh, `q` to quit.
-
-**What each tab shows:**
-
-| Tab | Contents |
-|---|---|
-| **Overview** | Install manifest, capability matrix (agents/skills/instructions/prompts/MCP/extensions/gstack/memory), health indicators for all 8 memory layers |
-| **Copilot** | All 6 Copilot lifecycle hooks: instructions, setup steps, file instructions, prompts, agents, MCP servers, VS Code extensions |
-| **CE** | Compound Engineering workflow stage (brainstorm → plan → work → compound), file listings, project config with review agent count |
-| **Gstack** | Runtime status, user-global session state (~/.gstack/), agent-browser sessions (~/.agent-browser/), gstack + core skill listings |
-| **Moves** | Up to 5 priority-sorted recommendations based on deterministic local state analysis |
 
 ---
 
 ## The Full Sprint
-
-ATV covers the complete software lifecycle:
 
 <table>
        <tr>
@@ -359,6 +509,9 @@ ATV covers the complete software lifecycle:
 </table>
 
 > 🛡️ Safety guardrails apply across the whole sprint: `/gstack-careful`, `/gstack-freeze`, `/gstack-guard`, and `/gstack-investigate`.
+
+<details>
+<summary><strong>Skill reference by phase</strong></summary>
 
 ### Think
 
@@ -432,6 +585,8 @@ ATV covers the complete software lifecycle:
 | `/gstack-guard` | Careful + Freeze combined |
 | `/gstack-investigate` | No fixes without systematic investigation first |
 
+</details>
+
 ---
 
 ## The Agent Roster
@@ -495,75 +650,33 @@ atv-installer init --guided
  Detect stack + prerequisites (git, bun, node)
         │
         ▼
- Screen 1: Stack Packs (multi-select) → Screen 2: Preset → Screen 3: Customize?
+ Screen 1: Stack Packs → Screen 2: Preset → Screen 3: Customize?
         │
         ▼
  Install with structured telemetry:
         │
         ├── ATV scaffold ──► Embedded templates → .github/skills/*/SKILL.md
-        │                    └── Substep events per file (created/skipped/merged)
         │
         ├── gstack ──► git clone → .gstack/ (staging)
         │               ├── gen:skill-docs → .agents/skills/gstack-*/
-        │               ├── Copy SKILL.md → .github/skills/gstack-*/
-        │               └── Substeps: clone → build/doc-gen → copy skills
+        │               └── Copy SKILL.md → .github/skills/gstack-*/
         │
         └── agent-browser ──► npm install -g → agent-browser install (Chrome)
-                              ├── .github/skills/agent-browser/SKILL.md
-                              └── Substeps: npm install → copy SKILL.md
+                              └── .github/skills/agent-browser/SKILL.md
         │
         ▼
  Write manifest to .atv/install-manifest.json
         │
-        ├── Requested state (packs, layers, preset)
-        ├── Outcomes with substeps + skip reasons
-        └── Deterministic recommendations
-        │
         ▼
- npx atv-starterkit launchpad ──► Live terminal dashboard (5 tabs, auto-refresh)
+ npx atv-starterkit launchpad ──► Live terminal dashboard (4 tabs, event-driven)
 ```
 
 - `.gstack/` is gitignored — staging area with the full repo and runtime
 - `.github/skills/gstack-*/SKILL.md` are lightweight copies Copilot discovers
-- `.github/skills/gstack/` is the runtime sidecar (binaries, checklists, ETHOS.md)
 - All skills at one level deep in `.github/skills/` — Copilot's discovery convention
 - Idempotent: re-running skips existing files, merges JSON configs
 
 ---
-
-## Prerequisites
-
-**Required:** Git, Node.js 16+
-
-**Optional:**
-- **Bun** — for gstack browser skills (`/gstack-qa`, `/gstack-browse`, `/gstack-benchmark`)
-- **GitHub PAT** — for GitHub MCP server
-- **Azure CLI** — for Azure MCP server
-
-Without Bun, text-based gstack skills still work. `agent-browser` works independently of Bun.
-
-## Installation
-
-### npm (recommended)
-
-```bash
-npx atv-starterkit@latest init       # quick run — downloads binary automatically
-npm install -g atv-starterkit        # global install
-atv-starterkit init                  # then run from anywhere
-```
-
-The npm package downloads the correct platform binary from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases) during install — no Go toolchain needed.
-
-### Binary (direct download)
-
-Grab a pre-built binary from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases/latest) for your platform (macOS, Linux, Windows — amd64/arm64).
-
-### From source
-
-```bash
-git clone https://github.com/All-The-Vibes/ATV-StarterKit.git
-cd ATV-StarterKit && go build -o atv-installer .
-```
 
 ## Development
 
@@ -571,8 +684,8 @@ cd ATV-StarterKit && go build -o atv-installer .
 go build -o atv-installer .             # build
 go test ./...                            # all tests
 go test ./pkg/installstate/ -v           # manifest + recommendations tests
+go test ./pkg/monitor/ -v                # watcher + drift detection tests
 go test ./test/sandbox/ -v               # integration tests (E2E scenarios)
-go test ./test/sandbox/ -v -run E2E      # comprehensive lifecycle tests only
 
 # sandbox test
 mkdir /tmp/test && cd /tmp/test

@@ -85,6 +85,15 @@ func runInit(cmd *cobra.Command, args []string) error {
 		}
 
 		manifestPath := ""
+
+		// Collect file paths from catalog for checksum computation
+		var catalogPaths []string
+		for _, comp := range catalog {
+			if !comp.IsDir && len(comp.Content) > 0 {
+				catalogPaths = append(catalogPaths, comp.Path)
+			}
+		}
+
 		manifest := installstate.InstallManifest{
 			Requested: installstate.RequestedState{
 				StackPacks:          result.StackPacks,
@@ -94,7 +103,8 @@ func runInit(cmd *cobra.Command, args []string) error {
 				IncludeAgentBrowser: result.IncludeAgentBrowser,
 				PresetName:          result.PresetName,
 			},
-			Outcomes: outcomes,
+			Outcomes:       outcomes,
+			FileChecksums:  installstate.ComputeFileChecksums(targetDir, catalogPaths),
 		}
 		manifest.Recommendations = installstate.BuildRecommendations(targetDir, manifest)
 		if err := installstate.WriteManifest(targetDir, manifest); err != nil {

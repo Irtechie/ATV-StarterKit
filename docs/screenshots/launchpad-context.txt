@@ -1,0 +1,23 @@
+
+  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
+
+   1:Memory  │[ 2:Context ]│  3:Health  │  4:Moves  
+
+  Context Estimate
+
+  Instruction bytes  24680
+  Estimated tokens   ~6170
+
+  Capability Matrix
+
+  19 agents   14 skills   1 instructions   1 prompts
+  0 MCP servers   5 extensions   0 gstack skills
+
+  Copilot Config
+
+  ● copilot-instructions.md
+  ● copilot-setup-steps.yml
+  ● MCP servers (0 configured)
+  ○ compound-engineering.local.md
+
+  Last FS event: 1s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
