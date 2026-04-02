@@ -1,0 +1,27 @@
+
+  ============================================================
+  ATV Installer — Full Test Suite Results
+  ============================================================
+  Branch: feat/copilot-sdk-launchpad (Phases 1-6)
+  ============================================================
+
+  ok  pkg/detect        0.45s   (4 tests)
+  ok  pkg/gstack        1.14s   (14 tests)
+  ok  pkg/installstate  0.68s   (10 tests)
+  ok  pkg/monitor       2.69s   (32 tests — watcher, drift, executor)
+  ok  pkg/output        0.59s   (3 tests)
+  ok  pkg/scaffold      0.51s   (1 test)
+  ok  pkg/sdk           0.55s   (11 tests — intelligence, rate limit, circuit breaker)
+  ok  pkg/tui           1.79s   (11 tests)
+  ok  test/sandbox     20.07s   (11 tests — e2e lifecycle, multi-stack, idempotent)
+
+  TOTAL: 9 packages, 97 tests — ALL PASS
+
+  New packages in this branch:
+    pkg/monitor  — FS watcher, drift detection, action executor
+    pkg/sdk      — GitHub Copilot SDK intelligence layer
+
+  New test coverage:
+    32 watcher + drift + executor tests
+    11 SDK intelligence tests
+    24 executor security tests (allowlist, shell injection, path traversal)

@@ -1,0 +1,26 @@
+
+  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
+
+   1:Memory  │  2:Context  │[ 3:Health ]│  4:Moves  
+
+  Install Intelligence
+
+  ● Manifest    .atv/install-manifest.json
+  │ Last run    2026-04-02 15:58 UTC
+  │ Preset      Starter
+  │ Stacks      General, TypeScript
+  ╰ Outcomes    1 done  0 warn  0 fail  0 skip
+
+  Install Drift
+
+  ✓ No drift detected
+
+  Runtime
+
+  ○ gstack staging
+  ○ gstack runtime
+  ○ agent-browser skill
+  ● ~/.gstack/ user config
+  ○ ~/.agent-browser/ sessions
+
+  Last FS event: 5s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
