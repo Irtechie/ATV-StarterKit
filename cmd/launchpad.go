@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/installstate"
+	"github.com/All-The-Vibes/ATV-StarterKit/pkg/monitor"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/output"
 	"github.com/All-The-Vibes/ATV-StarterKit/pkg/tui"
 	"github.com/spf13/cobra"
@@ -45,7 +46,17 @@ func runLaunchpad(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	return tui.RunLaunchpad(targetDir)
+	// Initialize filesystem watcher
+	w, err := monitor.NewWatcher(targetDir, monitor.WatcherOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to create watcher: %w", err)
+	}
+	if err := w.Start(cmd.Context()); err != nil {
+		return fmt.Errorf("failed to start watcher: %w", err)
+	}
+	defer w.Stop()
+
+	return tui.RunLaunchpad(targetDir, w)
 }
 
 func isInteractiveTerminal() bool {
