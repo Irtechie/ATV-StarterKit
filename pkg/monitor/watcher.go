@@ -100,6 +100,11 @@ func (w *Watcher) State() LiveState {
 	return w.state
 }
 
+// Root returns the watched root directory path.
+func (w *Watcher) Root() string {
+	return w.root
+}
+
 // ForceRefresh triggers a full re-scan of all watched directories.
 func (w *Watcher) ForceRefresh() {
 	w.fullScan()
@@ -371,6 +376,9 @@ func (w *Watcher) scanHealthLayer() {
 		w.state.LaunchpadSnapshot.Requested = manifest.Requested
 		w.state.LaunchpadSnapshot.OutcomeSummary = installstate.SummarizeOutcomes(manifest.Outcomes)
 		w.state.LaunchpadSnapshot.Recommendations = installstate.BuildRecommendations(w.root, manifest)
+
+		// Compute drift
+		w.state.DriftEntries = ComputeDrift(w.root, manifest)
 	}
 }
 
