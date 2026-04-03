@@ -673,8 +673,12 @@ func TestE2EFullGuidedInstallLifecycle(t *testing.T) {
 	}
 
 	// Simulate gstack staging and agent-browser skill presence (as if install ran)
-	os.MkdirAll(filepath.Join(root, ".gstack"), 0o755)
-	os.MkdirAll(filepath.Join(root, ".github", "skills", "agent-browser"), 0o755)
+	if err := os.MkdirAll(filepath.Join(root, ".gstack"), 0o755); err != nil {
+		t.Fatalf("MkdirAll(.gstack) error = %v", err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, ".github", "skills", "agent-browser"), 0o755); err != nil {
+		t.Fatalf("MkdirAll(agent-browser) error = %v", err)
+	}
 	mustWriteFile(t, filepath.Join(root, ".github", "skills", "agent-browser", "SKILL.md"), "# agent-browser")
 
 	// --- Step 7: Verify manifest round-trip ---
@@ -854,20 +858,24 @@ func TestE2EMultiStackDeterminism(t *testing.T) {
 
 	// Verify same files exist
 	var filesA, filesB []string
-	filepath.Walk(rootA, func(path string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(rootA, func(path string, info os.FileInfo, err error) error {
 		if err == nil && !info.IsDir() {
 			rel, _ := filepath.Rel(rootA, path)
 			filesA = append(filesA, filepath.ToSlash(rel))
 		}
 		return nil
-	})
-	filepath.Walk(rootB, func(path string, info os.FileInfo, err error) error {
+	}); err != nil {
+		t.Fatalf("Walk(rootA) error = %v", err)
+	}
+	if err := filepath.Walk(rootB, func(path string, info os.FileInfo, err error) error {
 		if err == nil && !info.IsDir() {
 			rel, _ := filepath.Rel(rootB, path)
 			filesB = append(filesB, filepath.ToSlash(rel))
 		}
 		return nil
-	})
+	}); err != nil {
+		t.Fatalf("Walk(rootB) error = %v", err)
+	}
 
 	if len(filesA) != len(filesB) {
 		t.Fatalf("file count differs: %d vs %d", len(filesA), len(filesB))

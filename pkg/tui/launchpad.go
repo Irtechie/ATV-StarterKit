@@ -495,29 +495,6 @@ func (m LaunchpadModel) renderMoves(b *strings.Builder, state *monitor.LiveState
 
 // ─── Shared helpers ─────────────────────────────────────────────────────────
 
-func renderColumnList(b *strings.Builder, items []string) {
-	cols := 3
-	if len(items) < 6 {
-		cols = 1
-	} else if len(items) < 15 {
-		cols = 2
-	}
-	colWidth := 28
-	for i, item := range items {
-		if i%cols == 0 {
-			b.WriteString("    ")
-		}
-		padded := item
-		for len(padded) < colWidth && cols > 1 && i%cols < cols-1 {
-			padded += " "
-		}
-		b.WriteString(fmt.Sprintf("%s %s", lpDimStyle.Render("•"), padded))
-		if i%cols == cols-1 || i == len(items)-1 {
-			b.WriteString("\n")
-		}
-	}
-}
-
 // RunLaunchpad starts the live launchpad TUI.
 func RunLaunchpad(root string, w *monitor.Watcher) error {
 	m := NewLaunchpadModel(root, w)
