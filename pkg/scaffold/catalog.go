@@ -149,6 +149,8 @@ var coreSkillDirectories = []string{
 	"brainstorming",
 	"ce-brainstorm",
 	"ce-compound",
+	"ce-compound-refresh",
+	"ce-ideate",
 	"ce-plan",
 	"ce-review",
 	"ce-work",
@@ -158,6 +160,7 @@ var coreSkillDirectories = []string{
 }
 
 var orchestratorSkillDirectories = []string{
+	"claude-permissions-optimizer",
 	"feature-video",
 	"lfg",
 	"resolve_todo_parallel",

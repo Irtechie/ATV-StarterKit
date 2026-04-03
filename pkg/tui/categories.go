@@ -28,6 +28,7 @@ type CategoryGroup struct {
 var atvCategoryMapping = map[string][]CategorySkill{
 	gstack.CategoryPlanning: {
 		{Label: "Brainstorming — explore what to build", Key: "core-skills:brainstorming", Source: "atv"},
+		{Label: "CE Ideate — structured idea exploration", Key: "core-skills:ce-ideate", Source: "atv"},
 		{Label: "Plan — turn ideas into an implementation plan", Key: "core-skills:ce-plan", Source: "atv"},
 		{Label: "Deepen Plan — parallel research to harden the plan", Key: "core-skills:deepen-plan", Source: "atv"},
 	},
@@ -39,6 +40,8 @@ var atvCategoryMapping = map[string][]CategorySkill{
 		{Label: "LFG — full autonomous pipeline", Key: "orchestrators:lfg", Source: "atv"},
 		{Label: "SLFG — swarm mode parallel execution", Key: "orchestrators:slfg", Source: "atv"},
 		{Label: "CE Compound — document solutions", Key: "core-skills:ce-compound", Source: "atv"},
+		{Label: "CE Compound Refresh — refresh documented solutions", Key: "core-skills:ce-compound-refresh", Source: "atv"},
+		{Label: "Claude Permissions Optimizer — optimize tool permissions", Key: "orchestrators:claude-permissions-optimizer", Source: "atv"},
 	},
 	gstack.CategoryQATesting: {
 		{Label: "agent-browser — real browser automation with screenshots and form fills", Key: "agent-browser", Source: "atv"},

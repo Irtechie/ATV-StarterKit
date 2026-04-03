@@ -45,3 +45,10 @@ vscode-atv-launchpad/preview.html
 
 # SQLite databases
 *.db
+
+# Screenshots
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
