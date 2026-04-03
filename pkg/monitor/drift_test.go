@@ -38,7 +38,9 @@ func TestComputeDrift_Missing(t *testing.T) {
 func TestComputeDrift_UserModified(t *testing.T) {
 	root := t.TempDir()
 	filePath := filepath.Join(root, "test.md")
-	os.WriteFile(filePath, []byte("modified content"), 0o644)
+	if err := os.WriteFile(filePath, []byte("modified content"), 0o644); err != nil {
+		t.Fatal(err)
+	}
 
 	manifest := installstate.InstallManifest{
 		FileChecksums: map[string]string{
@@ -59,7 +61,9 @@ func TestComputeDrift_NoChange(t *testing.T) {
 	root := t.TempDir()
 	content := []byte("stable content")
 	filePath := filepath.Join(root, "test.md")
-	os.WriteFile(filePath, content, 0o644)
+	if err := os.WriteFile(filePath, content, 0o644); err != nil {
+		t.Fatal(err)
+	}
 
 	manifest := installstate.InstallManifest{
 		FileChecksums: map[string]string{
@@ -78,8 +82,12 @@ func TestComputeDrift_IgnorePattern(t *testing.T) {
 
 	// Create drift-ignore file
 	atvDir := filepath.Join(root, ".atv")
-	os.MkdirAll(atvDir, 0o755)
-	os.WriteFile(filepath.Join(atvDir, "drift-ignore"), []byte("*.log\n"), 0o644)
+	if err := os.MkdirAll(atvDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(atvDir, "drift-ignore"), []byte("*.log\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
 
 	manifest := installstate.InstallManifest{
 		FileChecksums: map[string]string{
@@ -158,10 +166,14 @@ func TestHashString(t *testing.T) {
 func TestLoadDriftIgnore(t *testing.T) {
 	dir := t.TempDir()
 	atvDir := filepath.Join(dir, ".atv")
-	os.MkdirAll(atvDir, 0o755)
+	if err := os.MkdirAll(atvDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
 
 	content := "# Comments are ignored\n*.log\ndocs/brainstorms/*\n\n.vscode/settings.json\n"
-	os.WriteFile(filepath.Join(atvDir, "drift-ignore"), []byte(content), 0o644)
+	if err := os.WriteFile(filepath.Join(atvDir, "drift-ignore"), []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
 
 	patterns := loadDriftIgnore(dir)
 	if len(patterns) != 3 {

@@ -54,7 +54,9 @@ func runLaunchpad(cmd *cobra.Command, args []string) error {
 	if err := w.Start(cmd.Context()); err != nil {
 		return fmt.Errorf("failed to start watcher: %w", err)
 	}
-	defer w.Stop()
+	defer func() {
+		_ = w.Stop()
+	}()
 
 	return tui.RunLaunchpad(targetDir, w)
 }

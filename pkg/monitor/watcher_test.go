@@ -110,7 +110,7 @@ func TestWatcher_FullScan(t *testing.T) {
 	if err := w.Start(ctx); err != nil {
 		t.Fatal(err)
 	}
-	defer w.Stop()
+	defer func() { _ = w.Stop() }()
 
 	state := w.State()
 	if len(state.Brainstorms) != 1 {
@@ -136,7 +136,7 @@ func TestWatcher_ForceRefresh(t *testing.T) {
 	if err := w.Start(ctx); err != nil {
 		t.Fatal(err)
 	}
-	defer w.Stop()
+	defer func() { _ = w.Stop() }()
 
 	// Initially no brainstorms
 	state := w.State()
@@ -174,7 +174,7 @@ func TestWatcher_StateFile(t *testing.T) {
 	if err := w.Start(ctx); err != nil {
 		t.Fatal(err)
 	}
-	defer w.Stop()
+	defer func() { _ = w.Stop() }()
 
 	// State file should be written
 	stateFile := filepath.Join(root, ".atv", "launchpad-state.json")
@@ -222,7 +222,7 @@ func TestWatcher_ContextEstimate(t *testing.T) {
 	if err := w.Start(ctx); err != nil {
 		t.Fatal(err)
 	}
-	defer w.Stop()
+	defer func() { _ = w.Stop() }()
 
 	state := w.State()
 	if state.ContextEstimate.SkillCount != 2 {
@@ -295,10 +295,18 @@ func TestScanArtifactDir(t *testing.T) {
 	dir := t.TempDir()
 
 	// Create test files
-	os.WriteFile(filepath.Join(dir, "a.md"), []byte("# A"), 0o644)
-	os.WriteFile(filepath.Join(dir, "b.md"), []byte("# B content here"), 0o644)
-	os.WriteFile(filepath.Join(dir, "not-md.txt"), []byte("skip"), 0o644)
-	os.Mkdir(filepath.Join(dir, "subdir"), 0o755)
+	if err := os.WriteFile(filepath.Join(dir, "a.md"), []byte("# A"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "b.md"), []byte("# B content here"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "not-md.txt"), []byte("skip"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(filepath.Join(dir, "subdir"), 0o755); err != nil {
+		t.Fatal(err)
+	}
 
 	artifacts := scanArtifactDir(dir)
 	if len(artifacts) != 2 {
