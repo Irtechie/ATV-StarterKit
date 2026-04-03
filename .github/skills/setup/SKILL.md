@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Configure project-level settings for compound-engineering workflows. Currently a placeholder — review agent selection is handled automatically by ce-review.
+description: Configure project-level settings for compound-engineering workflows. Currently a placeholder -- review agent selection is handled automatically by ce-review.
 disable-model-invocation: true
 ---
 

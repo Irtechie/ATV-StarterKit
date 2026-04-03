@@ -1,6 +1,6 @@
 ---
 name: workflows-brainstorm
-description: "[DEPRECATED] Use /ce:brainstorm instead — renamed for clarity."
+description: "[DEPRECATED] Use /ce:brainstorm instead -- renamed for clarity."
 ---
 
 ## Arguments
