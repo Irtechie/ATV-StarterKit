@@ -163,6 +163,7 @@ var orchestratorSkillDirectories = []string{
 	"claude-permissions-optimizer",
 	"feature-video",
 	"lfg",
+	"ralph-loop",
 	"resolve_todo_parallel",
 	"slfg",
 	"test-browser",
