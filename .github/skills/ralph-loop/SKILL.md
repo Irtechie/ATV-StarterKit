@@ -102,7 +102,7 @@ After the executor sub-agent completes:
    - Does the code compile/pass linting?
    - Were tests added or do existing tests still pass?
    - Does the change match the acceptance criteria?
-3. **If review fails** — Update task status to `FAILED` with notes, then re-attempt (max 2 retries per task). On third failure, mark as `BLOCKED` and continue to next task.
+3. **If review fails** — Update task status to `FAILED` with notes, then re-attempt. Each task gets up to 3 total attempts (1 initial + 2 retries). After the third failed attempt, mark the task as `BLOCKED` and continue to the next task.
 4. **If review passes** — Continue to next iteration (back to Step 1)
 
 ### Phase 2: Completion
@@ -161,7 +161,7 @@ These files are committed to git and serve as the **filesystem memory** that ena
 
 - **One task per iteration**: Keeps each sub-agent focused and prevents context pollution
 - **Git commits per task**: Enables rollback of individual tasks and provides audit trail
-- **Max 2 retries**: Prevents infinite loops on genuinely broken tasks
+- **3 total attempts per task**: 1 initial attempt + up to 2 retries prevents infinite loops on genuinely broken tasks
 - **Reviewer sub-agent**: Catches issues before they compound across iterations
 - **BLOCKED status**: Allows the loop to continue past stuck tasks rather than halting entirely
 
@@ -172,5 +172,5 @@ These files are committed to git and serve as the **filesystem memory** that ena
 | Execute multiple tasks in one sub-agent | One task per sub-agent with fresh context |
 | Skip git commits between tasks | Commit after every completed task |
 | Carry conversation context across iterations | Each iteration reads state from filesystem |
-| Retry failed tasks indefinitely | Max 2 retries, then mark BLOCKED and continue |
+| Retry failed tasks indefinitely | 3 total attempts (1 initial + 2 retries), then mark BLOCKED and continue |
 | Modify PRD.md during execution | PRD.md is read-only after planning phase |
