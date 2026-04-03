@@ -55,5 +55,18 @@ jobs:
             echo "Version unchanged, skipping 'npm version'"
           fi
 
+      - name: Check if version already published
+        id: check-npm
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          PKG_NAME=$(node -p "require('./npm/package.json').name")
+          if npm view "${PKG_NAME}@${VERSION}" version >/dev/null 2>&1; then
+            echo "already_published=true" >> "$GITHUB_OUTPUT"
+            echo "✅ ${PKG_NAME}@${VERSION} already exists on npm — skipping publish."
+          else
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to npm
+        if: steps.check-npm.outputs.already_published != 'true'
         run: cd npm && npm publish --access public
