@@ -30,7 +30,7 @@ export function isRiskFlag(token, base) {
 export function normalize(command) {
   // Don't normalize shell injection patterns
   if (/\|\s*(sh|bash|zsh)\b/.test(command)) return command;
-  // Don't normalize sudo -- keep as-is
+  // Normalize sudo commands to a wildcard pattern
   if (/^sudo\s/.test(command)) return "sudo *";
 
   // Handle pnpm --filter <pkg> <subcommand> specially

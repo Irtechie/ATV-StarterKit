@@ -8,14 +8,6 @@
       "url": "https://mcp.context7.com/mcp"
     }
   },
-  "inputs": [
-    {
-      "id": "github_pat",
-      "type": "promptString",
-      "description": "GitHub Personal Access Token (needs repo, read:org scopes)",
-      "password": true
-    }
-  ],
   "_compound_managed_mcp": [
     "context7"
   ]
