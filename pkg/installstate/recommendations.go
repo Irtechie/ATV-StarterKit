@@ -157,7 +157,7 @@ func BuildRecommendations(root string, manifest InstallManifest) []Recommendatio
 		})
 	}
 
-	if manifest.Requested.GstackDirs != nil && len(manifest.Requested.GstackDirs) > 0 && stepUsable(manifest.Outcomes, "gstack") {
+	if len(manifest.Requested.GstackDirs) > 0 && stepUsable(manifest.Outcomes, "gstack") {
 		recommendations = append(recommendations, Recommendation{
 			ID:       "start-gstack-sprint",
 			Title:    `Use /gstack-office-hours for a deeper sprint kickoff`,

@@ -58,7 +58,9 @@ func TestStart_OfflineByDefault(t *testing.T) {
 
 func TestStop(t *testing.T) {
 	i := newTestIntelligence(t)
-	i.Start(context.Background())
+	if err := i.Start(context.Background()); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
 	if err := i.Stop(); err != nil {
 		t.Fatalf("Stop() error = %v", err)
 	}
@@ -69,7 +71,9 @@ func TestStop(t *testing.T) {
 
 func TestQuery_OfflineReturnsNil(t *testing.T) {
 	i := newTestIntelligence(t)
-	i.Start(context.Background())
+	if err := i.Start(context.Background()); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
 	recs, err := i.Query(context.Background())
 	if err != nil {
 		t.Fatalf("Query() error = %v", err)
@@ -81,7 +85,9 @@ func TestQuery_OfflineReturnsNil(t *testing.T) {
 
 func TestExplain_OfflineReturnsError(t *testing.T) {
 	i := newTestIntelligence(t)
-	i.Start(context.Background())
+	if err := i.Start(context.Background()); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
 	_, err := i.Explain(context.Background(), "test-rec")
 	if err == nil {
 		t.Error("expected error when explaining offline")
@@ -131,12 +137,12 @@ func TestRateLimit_MinInterval(t *testing.T) {
 
 	// First query succeeds
 	i.lastQuery = time.Time{} // reset
-	recs, err := i.Query(context.Background())
+	_, err := i.Query(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 	// Second query should be rate-limited
-	recs, err = i.Query(context.Background())
+	recs, err := i.Query(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,8 +158,12 @@ func TestRateLimit_Budget(t *testing.T) {
 	i.opts.QueryBudget = 2
 
 	// First two queries consume budget
-	i.Query(context.Background())
-	i.Query(context.Background())
+	if _, err := i.Query(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := i.Query(context.Background()); err != nil {
+		t.Fatal(err)
+	}
 
 	// Third should be budget-limited
 	recs, err := i.Query(context.Background())

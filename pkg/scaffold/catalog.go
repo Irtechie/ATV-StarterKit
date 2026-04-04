@@ -163,6 +163,7 @@ var orchestratorSkillDirectories = []string{
 	"claude-permissions-optimizer",
 	"feature-video",
 	"lfg",
+	"ralph-loop",
 	"resolve_todo_parallel",
 	"slfg",
 	"test-browser",
@@ -330,12 +331,4 @@ var stackAgents = map[string]detect.Stack{
 func isStackSpecific(filename string) bool {
 	_, ok := stackAgents[filepath.Base(filename)]
 	return ok
-}
-
-func isForStack(filename string, stack detect.Stack) bool {
-	agentStack, ok := stackAgents[filepath.Base(filename)]
-	if !ok {
-		return true // not stack-specific, include for all
-	}
-	return agentStack == stack
 }

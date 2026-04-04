@@ -483,10 +483,7 @@ func isIgnoredFile(path string) bool {
 	}
 	// Ignore .git directory events
 	cleanPath := filepath.ToSlash(path)
-	if strings.Contains(cleanPath, "/.git/") {
-		return true
-	}
-	return false
+	return strings.Contains(cleanPath, "/.git/")
 }
 
 func countFilesInDir(dir, suffix string) int {
