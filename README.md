@@ -17,7 +17,6 @@
 
 <p align="center">
        <a href="#quick-start">Quick start</a> ·
-       <a href="#the-launchpad">Launchpad</a> ·
        <a href="#installation">Installation</a> ·
        <a href="#the-three-pillars">Three pillars</a> ·
        <a href="#the-full-sprint">Full sprint</a> ·
@@ -34,7 +33,7 @@ ATV 2.0 is a one-command installer that wires together three open-source systems
 - **gstack** — the sprint execution engine
 - **agent-browser** — the browser automation layer
 
-Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45 skills, 28 agents, a memory-aware launchpad, and a knowledge system that makes your repo smarter with every PR.
+Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45 skills, 28 agents, and a knowledge system that makes your repo smarter with every PR.
 
 ---
 
@@ -98,184 +97,6 @@ Or run the full pipeline in one shot:
 ```text
 /lfg             →  Plan → deepen → build → review → test → compound
 ```
-
-### 3. Open the Launchpad
-
-```bash
-npx atv-starterkit launchpad
-```
-
-Shows your live memory dashboard with install intelligence and next-step recommendations. Reopenable any time — no reinstall needed.
-
----
-
-## The Launchpad
-
-The launchpad is available in two forms: a **live terminal TUI** and a **VS Code webview extension**. Both show the same four signal-oriented tabs and update in real time when your files change.
-
-### Terminal TUI
-
-Run `npx atv-starterkit launchpad` for the interactive terminal dashboard. Arrow keys or `1`-`4` to switch tabs, `r` to refresh, `q` to quit.
-
-<details>
-<summary><strong>Tab 1: Memory</strong> — repo memory artifacts with timestamps</summary>
-
-```
-  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
-
-  [ 1:Memory ]│  2:Context  │  3:Health  │  4:Moves  
-
-  Repo Memory Artifacts
-
-  Brainstorms (1)
-    • 2026-04-01-my-feature-brainstorm.md  12m ago
-
-  Plans (1)
-    • 2026-04-01-001-feat-my-feature-plan.md  12m ago
-
-  Solutions (1)
-    • 2026-04-01-fixing-the-widget.md  12m ago
-
-  Copilot Memory Files (1)
-    • project-patterns.md
-
-  ⚠ Active plan has unchecked work
-
-  Last FS event: 2s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
-```
-</details>
-
-<details>
-<summary><strong>Tab 2: Context</strong> — instruction budget and capability matrix</summary>
-
-```
-  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
-
-   1:Memory  │[ 2:Context ]│  3:Health  │  4:Moves  
-
-  Context Estimate
-
-  Instruction bytes  24680
-  Estimated tokens   ~6170
-
-  Capability Matrix
-
-  19 agents   14 skills   1 instructions   1 prompts
-  0 MCP servers   5 extensions   0 gstack skills
-
-  Copilot Config
-
-  ● copilot-instructions.md
-  ● copilot-setup-steps.yml
-  ● MCP servers (0 configured)
-  ○ compound-engineering.local.md
-
-  Last FS event: 1s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
-```
-</details>
-
-<details>
-<summary><strong>Tab 3: Health</strong> — install drift detection and runtime status</summary>
-
-```
-  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
-
-   1:Memory  │  2:Context  │[ 3:Health ]│  4:Moves  
-
-  Install Intelligence
-
-  ● Manifest    .atv/install-manifest.json
-  │ Last run    2026-04-02 15:58 UTC
-  │ Preset      Starter
-  │ Stacks      General, TypeScript
-  ╰ Outcomes    1 done  0 warn  0 fail  0 skip
-
-  Install Drift
-
-  ✓ No drift detected
-
-  Runtime
-
-  ○ gstack staging
-  ○ gstack runtime
-  ○ agent-browser skill
-  ● ~/.gstack/ user config
-  ○ ~/.agent-browser/ sessions
-
-  Last FS event: 5s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
-```
-
-When files have been modified or deleted since install, drift is shown:
-
-```
-  Install Drift
-
-  ⚠ .github/copilot-instructions.md  user-modified
-  ✗ .github/copilot-setup-steps.yml  missing
-```
-</details>
-
-<details>
-<summary><strong>Tab 4: Moves</strong> — prioritized next-step recommendations</summary>
-
-```
-  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
-
-   1:Memory  │  2:Context  │  3:Health  │[ 4:Moves ]
-
-  Recommended Next Moves
-
-  ▸ 1. Continue the active plan with /ce-work       [Enter to run]
-    At least one plan still has unchecked items.
-
-    2. Create prompt files for repeatable workflows
-    No .prompt.md files found in .github/prompts/.
-
-    3. Add compound-engineering.local.md
-    Configure CE review agents for structured code review.
-
-  Last FS event: 3s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
-```
-
-Select a recommendation and press Enter to see the confirm dialog:
-
-```
-  Confirm Action
-
-  ▸ Reinitialize ATV files to restore drifted config
-  Command: atv-installer init
-  Risk:    safe
-
-  Enter to approve   Esc to cancel
-```
-</details>
-
-For non-interactive contexts (piped output, CI, VS Code Copilot Chat), use `--static` for a one-shot printable view:
-
-```bash
-npx atv-starterkit launchpad --static
-```
-
-### VS Code Webview Extension
-
-The `vscode-atv-launchpad/` extension provides the same 4-tab dashboard as a VS Code webview panel. It watches `.atv/launchpad-state.json` for live updates from the filesystem watcher and detects active VS Code extensions (GitHub Copilot, Copilot Chat).
-
-| Memory | Context |
-|:---:|:---:|
-| ![Memory tab](docs/screenshots/webview-memory.png) | ![Context tab](docs/screenshots/webview-context.png) |
-
-| Health | Moves |
-|:---:|:---:|
-| ![Health tab](docs/screenshots/webview-health.png) | ![Moves tab](docs/screenshots/webview-moves.png) |
-
-**Tab descriptions:**
-
-| Tab | What it shows |
-|---|---|
-| **Memory** | Brainstorms, plans, solutions, and Copilot memory files with relative timestamps |
-| **Context** | Instruction byte count, estimated tokens, capability matrix (agents/skills/instructions/prompts/MCP/extensions), Copilot config status |
-| **Health** | Install manifest status, outcome summary, install drift detection (modified/missing files), VS Code extension status |
-| **Moves** | Priority-scored recommendations based on local repo state analysis |
 
 ---
 
@@ -381,7 +202,6 @@ Real-time animated spinners with structured telemetry: durations, skip reasons, 
 
   🎉 ATV Starter Kit ready!
   Install state saved to .atv/install-manifest.json
-  Reopen later with: npx atv-starterkit launchpad
 ```
 
 ---
@@ -429,7 +249,7 @@ A gated pipeline where each step produces an artifact the next step consumes:
 | **Institutional knowledge** | Solved problems, gotchas, patterns | `docs/solutions/*.md` | `learnings-researcher` agent during `/ce-plan` and `/ce-review` |
 | **Design decisions** | Why we chose approach A over B | `docs/brainstorms/*.md` | `/ce-plan` auto-discovers recent brainstorms |
 | **Implementation plans** | What to build, acceptance criteria | `docs/plans/*.md` | `/ce-work` reads and checks off items |
-| **Install manifest** | What the installer intended, attempted, skipped, failed | `.atv/install-manifest.json` | `npx atv-starterkit launchpad` |
+| **Install manifest** | What the installer intended, attempted, skipped, failed | `.atv/install-manifest.json` | `atv-starterkit init` |
 | **Project config** | Which review agents to run | `compound-engineering.local.md` | `/ce-review`, `/ce-work` |
 | **gstack session state** | Active sessions, preferences | `~/.gstack/` | Every gstack skill |
 | **Browser state** | Cookies, localStorage, login sessions | `~/.agent-browser/sessions/` | `agent-browser` |
@@ -666,9 +486,6 @@ atv-installer init --guided
         │
         ▼
  Write manifest to .atv/install-manifest.json
-        │
-        ▼
- npx atv-starterkit launchpad ──► Live terminal dashboard (4 tabs, event-driven)
 ```
 
 - `.gstack/` is gitignored — staging area with the full repo and runtime
@@ -691,9 +508,6 @@ go test ./test/sandbox/ -v               # integration tests (E2E scenarios)
 mkdir /tmp/test && cd /tmp/test
 echo '{}' > tsconfig.json && git init
 npx atv-starterkit init --guided
-
-# verify launchpad
-npx atv-starterkit launchpad
 ```
 
 ## Limitations

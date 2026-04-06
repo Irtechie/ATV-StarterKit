@@ -177,7 +177,7 @@ func TestWatcher_StateFile(t *testing.T) {
 	defer w.Stop() //nolint:errcheck
 
 	// State file should be written
-	stateFile := filepath.Join(root, ".atv", "launchpad-state.json")
+	stateFile := filepath.Join(root, ".atv", "dashboard-state.json")
 	if _, err := os.Stat(stateFile); os.IsNotExist(err) {
 		t.Error("state file not written")
 	}

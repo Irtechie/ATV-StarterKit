@@ -6,13 +6,13 @@ import (
 	"time"
 )
 
-func TestBuildLaunchpadSnapshotWithoutManifestStillComputesRecommendations(t *testing.T) {
+func TestBuildInstallSnapshotWithoutManifestStillComputesRecommendations(t *testing.T) {
 	root := t.TempDir()
 	mustWriteMarkdown(t, filepath.Join(root, "docs", "brainstorms", "idea.md"), "# Idea")
 
-	snapshot, err := BuildLaunchpadSnapshot(root)
+	snapshot, err := BuildInstallSnapshot(root)
 	if err != nil {
-		t.Fatalf("BuildLaunchpadSnapshot() error = %v", err)
+		t.Fatalf("BuildInstallSnapshot() error = %v", err)
 	}
 	if snapshot.HasManifest {
 		t.Fatal("snapshot should not report a manifest when none exists")
@@ -34,7 +34,7 @@ func TestBuildLaunchpadSnapshotWithoutManifestStillComputesRecommendations(t *te
 	}
 }
 
-func TestBuildLaunchpadSnapshotWithManifestIncludesRequestedState(t *testing.T) {
+func TestBuildInstallSnapshotWithManifestIncludesRequestedState(t *testing.T) {
 	root := t.TempDir()
 	mustWriteMarkdown(t, filepath.Join(root, "docs", "brainstorms", "idea.md"), "# Idea")
 	mustWriteMarkdown(t, filepath.Join(root, "docs", "plans", "work.md"), "status: active\n- [ ] do the work\n")
@@ -56,9 +56,9 @@ func TestBuildLaunchpadSnapshotWithManifestIncludesRequestedState(t *testing.T) 
 		t.Fatalf("WriteManifest() error = %v", err)
 	}
 
-	snapshot, err := BuildLaunchpadSnapshot(root)
+	snapshot, err := BuildInstallSnapshot(root)
 	if err != nil {
-		t.Fatalf("BuildLaunchpadSnapshot() error = %v", err)
+		t.Fatalf("BuildInstallSnapshot() error = %v", err)
 	}
 	if !snapshot.HasManifest {
 		t.Fatal("snapshot should report manifest presence")

@@ -15,8 +15,8 @@ type OutcomeSummary struct {
 	Skipped int
 }
 
-// LaunchpadSnapshot is the deterministic local state consumed by the reopen command.
-type LaunchpadSnapshot struct {
+// InstallSnapshot is the deterministic local state consumed by the dashboard and monitor.
+type InstallSnapshot struct {
 	Root            string
 	ManifestPath    string
 	HasManifest     bool
@@ -27,9 +27,9 @@ type LaunchpadSnapshot struct {
 	Recommendations []Recommendation
 }
 
-// BuildLaunchpadSnapshot assembles the local launchpad view model from repo state and the manifest.
-func BuildLaunchpadSnapshot(root string) (LaunchpadSnapshot, error) {
-	snapshot := LaunchpadSnapshot{
+// BuildInstallSnapshot assembles the install snapshot view model from repo state and the manifest.
+func BuildInstallSnapshot(root string) (InstallSnapshot, error) {
+	snapshot := InstallSnapshot{
 		Root:         root,
 		ManifestPath: filepath.ToSlash(ManifestPath(root)),
 		RepoState:    ScanRepoState(root),
@@ -45,7 +45,7 @@ func BuildLaunchpadSnapshot(root string) (LaunchpadSnapshot, error) {
 		return snapshot, nil
 	}
 	if !os.IsNotExist(err) {
-		return LaunchpadSnapshot{}, err
+		return InstallSnapshot{}, err
 	}
 
 	snapshot.Recommendations = BuildRecommendations(root, InstallManifest{})
@@ -71,7 +71,7 @@ func SummarizeOutcomes(outcomes []InstallOutcome) OutcomeSummary {
 }
 
 // StackPackLabels returns deterministic human-readable labels for selected stack packs.
-func (s LaunchpadSnapshot) StackPackLabels() []string {
+func (s InstallSnapshot) StackPackLabels() []string {
 	labels := make([]string, 0, len(s.Requested.StackPacks))
 	for _, pack := range s.Requested.StackPacks {
 		labels = append(labels, stackPackLabel(pack))
@@ -80,17 +80,17 @@ func (s LaunchpadSnapshot) StackPackLabels() []string {
 }
 
 // HasGstack reports whether the manifest requested any gstack skills.
-func (s LaunchpadSnapshot) HasGstack() bool {
+func (s InstallSnapshot) HasGstack() bool {
 	return len(s.Requested.GstackDirs) > 0
 }
 
 // HasAgentBrowser reports whether the manifest requested agent-browser.
-func (s LaunchpadSnapshot) HasAgentBrowser() bool {
+func (s InstallSnapshot) HasAgentBrowser() bool {
 	return s.Requested.IncludeAgentBrowser
 }
 
 // CloneRecommendations returns a copy of recommendations for safe rendering.
-func (s LaunchpadSnapshot) CloneRecommendations() []Recommendation {
+func (s InstallSnapshot) CloneRecommendations() []Recommendation {
 	return slices.Clone(s.Recommendations)
 }
 

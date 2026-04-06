@@ -101,9 +101,9 @@ type RuntimeHealthState struct {
 	MCPServers   RuntimeHealthStatus `json:"mcpServers"`
 }
 
-// LiveState extends LaunchpadSnapshot with realtime monitoring data.
+// LiveState extends InstallSnapshot with realtime monitoring data.
 type LiveState struct {
-	installstate.LaunchpadSnapshot
+	installstate.InstallSnapshot
 
 	// Layer 1: Repo memory (live-tracked)
 	Brainstorms []ArtifactEntry `json:"brainstorms"`

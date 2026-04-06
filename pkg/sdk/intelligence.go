@@ -180,7 +180,7 @@ func (i *Intelligence) ToolState() monitor.LiveState {
 // ToolManifest returns the install manifest for SDK tool invocations.
 func (i *Intelligence) ToolManifest() (installstate.InstallManifest, error) {
 	state := i.watcher.State()
-	if !state.LaunchpadSnapshot.HasManifest {
+	if !state.InstallSnapshot.HasManifest {
 		return installstate.InstallManifest{}, fmt.Errorf("no manifest found")
 	}
 	return installstate.ReadManifest(i.watcher.Root())

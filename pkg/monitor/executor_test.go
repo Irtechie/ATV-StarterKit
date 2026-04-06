@@ -11,7 +11,7 @@ func TestValidateAction_Allowed(t *testing.T) {
 		cmd  string
 	}{
 		{"atv-installer", "atv-installer init"},
-		{"atv", "atv launchpad"},
+		{"atv", "atv dashboard"},
 		{"gstack", "gstack build"},
 		{"git", "git status"},
 		{"copilot", "copilot auth"},

@@ -292,7 +292,7 @@ func stepUsable(outcomes []InstallOutcome, contains string) bool {
 	return false
 }
 
-// WalkMarkdownFiles counts markdown files recursively. Reserved for later launchpad indexing.
+// WalkMarkdownFiles counts markdown files recursively.
 func WalkMarkdownFiles(root string) int {
 	count := 0
 	_ = filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {

@@ -397,12 +397,12 @@ func TestRerunPreservesManifestAdditively(t *testing.T) {
 	}
 }
 
-func TestLaunchpadMatchesManifestAndRepoMemory(t *testing.T) {
-	// "Launchpad recommendation output matches manifest + repo memory for empty, partial, and mature repos"
+func TestInstallSnapshotMatchesManifestAndRepoMemory(t *testing.T) {
+	// "Install snapshot recommendation output matches manifest + repo memory for empty, partial, and mature repos"
 	root := t.TempDir()
 
 	// --- Empty repo (no manifest, no docs) ---
-	snapshot, err := installstate.BuildLaunchpadSnapshot(root)
+	snapshot, err := installstate.BuildInstallSnapshot(root)
 	if err != nil {
 		t.Fatalf("empty snapshot error = %v", err)
 	}
@@ -432,7 +432,7 @@ func TestLaunchpadMatchesManifestAndRepoMemory(t *testing.T) {
 		t.Fatalf("WriteManifest() error = %v", err)
 	}
 
-	snapshot, err = installstate.BuildLaunchpadSnapshot(root)
+	snapshot, err = installstate.BuildInstallSnapshot(root)
 	if err != nil {
 		t.Fatalf("partial snapshot error = %v", err)
 	}
@@ -463,7 +463,7 @@ func TestLaunchpadMatchesManifestAndRepoMemory(t *testing.T) {
 		t.Fatalf("WriteManifest() error = %v", err)
 	}
 
-	snapshot, err = installstate.BuildLaunchpadSnapshot(root)
+	snapshot, err = installstate.BuildInstallSnapshot(root)
 	if err != nil {
 		t.Fatalf("mature snapshot error = %v", err)
 	}
@@ -485,10 +485,10 @@ func TestLaunchpadMatchesManifestAndRepoMemory(t *testing.T) {
 	}
 
 	// Verify determinism
-	snap1, _ := installstate.BuildLaunchpadSnapshot(root)
-	snap2, _ := installstate.BuildLaunchpadSnapshot(root)
+	snap1, _ := installstate.BuildInstallSnapshot(root)
+	snap2, _ := installstate.BuildInstallSnapshot(root)
 	if len(snap1.Recommendations) != len(snap2.Recommendations) {
-		t.Fatal("launchpad should be deterministic")
+		t.Fatal("snapshot should be deterministic")
 	}
 	for i := range snap1.Recommendations {
 		if snap1.Recommendations[i].ID != snap2.Recommendations[i].ID {
@@ -515,7 +515,7 @@ func mustWriteFile(t *testing.T, path, content string) {
 //   - detect stack → build filtered catalog → scaffold files → write manifest
 //   - verify every expected file is installed in the right location
 //   - verify memory index picks up installed intelligence
-//   - verify launchpad dashboard reads the correct state
+//   - verify install snapshot reads the correct state
 //   - verify determinism across repeated calls
 func TestE2EFullGuidedInstallLifecycle(t *testing.T) {
 	root := t.TempDir()
@@ -733,11 +733,11 @@ func TestE2EFullGuidedInstallLifecycle(t *testing.T) {
 		}
 	})
 
-	// --- Step 9: Verify launchpad snapshot ---
-	t.Run("launchpad_snapshot", func(t *testing.T) {
-		snapshot, err := installstate.BuildLaunchpadSnapshot(root)
+	// --- Step 9: Verify install snapshot ---
+	t.Run("install_snapshot", func(t *testing.T) {
+		snapshot, err := installstate.BuildInstallSnapshot(root)
 		if err != nil {
-			t.Fatalf("BuildLaunchpadSnapshot() error = %v", err)
+			t.Fatalf("BuildInstallSnapshot() error = %v", err)
 		}
 		if !snapshot.HasManifest {
 			t.Fatal("should find manifest")
@@ -766,7 +766,7 @@ func TestE2EFullGuidedInstallLifecycle(t *testing.T) {
 	// --- Step 10: Verify memory index detail ---
 	t.Run("memory_index_detail", func(t *testing.T) {
 		state := installstate.ScanRepoState(root)
-		snapshot, _ := installstate.BuildLaunchpadSnapshot(root)
+		snapshot, _ := installstate.BuildInstallSnapshot(root)
 
 		// Verify manifest data flows through to snapshot
 		if !snapshot.HasManifest {
@@ -799,7 +799,7 @@ func TestE2EFullGuidedInstallLifecycle(t *testing.T) {
 		// Recommendations determinism: call 10 times, always same order
 		first := snapshot.Recommendations
 		for i := 0; i < 10; i++ {
-			check, _ := installstate.BuildLaunchpadSnapshot(root)
+			check, _ := installstate.BuildInstallSnapshot(root)
 			if len(check.Recommendations) != len(first) {
 				t.Fatalf("iteration %d: length differs", i)
 			}
