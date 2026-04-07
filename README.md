@@ -30,16 +30,12 @@
        </a>
 </p>
 
-https://github.com/All-The-Vibes/ATV-StarterKit/raw/main/assets/demo.mp4
+<video src="https://github.com/All-The-Vibes/ATV-StarterKit/releases/download/v2.4.0/demo.mp4" width="100%" autoplay loop muted playsinline controls></video>
 
 <details>
-<summary><strong>📽️ Demo Video (91 seconds)</strong> — click to expand</summary>
+<summary><strong>📽️ Demo Video (91 seconds)</strong> — click to expand scene list</summary>
 
 <br />
-
-<video src="./assets/demo.mp4" width="100%" controls>
-       Your browser does not support the video tag. <a href="./assets/demo.mp4">Download the demo video</a>.
-</video>
 
 **What you'll see:**
 1. **The Problem** — AI that never remembers your patterns
