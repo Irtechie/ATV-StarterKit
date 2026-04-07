@@ -48,3 +48,6 @@ node_modules/
 *.jpeg
 *.gif
 *.webp
+
+# Demo video source — built video lives in assets/demo.mp4
+demo-video/

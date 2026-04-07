@@ -63,6 +63,7 @@ This project uses ATV's continuous learning system to capture and evolve pattern
 - `/instincts` — View all learned patterns with confidence scores
 - `/evolve` — Promote mature instincts (confidence > 0.8) into full skills
 - `/observe` — Run a focused observation session on a specific domain
+- `/unslop` — Unified de-slop pass: strip AI-generated code slop, comment rot, and design slop
 
 ### How It Works
 
@@ -83,4 +84,5 @@ This project uses ATV's continuous learning system to capture and evolve pattern
 - Run `/learn` after completing features or at session end
 - Run `/instincts` to check what patterns the project has learned
 - Run `/evolve` periodically to graduate well-established conventions
+- Run `/unslop` before PRs to strip AI-generated slop from code, comments, and UI
 - Review generated skills before committing — they're a starting point

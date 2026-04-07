@@ -11,7 +11,7 @@
        <a href="https://go.dev"><img alt="Go 1.26+" src="https://img.shields.io/badge/Go-1.26+-00ADD8?style=flat-square&logo=go&logoColor=white"></a>
        <a href="https://opensource.org/licenses/MIT"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-ffd700?style=flat-square"></a>
        <a href="https://github.com/features/copilot"><img alt="GitHub Copilot Ready" src="https://img.shields.io/badge/GitHub%20Copilot-Ready-8957e5?style=flat-square&logo=github"></a>
-       <a href="#the-full-sprint"><img alt="49 skills" src="https://img.shields.io/badge/Skills-49-ff8c00?style=flat-square"></a>
+       <a href="#the-full-sprint"><img alt="45 skills" src="https://img.shields.io/badge/Skills-45-ff8c00?style=flat-square"></a>
        <a href="#the-agent-roster"><img alt="29 agents" src="https://img.shields.io/badge/Agents-29-f97316?style=flat-square"></a>
 </p>
 
@@ -24,6 +24,35 @@
        <a href="#development">Development</a>
 </p>
 
+<p align="center">
+       <a href="./assets/demo.mp4">
+              <img src="https://img.shields.io/badge/▶%20Watch%20Demo-91s-f59e0b?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch Demo Video" />
+       </a>
+</p>
+
+https://github.com/user-attachments/assets/demo-video/out/demo.mp4
+
+<details>
+<summary><strong>📽️ Demo Video (91 seconds)</strong> — click to expand</summary>
+
+<br />
+
+<video src="./assets/demo.mp4" width="100%" controls>
+       Your browser does not support the video tag. <a href="./assets/demo.mp4">Download the demo video</a>.
+</video>
+
+**What you'll see:**
+1. **The Problem** — AI that never remembers your patterns
+2. **One Command** — `npx atv-starterkit@latest init` installs everything
+3. **What You Get** — 45 skills, 29 agents, infinite memory
+4. **The Full Sprint** — Think → Plan → Build → Review → Test → Ship → Reflect
+5. **/unslop** ⭐ — Three parallel passes strip AI slop: Code Slop, Comment Rot, Design Slop
+6. **The Learning Loop** — Observer hooks → /learn → instincts → /evolve → permanent skills
+7. **Memory Cycles** — Three reinforcing loops that make your repo smarter
+8. **Get Started** — One command away
+
+</details>
+
 ---
 
 ## What is ATV 2.0?
@@ -34,7 +63,7 @@ ATV 2.0 is a one-command installer that wires together three open-source systems
 - **gstack** — the sprint execution engine
 - **agent-browser** — the browser automation layer
 
-Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45+ skills, 28+ agents, a continuous learning pipeline, and a knowledge system that makes your repo smarter with every session.
+Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45 skills, 29 agents, a continuous learning pipeline, and a knowledge system that makes your repo smarter with every session.
 
 ---
 
@@ -47,7 +76,7 @@ cd your-project
 npx atv-starterkit@latest init
 ```
 
-Auto-detects your stack. Installs 15 core skills, 29+ agents, observer hooks, MCP servers, and docs structure. Done in seconds.
+Auto-detects your stack. Installs 16 core skills, 29 agents, observer hooks, MCP servers, and docs structure. Done in seconds.
 
 For the interactive TUI with multi-stack selection:
 
@@ -79,6 +108,7 @@ npx atv-starterkit@latest init --guided
   ✅ .github/skills/atv-instincts/SKILL.md
   ✅ .github/skills/atv-evolve/SKILL.md
   ✅ .github/skills/atv-observe/SKILL.md
+  ✅ .github/skills/atv-unslop/SKILL.md
   ✅ .github/skills/ce-brainstorm/SKILL.md
   ✅ .github/skills/ce-plan/SKILL.md
   ✅ .github/skills/ce-work/SKILL.md
@@ -366,6 +396,103 @@ Session 8:  Pattern consistently confirmed        → confidence 0.85 ★ ready 
 
 ---
 
+## De-Slop — The Quality Gate No Other AI Coding Tool Has
+
+> **Every AI coding tool helps you write code faster. ATV is the only one that makes sure the output doesn't *look* like AI wrote it.**
+
+### The Problem
+
+AI coding assistants have a "tell." They over-abstract things that should be simple. They write comments that restate the obvious. They default to purple-to-blue gradients and generic card grids. Experienced developers spot it instantly — and it erodes trust in your codebase.
+
+Every AI tool on the market focuses on generating more code faster. **None of them have a quality gate for detecting and removing the patterns that make AI output look artificial.** The result: codebases fill up with over-engineered abstractions, `// This function handles the logic for...` comments, and template-looking UI. Code review catches bugs — but nobody catches *slop*.
+
+ATV is the first tool to ship a built-in de-slop pass.
+
+### The Solution
+
+`/unslop` runs **three parallel analysis passes** on your recent changes and produces a unified report:
+
+```text
+/unslop                          →  Report slop in changed files
+/unslop src/components/          →  Scope to a directory
+/unslop fix                      →  Auto-apply safe fixes
+```
+
+| Pass | What it catches | Example |
+|------|----------------|---------|
+| **Code Slop** | Over-abstraction, YAGNI violations, nested ternaries, commented-out code | Interface used once → inline it |
+| **Comment Rot** | Obvious restatements, AI filler phrases, stale TODOs, inaccurate docs | `// This function handles auth` → delete it |
+| **Design Slop** | Generic gradients, template layouts, missing hover states, stock UI | Purple-to-blue default → use brand palette |
+
+### How It Works
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│                     /unslop PIPELINE                                │
+│                                                                     │
+│   Determine scope (git diff or explicit path)                       │
+│        ↓                                                            │
+│   Classify files → which passes to run                              │
+│        ↓                                                            │
+│   ┌──────────────┬──────────────────┬──────────────────┐            │
+│   │  Code Slop   │   Comment Rot    │   Design Slop    │  PARALLEL  │
+│   │  Detector    │   Detector       │   Detector       │            │
+│   └──────┬───────┴────────┬─────────┴────────┬─────────┘            │
+│          └────────────────┼──────────────────┘                      │
+│                           ↓                                         │
+│   Merge, deduplicate, sort by severity                              │
+│        ↓                                                            │
+│   De-slop Report (table format)                                     │
+│        ↓                                                            │
+│   Optional: /unslop fix → auto-apply safe fixes                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Pipeline Integration
+
+`/unslop` is wired into both autonomous pipelines:
+
+- **`/lfg`** — runs `/unslop fix` after `ce-review` autofix, before todo-resolve
+- **`/slfg`** — runs `/unslop` (report-only) in the **parallel phase** for free, then `/unslop fix` in the sequential autofix phase
+
+In `/slfg`, the report pass adds **zero wall-clock time** because it runs alongside `ce-review` and browser testing:
+
+```text
+/slfg parallel phase:
+  ┌─────────────────────────────┐
+  │ ce-review (report-only)     │
+  │ test-browser                │  ← all three run simultaneously
+  │ /unslop (report-only)       │
+  └─────────────────────────────┘
+```
+
+### AI Filler Phrase Blocklist
+
+`/unslop` maintains a hard-ban list of AI-generated filler that gets flagged immediately:
+
+| Phrase | Why it's slop |
+|--------|--------------|
+| "This function is responsible for handling..." | Restates the function name |
+| "robust and scalable" | Meaningless without evidence |
+| "leverages" / "utilizes" | Just say "uses" |
+| "seamlessly integrates" | Nothing integrates seamlessly |
+| "comprehensive solution" | What solution isn't? |
+| "In today's rapidly evolving..." | Marketing copy in a codebase |
+
+### What Makes This Different from Code Review
+
+| `/ce-review` | `/unslop` |
+|---|---|
+| Asks: "Is this **correct**?" | Asks: "Does this **look human-written**?" |
+| Catches bugs, security issues, architecture problems | Catches over-engineering, filler comments, template UI |
+| Uses P0-P3 severity (can block merge) | Uses High/Medium/Low (never blocks — slop isn't a bug) |
+| 17 specialized reviewer personas | 3 focused passes (code, comments, design) |
+| Part of the Review phase | Part of the Reflect phase |
+
+They're complementary — run both. `/ce-review` ensures your code works. `/unslop` ensures it doesn't look like a robot wrote it.
+
+---
+
 ## Why Memory Matters
 
 ATV builds **seven layers of memory** — each serving a different timescale and audience:
@@ -464,6 +591,7 @@ Cycle 3: Team Propagation (per-commit)
                      <code>/learn</code><br />
                      <code>/instincts</code><br />
                      <code>/evolve</code><br />
+                     <code>/unslop</code><br />
                      <code>/gstack-retro</code><br />
                      <code>/gstack-learn</code>
               </td>
@@ -539,6 +667,7 @@ Cycle 3: Team Propagation (per-commit)
 | `/instincts` | Dashboard showing all learned patterns grouped by domain with evolution readiness |
 | `/evolve` | Promotes mature instincts (confidence >0.8) into permanent, auto-discovered Copilot skills |
 | `/observe` | Focused pattern analysis on a specific domain, file pattern, or question |
+| `/unslop` | Unified de-slop pass: code simplification + comment rot detection + design slop check |
 | `/gstack-retro` | Team-aware weekly retro with per-person breakdowns |
 | `/gstack-learn` | Per-project self-learning infrastructure |
 
@@ -557,7 +686,7 @@ Cycle 3: Team Propagation (per-commit)
 
 ## The Agent Roster
 
-28+ specialized agents in `.github/agents/`, invoked by skills during review, planning, learning, and debugging:
+29 specialized agents in `.github/agents/`, invoked by skills during review, planning, learning, and debugging:
 
 | Category | Agents |
 |---|---|

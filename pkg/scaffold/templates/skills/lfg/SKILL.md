@@ -21,12 +21,16 @@ CRITICAL: You MUST execute every step below IN ORDER. Do NOT skip any required s
 
    Pass the plan file path from step 2 so ce-review can verify requirements completeness.
 
-5. `/compound-engineering-todo-resolve`
+5. `/unslop fix`
 
-6. `/compound-engineering-test-browser`
+   Strip AI slop after review fixes land — removes commented-out code, filler comments, stale TODOs.
 
-7. `/compound-engineering-feature-video`
+6. `/compound-engineering-todo-resolve`
 
-8. Output `<promise>DONE</promise>` when video is in PR
+7. `/compound-engineering-test-browser`
+
+8. `/compound-engineering-feature-video`
+
+9. Output `<promise>DONE</promise>` when video is in PR
 
 Start with step 2 now (or step 1 if ralph-loop is available). Remember: plan FIRST, then work. Never skip the plan.

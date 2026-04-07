@@ -15,21 +15,23 @@ Swarm-enabled LFG. Run these steps in order, parallelizing where indicated. Do n
 
 ## Parallel Phase
 
-After work completes, launch steps 4 and 5 as **parallel swarm agents** (both only need code to be written):
+After work completes, launch steps 4, 5, and 6 as **parallel swarm agents** (all read-only, safe to run concurrently):
 
 4. `/ce-review mode:report-only plan:<plan-path-from-step-2>` — spawn as background Task agent
 5. `/compound-engineering-test-browser` — spawn as background Task agent
+6. `/unslop` — spawn as background Task agent (read-only de-slop report)
 
-Wait for both to complete before continuing.
+Wait for all three to complete before continuing.
 
 ## Autofix Phase
 
-6. `/ce-review mode:autofix plan:<plan-path-from-step-2>` — run sequentially after the parallel phase so it can safely mutate the checkout, apply `safe_auto` fixes, and emit residual todos for step 7
+7. `/ce-review mode:autofix plan:<plan-path-from-step-2>` — run sequentially after the parallel phase so it can safely mutate the checkout, apply `safe_auto` fixes, and emit residual todos for step 8
+8. `/unslop fix` — run sequentially after ce-review autofix to strip AI slop (commented-out code, filler comments, stale TODOs)
 
 ## Finalize Phase
 
-7. `/compound-engineering-todo-resolve` — resolve findings, compound on learnings, clean up completed todos
-8. `/compound-engineering-feature-video` — record the final walkthrough and add to PR
-9. Output `<promise>DONE</promise>` when video is in PR
+9. `/compound-engineering-todo-resolve` — resolve findings, compound on learnings, clean up completed todos
+10. `/compound-engineering-feature-video` — record the final walkthrough and add to PR
+11. Output `<promise>DONE</promise>` when video is in PR
 
 Start with step 1 now.

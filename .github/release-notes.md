@@ -1,6 +1,6 @@
 ## ATV 2.0 — All The Vibes Starter Kit
 
-One command. Full agentic coding setup. 45 skills, 28 agents, and a memory system that makes your repo smarter with every PR.
+One command. Full agentic coding setup. 45 skills, 29 agents, and a memory system that makes your repo smarter with every PR.
 
 ### What's new in 2.0
 

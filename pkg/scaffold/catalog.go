@@ -171,6 +171,8 @@ var coreSkillDirectories = []string{
 	"atv-instincts",
 	"atv-evolve",
 	"atv-observe",
+	// ATV Quality
+	"atv-unslop",
 }
 
 var orchestratorSkillDirectories = []string{
