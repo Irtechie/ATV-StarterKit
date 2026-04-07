@@ -2,6 +2,7 @@ package installstate
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -45,6 +46,12 @@ type RepoState struct {
 	// CE project config
 	HasCELocalConfig   bool // compound-engineering.local.md exists
 	CEReviewAgentCount int  // review_agents listed in frontmatter
+
+	// Learning pipeline
+	InstinctCount    int  // instincts in .atv/instincts/project.yaml
+	HasInstincts     bool // .atv/instincts/project.yaml exists
+	ObservationCount int  // lines in .atv/observations.jsonl
+	HasObserverHooks bool // .github/hooks/copilot-hooks.json exists
 
 	// User-global tool state (outside repo)
 	HasGstackUserConfig      bool // ~/.gstack/ exists
@@ -92,6 +99,16 @@ func ScanRepoState(root string) RepoState {
 	if state.HasCELocalConfig {
 		state.CEReviewAgentCount = countFrontmatterListItems(ceLocalPath, "review_agents")
 	}
+
+	// Learning pipeline
+	instinctPath := filepath.Join(root, ".atv", "instincts", "project.yaml")
+	state.HasInstincts = fileExists(instinctPath)
+	if state.HasInstincts {
+		state.InstinctCount = countYAMLListItems(instinctPath, "instincts")
+	}
+	observationsPath := filepath.Join(root, ".atv", "observations.jsonl")
+	state.ObservationCount = countFileLines(observationsPath)
+	state.HasObserverHooks = fileExists(filepath.Join(root, ".github", "hooks", "copilot-hooks.json"))
 
 	// User-global tool state
 	home, _ := os.UserHomeDir()
@@ -206,6 +223,22 @@ func BuildRecommendations(root string, manifest InstallManifest) []Recommendatio
 			Title:    "Add file-level instructions for language-specific guidance",
 			Reason:   "No .instructions.md files found in .github/.",
 			Priority: 60,
+		})
+	}
+	if state.HasObserverHooks && !state.HasInstincts && state.ObservationCount > 10 {
+		recommendations = append(recommendations, Recommendation{
+			ID:       "run-learn",
+			Title:    "Run /learn to extract patterns from accumulated observations",
+			Reason:   fmt.Sprintf("%d observations captured but no instincts created yet.", state.ObservationCount),
+			Priority: 65,
+		})
+	}
+	if state.HasInstincts && state.InstinctCount > 0 {
+		recommendations = append(recommendations, Recommendation{
+			ID:       "check-instincts",
+			Title:    "Run /instincts to review learned patterns and check for evolution candidates",
+			Reason:   fmt.Sprintf("%d instincts learned — some may be ready to evolve into skills.", state.InstinctCount),
+			Priority: 40,
 		})
 	}
 	if state.PromptFileCount == 0 {
@@ -549,4 +582,47 @@ func ListMemoryFiles(root string) []string {
 		return nil
 	})
 	return names
+}
+
+// countYAMLListItems counts top-level list items under a key in a YAML file.
+// Looks for "key:" followed by lines starting with "  - ".
+func countYAMLListItems(path, key string) int {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return 0
+	}
+	lines := strings.Split(string(data), "\n")
+	foundKey := false
+	count := 0
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == key+":" || strings.HasPrefix(trimmed, key+":") {
+			foundKey = true
+			continue
+		}
+		if foundKey {
+			if strings.HasPrefix(line, "  -") || strings.HasPrefix(line, "- ") {
+				count++
+			} else if trimmed != "" && !strings.HasPrefix(line, "  ") && !strings.HasPrefix(line, "    ") {
+				break // new top-level key
+			}
+		}
+	}
+	return count
+}
+
+// countFileLines counts non-empty lines in a file. Returns 0 if file doesn't exist.
+func countFileLines(path string) int {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return 0
+	}
+	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
+	count := 0
+	for _, line := range lines {
+		if strings.TrimSpace(line) != "" {
+			count++
+		}
+	}
+	return count
 }

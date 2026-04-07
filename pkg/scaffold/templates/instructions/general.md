@@ -52,3 +52,35 @@ When both ATV and gstack provide similar functionality, ATV takes priority:
 - Follow existing patterns in the codebase
 - Write tests for new functionality
 - Use conventional commit messages (`feat:`, `fix:`, `refactor:`)
+
+## Continuous Learning Pipeline
+
+This project uses ATV's continuous learning system to capture and evolve patterns.
+
+### Learning Commands
+
+- `/learn` — Extract patterns from recent work into instincts
+- `/instincts` — View all learned patterns with confidence scores
+- `/evolve` — Promote mature instincts (confidence > 0.8) into full skills
+- `/observe` — Run a focused observation session on a specific domain
+
+### How It Works
+
+1. **Observer hooks** automatically capture tool use data to `.atv/observations.jsonl`
+2. **`/learn`** analyzes recent work and creates instincts in `.atv/instincts/project.yaml`
+3. **Instincts** build confidence over time through repeated observation
+4. **`/evolve`** promotes mature instincts into discoverable skills in `.github/skills/learned-*/`
+
+### Key Files
+
+- `.atv/observations.jsonl` — Raw tool use log (gitignored, ephemeral)
+- `.atv/instincts/project.yaml` — Learned patterns (committed, shared with team)
+- `.github/hooks/copilot-hooks.json` — Observer hook configuration
+- `.github/skills/learned-*/` — Auto-generated skills from evolved instincts
+
+### Best Practices
+
+- Run `/learn` after completing features or at session end
+- Run `/instincts` to check what patterns the project has learned
+- Run `/evolve` periodically to graduate well-established conventions
+- Review generated skills before committing — they're a starting point

@@ -49,6 +49,9 @@ func BuildCatalog(stack detect.Stack) []Component {
 	// Hook 6: File Instructions
 	catalog = append(catalog, fileInstructions(stack)...)
 
+	// Observer hooks (copilot-hooks.json + scripts)
+	catalog = append(catalog, observerHooks()...)
+
 	// VS Code config
 	catalog = append(catalog, vscodeConfig()...)
 
@@ -115,6 +118,10 @@ func BuildFilteredCatalogForPacks(packs []installstate.StackPack, primaryStack d
 	if layerSet["vscode-extensions"] {
 		catalog = append(catalog, vscodeConfig()...)
 	}
+	// Observer hooks are included when core-skills are selected (learning pipeline)
+	if layerSet["core-skills"] {
+		catalog = append(catalog, observerHooks()...)
+	}
 
 	return catalog
 }
@@ -123,6 +130,7 @@ func directories() []Component {
 	dirs := []string{
 		".github/skills",
 		".github/agents",
+		".github/hooks/scripts",
 		".vscode",
 	}
 	var comps []Component
@@ -137,6 +145,7 @@ func documentationDirectories() []Component {
 		"docs/plans",
 		"docs/brainstorms",
 		"docs/solutions",
+		".atv/instincts",
 	}
 	var comps []Component
 	for _, d := range dirs {
@@ -157,6 +166,11 @@ var coreSkillDirectories = []string{
 	"deepen-plan",
 	"document-review",
 	"setup",
+	// ATV Learning Pipeline
+	"atv-learn",
+	"atv-instincts",
+	"atv-evolve",
+	"atv-observe",
 }
 
 var orchestratorSkillDirectories = []string{
@@ -290,6 +304,18 @@ func vscodeConfig() []Component {
 	content := mustRead("templates/configs/extensions.json")
 	return []Component{
 		{Path: ".vscode/extensions.json", Content: content, MergeJSON: true},
+	}
+}
+
+// observerHooks returns the Copilot CLI hook configuration and observer scripts
+// for the ATV continuous learning pipeline.
+func observerHooks() []Component {
+	hookConfig := mustRead("templates/hooks/copilot-hooks.json")
+	observeScript := mustRead("templates/hooks/scripts/observe.js")
+
+	return []Component{
+		{Path: ".github/hooks/copilot-hooks.json", Content: hookConfig, MergeJSON: true},
+		{Path: ".github/hooks/scripts/observe.js", Content: observeScript},
 	}
 }
 

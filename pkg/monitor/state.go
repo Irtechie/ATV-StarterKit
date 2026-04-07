@@ -123,6 +123,11 @@ type LiveState struct {
 	// Layer 5: Runtime health
 	RuntimeHealth RuntimeHealthState `json:"runtimeHealth"`
 
+	// Layer 6: Learning pipeline
+	InstinctCount    int  `json:"instinctCount"`
+	ObservationCount int  `json:"observationCount"`
+	HasObserverHooks bool `json:"hasObserverHooks"`
+
 	// SDK intelligence (zero values when offline)
 	SDKRecommendations []SDKRecommendation `json:"sdkRecommendations,omitempty"`
 	SDKOnline          bool                `json:"sdkOnline"`

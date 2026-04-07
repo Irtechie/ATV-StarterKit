@@ -589,6 +589,11 @@ func TestE2EFullGuidedInstallLifecycle(t *testing.T) {
 			skillPath := filepath.Join(skillsDir, skill, "SKILL.md")
 			assertFileExists(t, skillPath)
 		}
+		// Verify learning pipeline skills exist
+		for _, skill := range []string{"atv-learn", "atv-instincts", "atv-evolve", "atv-observe"} {
+			skillPath := filepath.Join(skillsDir, skill, "SKILL.md")
+			assertFileExists(t, skillPath)
+		}
 	})
 
 	t.Run("hook5_agents_installed", func(t *testing.T) {
@@ -622,6 +627,13 @@ func TestE2EFullGuidedInstallLifecycle(t *testing.T) {
 		for _, dir := range []string{"docs/plans", "docs/brainstorms", "docs/solutions"} {
 			assertDirExists(t, filepath.Join(root, dir))
 		}
+		// Learning pipeline directories
+		assertDirExists(t, filepath.Join(root, ".atv", "instincts"))
+	})
+
+	t.Run("observer_hooks_in_lifecycle", func(t *testing.T) {
+		assertFileExists(t, filepath.Join(root, ".github", "hooks", "copilot-hooks.json"))
+		assertFileExists(t, filepath.Join(root, ".github", "hooks", "scripts", "observe.js"))
 	})
 
 	// --- Step 6: Write install manifest (simulating guided mode completion) ---
@@ -817,8 +829,214 @@ func TestE2EFullGuidedInstallLifecycle(t *testing.T) {
 	})
 }
 
-// TestE2EMultiStackDeterminism verifies that multi-stack selection is deterministic
-// regardless of pack selection order
+// =============================================================================
+// Learning Pipeline E2E: Verify observer hooks, skills, and instinct support
+// =============================================================================
+
+func TestE2ELearningPipelineInstalled(t *testing.T) {
+	root := t.TempDir()
+
+	// Build full catalog (general stack) — should include learning pipeline
+	env := detect.DetectEnvironment(root)
+	catalog := scaffold.BuildCatalog(env.Stack)
+	results := scaffold.WriteAll(root, catalog)
+
+	summary := scaffold.SummarizeResults(results)
+	if summary.Failed > 0 {
+		t.Fatalf("scaffold should not fail: %d failures", summary.Failed)
+	}
+
+	// --- Observer hooks installed ---
+	t.Run("observer_hooks_config", func(t *testing.T) {
+		path := filepath.Join(root, ".github", "hooks", "copilot-hooks.json")
+		assertFileExists(t, path)
+		content, _ := os.ReadFile(path)
+		var parsed map[string]interface{}
+		if err := json.Unmarshal(content, &parsed); err != nil {
+			t.Fatalf("copilot-hooks.json should be valid JSON: %v", err)
+		}
+		hooks, ok := parsed["hooks"]
+		if !ok {
+			t.Fatal("copilot-hooks.json should contain 'hooks' key")
+		}
+		hooksMap, ok := hooks.(map[string]interface{})
+		if !ok {
+			t.Fatal("hooks should be a JSON object")
+		}
+		// Verify all 6 hook types are configured
+		for _, hookType := range []string{"sessionStart", "sessionEnd", "userPromptSubmitted", "preToolUse", "postToolUse", "errorOccurred"} {
+			if _, exists := hooksMap[hookType]; !exists {
+				t.Errorf("missing hook type: %s", hookType)
+			}
+		}
+	})
+
+	t.Run("observer_script", func(t *testing.T) {
+		path := filepath.Join(root, ".github", "hooks", "scripts", "observe.js")
+		assertFileExists(t, path)
+		content, _ := os.ReadFile(path)
+		if !strings.Contains(string(content), "observations.jsonl") {
+			t.Error("observe.js should reference observations.jsonl")
+		}
+		if !strings.Contains(string(content), "updateInstinctConfidence") {
+			t.Error("observe.js should contain updateInstinctConfidence function")
+		}
+	})
+
+	// --- Learning skills installed ---
+	t.Run("learning_skills", func(t *testing.T) {
+		skillsDir := filepath.Join(root, ".github", "skills")
+		for _, skill := range []string{"atv-learn", "atv-instincts", "atv-evolve", "atv-observe"} {
+			skillPath := filepath.Join(skillsDir, skill, "SKILL.md")
+			assertFileExists(t, skillPath)
+		}
+	})
+
+	// --- Pattern observer agent installed ---
+	t.Run("pattern_observer_agent", func(t *testing.T) {
+		assertFileExists(t, filepath.Join(root, ".github", "agents", "pattern-observer.agent.md"))
+	})
+
+	// --- Instructions mention learning pipeline ---
+	t.Run("instructions_mention_learning", func(t *testing.T) {
+		content, _ := os.ReadFile(filepath.Join(root, ".github", "copilot-instructions.md"))
+		contentStr := string(content)
+		if !strings.Contains(contentStr, "Continuous Learning Pipeline") {
+			t.Error("copilot-instructions.md should mention Continuous Learning Pipeline")
+		}
+		if !strings.Contains(contentStr, "/learn") {
+			t.Error("copilot-instructions.md should mention /learn command")
+		}
+		if !strings.Contains(contentStr, "/instincts") {
+			t.Error("copilot-instructions.md should mention /instincts command")
+		}
+		if !strings.Contains(contentStr, "/evolve") {
+			t.Error("copilot-instructions.md should mention /evolve command")
+		}
+	})
+
+	// --- Instinct directories scaffolded ---
+	t.Run("instinct_directories", func(t *testing.T) {
+		assertDirExists(t, filepath.Join(root, ".atv", "instincts"))
+	})
+}
+
+func TestLearningPipelineRepoState(t *testing.T) {
+	root := t.TempDir()
+
+	// --- No instincts, no observations ---
+	state := installstate.ScanRepoState(root)
+	if state.HasInstincts {
+		t.Error("should not have instincts in empty repo")
+	}
+	if state.InstinctCount != 0 {
+		t.Errorf("instinct count should be 0, got %d", state.InstinctCount)
+	}
+	if state.ObservationCount != 0 {
+		t.Errorf("observation count should be 0, got %d", state.ObservationCount)
+	}
+
+	// --- Create observations ---
+	mustWriteFile(t, filepath.Join(root, ".atv", "observations.jsonl"),
+		`{"ts":"2026-04-06T10:00:00Z","hook":"preToolUse","tool":"Edit"}
+{"ts":"2026-04-06T10:01:00Z","hook":"postToolUse","tool":"Edit"}
+{"ts":"2026-04-06T10:02:00Z","hook":"preToolUse","tool":"Bash"}
+`)
+	state = installstate.ScanRepoState(root)
+	if state.ObservationCount != 3 {
+		t.Errorf("observation count should be 3, got %d", state.ObservationCount)
+	}
+
+	// --- Create instincts ---
+	mustWriteFile(t, filepath.Join(root, ".atv", "instincts", "project.yaml"),
+		`instincts:
+  - id: always-wrap-errors
+    trigger: "when returning an error"
+    behavior: "wrap with fmt.Errorf using %w"
+    confidence: 0.85
+    domain: error-handling
+    observations: 12
+  - id: table-driven-tests
+    trigger: "when writing tests"
+    behavior: "use table-driven test pattern"
+    confidence: 0.7
+    domain: testing
+    observations: 8
+`)
+	state = installstate.ScanRepoState(root)
+	if !state.HasInstincts {
+		t.Error("should have instincts")
+	}
+	if state.InstinctCount != 2 {
+		t.Errorf("instinct count should be 2, got %d", state.InstinctCount)
+	}
+
+	// --- Observer hooks detection ---
+	mustWriteFile(t, filepath.Join(root, ".github", "hooks", "copilot-hooks.json"), `{"hooks":{}}`)
+	state = installstate.ScanRepoState(root)
+	if !state.HasObserverHooks {
+		t.Error("should detect observer hooks")
+	}
+}
+
+func TestLearningPipelineRecommendations(t *testing.T) {
+	root := t.TempDir()
+
+	// Setup: install manifest with clean outcomes, observer hooks, observations, no instincts
+	mustWriteFile(t, filepath.Join(root, ".github", "hooks", "copilot-hooks.json"), `{"hooks":{}}`)
+	mustWriteFile(t, filepath.Join(root, ".github", "copilot-instructions.md"), "# Test")
+	mustWriteFile(t, filepath.Join(root, ".github", "copilot-mcp-config.json"), `{"servers":{}}`)
+
+	// Write 15 observations (exceeds threshold of 10)
+	var obsLines string
+	for i := 0; i < 15; i++ {
+		obsLines += `{"ts":"2026-04-06T10:00:00Z","hook":"preToolUse","tool":"Edit"}` + "\n"
+	}
+	mustWriteFile(t, filepath.Join(root, ".atv", "observations.jsonl"), obsLines)
+
+	manifest := installstate.InstallManifest{
+		Requested: installstate.RequestedState{
+			StackPacks: []installstate.StackPack{installstate.StackPackGeneral},
+			PresetName: "Starter",
+		},
+		Outcomes: []installstate.InstallOutcome{
+			{Step: "Scaffolding ATV files", Status: installstate.InstallStepDone},
+		},
+	}
+	recs := installstate.BuildRecommendations(root, manifest)
+
+	// Should recommend /learn when observations exist but no instincts
+	foundLearn := false
+	for _, rec := range recs {
+		if rec.ID == "run-learn" {
+			foundLearn = true
+			if !strings.Contains(rec.Reason, "15 observations") {
+				t.Errorf("run-learn reason should mention observation count, got %q", rec.Reason)
+			}
+		}
+	}
+	if !foundLearn {
+		t.Fatalf("should recommend /learn when observations > 10 but no instincts, got %+v", recs)
+	}
+
+	// Now add instincts — should recommend /instincts instead
+	mustWriteFile(t, filepath.Join(root, ".atv", "instincts", "project.yaml"),
+		`instincts:
+  - id: test-instinct
+    confidence: 0.85
+`)
+	recs = installstate.BuildRecommendations(root, manifest)
+	foundInstincts := false
+	for _, rec := range recs {
+		if rec.ID == "check-instincts" {
+			foundInstincts = true
+		}
+	}
+	if !foundInstincts {
+		t.Fatalf("should recommend /instincts when instincts exist, got %+v", recs)
+	}
+}
+
 func TestE2EMultiStackDeterminism(t *testing.T) {
 	// Order A: General, TypeScript, Rails
 	catalogA := scaffold.BuildFilteredCatalogForPacks(

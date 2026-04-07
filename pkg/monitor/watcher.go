@@ -380,6 +380,12 @@ func (w *Watcher) scanHealthLayer() {
 		// Compute drift
 		w.state.DriftEntries = ComputeDrift(w.root, manifest)
 	}
+
+	// Learning pipeline state
+	repoState := installstate.ScanRepoState(w.root)
+	w.state.InstinctCount = repoState.InstinctCount
+	w.state.ObservationCount = repoState.ObservationCount
+	w.state.HasObserverHooks = repoState.HasObserverHooks
 }
 
 // scanRuntimeLayer probes runtime tool availability.
