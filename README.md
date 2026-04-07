@@ -30,7 +30,7 @@
        </a>
 </p>
 
-https://github.com/user-attachments/assets/demo-video/out/demo.mp4
+https://github.com/All-The-Vibes/ATV-StarterKit/raw/main/assets/demo.mp4
 
 <details>
 <summary><strong>📽️ Demo Video (91 seconds)</strong> — click to expand</summary>
