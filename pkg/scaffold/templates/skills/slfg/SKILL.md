@@ -28,10 +28,15 @@ Wait for all three to complete before continuing.
 7. `/ce-review mode:autofix plan:<plan-path-from-step-2>` — run sequentially after the parallel phase so it can safely mutate the checkout, apply `safe_auto` fixes, and emit residual todos for step 8
 8. `/unslop fix` — run sequentially after ce-review autofix to strip AI slop (commented-out code, filler comments, stale TODOs)
 
+## Learning Phase
+
+9. `/observe` on the areas of code that were changed — analyze patterns in the modified files to capture what was done and how.
+10. `/learn` — extract reusable patterns from this session into project instincts.
+
 ## Finalize Phase
 
-9. `/compound-engineering-todo-resolve` — resolve findings, compound on learnings, clean up completed todos
-10. `/compound-engineering-feature-video` — record the final walkthrough and add to PR
-11. Output `<promise>DONE</promise>` when video is in PR
+11. `/compound-engineering-todo-resolve` — resolve findings, compound on learnings, clean up completed todos
+12. `/compound-engineering-feature-video` — record the final walkthrough and add to PR
+13. Output `<promise>DONE</promise>` when video is in PR
 
 Start with step 1 now.

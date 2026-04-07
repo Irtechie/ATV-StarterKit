@@ -25,12 +25,16 @@ CRITICAL: You MUST execute every step below IN ORDER. Do NOT skip any required s
 
    Strip AI slop after review fixes land — removes commented-out code, filler comments, stale TODOs.
 
-6. `/compound-engineering-todo-resolve`
+6. `/observe` on the areas of code that were changed — analyze patterns in the modified files to capture what was done and how.
 
-7. `/compound-engineering-test-browser`
+7. `/learn` — extract reusable patterns from this session into project instincts.
 
-8. `/compound-engineering-feature-video`
+8. `/compound-engineering-todo-resolve`
 
-9. Output `<promise>DONE</promise>` when video is in PR
+9. `/compound-engineering-test-browser`
+
+10. `/compound-engineering-feature-video`
+
+11. Output `<promise>DONE</promise>` when video is in PR
 
 Start with step 2 now (or step 1 if ralph-loop is available). Remember: plan FIRST, then work. Never skip the plan.

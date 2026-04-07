@@ -590,7 +590,7 @@ func TestE2EFullGuidedInstallLifecycle(t *testing.T) {
 			assertFileExists(t, skillPath)
 		}
 		// Verify learning pipeline skills exist
-		for _, skill := range []string{"atv-learn", "atv-instincts", "atv-evolve", "atv-observe"} {
+		for _, skill := range []string{"learn", "instincts", "evolve", "observe"} {
 			skillPath := filepath.Join(skillsDir, skill, "SKILL.md")
 			assertFileExists(t, skillPath)
 		}
@@ -886,7 +886,7 @@ func TestE2ELearningPipelineInstalled(t *testing.T) {
 	// --- Learning skills installed ---
 	t.Run("learning_skills", func(t *testing.T) {
 		skillsDir := filepath.Join(root, ".github", "skills")
-		for _, skill := range []string{"atv-learn", "atv-instincts", "atv-evolve", "atv-observe"} {
+		for _, skill := range []string{"learn", "instincts", "evolve", "observe"} {
 			skillPath := filepath.Join(skillsDir, skill, "SKILL.md")
 			assertFileExists(t, skillPath)
 		}

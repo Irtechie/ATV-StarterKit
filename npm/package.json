@@ -1,6 +1,6 @@
 {
   "name": "atv-starterkit",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "ATV Starter Kit — scaffold a complete GitHub Copilot agentic coding environment into any project",
   "license": "MIT",
   "repository": {
@@ -19,10 +19,7 @@
     "starter-kit",
     "mcp",
     "agents",
-    "skills",
-    "continuous-learning",
-    "instincts",
-    "pattern-learning"
+    "skills"
   ],
   "bin": {
     "atv-starterkit": "bin/cli.js",

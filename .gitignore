@@ -32,6 +32,9 @@ Thumbs.db
 # gstack runtime state
 .gstack/
 
+# ATV observation logs (ephemeral)
+.atv/observations.jsonl
+
 # Node
 node_modules/
 

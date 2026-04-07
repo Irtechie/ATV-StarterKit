@@ -1,5 +1,5 @@
 ---
-name: atv-learn
+name: learn
 description: Extract reusable patterns from recent work into instincts. Run after completing features, fixing bugs, or at session end to capture what the project learned.
 ---
 

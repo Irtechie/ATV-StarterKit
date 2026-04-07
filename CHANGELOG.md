@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.5.0] — 2026-04-07
+
+### Fixed
+
+- **ce-brainstorm and brainstorming templates restored** — the compound-engineering update (v2.4.0) accidentally flattened both SKILL.md files into single lines, breaking YAML frontmatter parsing and making `/ce-brainstorm` undiscoverable. Both templates now have proper multi-line content with valid frontmatter.
+
+### Changed
+
+- **Learning pipeline skills renamed** — removed `atv-` prefix from all learning pipeline skills for cleaner slash commands:
+  - `atv-learn` → `learn` (`/learn`)
+  - `atv-instincts` → `instincts` (`/instincts`)
+  - `atv-evolve` → `evolve` (`/evolve`)
+  - `atv-observe` → `observe` (`/observe`)
+  - `atv-unslop` → `unslop` (`/unslop`)
+- **`/lfg` workflow updated** — now includes `/observe` and `/learn` steps after `/unslop fix` to capture patterns from the completed work
+- **`/slfg` workflow updated** — added a new Learning Phase with `/observe` and `/learn` between the Autofix Phase and Finalize Phase
+
 ## [2.0.1] — 2026-04-01
 
 Patch release to fix npm distribution. The v2.0.0 npm package was published before any corresponding GitHub release with goreleaser binaries existed, so the postinstall binary download would fail. This release publishes a GitHub release for v2.0.1 with pre-built binaries and a matching npm version that resolves correctly via `releases/latest`.

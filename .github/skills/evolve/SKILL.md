@@ -1,5 +1,5 @@
 ---
-name: atv-evolve
+name: evolve
 description: Promote mature instincts (confidence > 0.8) into full Copilot skills that get auto-discovered. Clusters related instincts and generates SKILL.md files in .github/skills/.
 ---
 

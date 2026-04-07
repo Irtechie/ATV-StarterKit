@@ -167,12 +167,12 @@ var coreSkillDirectories = []string{
 	"document-review",
 	"setup",
 	// ATV Learning Pipeline
-	"atv-learn",
-	"atv-instincts",
-	"atv-evolve",
-	"atv-observe",
+	"learn",
+	"instincts",
+	"evolve",
+	"observe",
 	// ATV Quality
-	"atv-unslop",
+	"unslop",
 }
 
 var orchestratorSkillDirectories = []string{

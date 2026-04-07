@@ -1,5 +1,5 @@
 ---
-name: atv-observe
+name: observe
 description: Start a focused observation session to analyze specific patterns in the codebase. Watches a domain or file pattern and records findings for future /learn runs.
 ---
 

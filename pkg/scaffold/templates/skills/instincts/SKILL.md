@@ -1,5 +1,5 @@
 ---
-name: atv-instincts
+name: instincts
 description: Show all learned instincts for this project with confidence scores, grouped by domain. Use to review what the project has learned and identify patterns ready for evolution.
 ---
 
