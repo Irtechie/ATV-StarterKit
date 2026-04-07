@@ -24,30 +24,7 @@
        <a href="#development">Development</a>
 </p>
 
-<p align="center">
-       <a href="./assets/demo.mp4">
-              <img src="https://img.shields.io/badge/▶%20Watch%20Demo-91s-f59e0b?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch Demo Video" />
-       </a>
-</p>
-
 <video src="https://github.com/All-The-Vibes/ATV-StarterKit/releases/download/v2.4.0/demo.mp4" width="100%" autoplay loop muted playsinline controls></video>
-
-<details>
-<summary><strong>📽️ Demo Video (91 seconds)</strong> — click to expand scene list</summary>
-
-<br />
-
-**What you'll see:**
-1. **The Problem** — AI that never remembers your patterns
-2. **One Command** — `npx atv-starterkit@latest init` installs everything
-3. **What You Get** — 45 skills, 29 agents, infinite memory
-4. **The Full Sprint** — Think → Plan → Build → Review → Test → Ship → Reflect
-5. **/unslop** ⭐ — Three parallel passes strip AI slop: Code Slop, Comment Rot, Design Slop
-6. **The Learning Loop** — Observer hooks → /learn → instincts → /evolve → permanent skills
-7. **Memory Cycles** — Three reinforcing loops that make your repo smarter
-8. **Get Started** — One command away
-
-</details>
 
 ---
 
