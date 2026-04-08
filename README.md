@@ -217,39 +217,26 @@ Every skill maps to a phase of the development lifecycle:
        </tr>
 </table>
 
-### `/lfg` — the full pipeline in one command
+### `/lfg` — full pipeline, one command
 
-`/lfg` runs every phase sequentially with gates between each step. If a gate fails, it retries before moving on.
-
-```
-/lfg add dark mode support
-
-  ce-plan → deepen-plan → ce-work → ce-review → unslop fix → resolve-todos → test-browser → feature-video → ce-compound
-    ↑ GATE     ↑ GATE       ↑ GATE
-  Plan file?  Deepened?   Code changed?
-```
-
-Each gate verifies the previous step produced real output before proceeding. `/unslop fix` runs after `ce-review` to auto-remove AI slop (over-abstraction, filler comments, template UI). `/ce-compound` closes the loop by saving what was learned to `docs/solutions/` — feeding future `/ce-plan` runs via the `learnings-researcher` agent.
-
-### `/slfg` — parallelized with swarm agents
-
-Same pipeline, restructured for speed. Planning runs sequentially, but review, de-slop, and browser testing run in parallel — `/unslop` adds zero wall-clock time.
+Each step must produce output before the next starts (plan file exists, plan was deepened, code was changed). Retries on failure.
 
 ```
-/slfg add dark mode support
-
-  SEQUENTIAL           PARALLEL (simultaneous)         FINALIZE
-  ─────────────────    ────────────────────────────     ─────────────────────────────────────────
-  ce-plan              ┌ ce-review       (Task) ┐      resolve-todos
-       ↓               │ test-browser    (Task) │           ↓
-  deepen-plan          │ unslop report   (Task) │      unslop fix
-       ↓               └────────────────────────┘           ↓
-  ce-work (swarm) ──→         wait for all              feature-video
-                                                            ↓
-                                                        ce-compound
+plan → deepen → work → review → unslop → resolve → test → video → compound
+  ✓       ✓       ✓
 ```
 
-`/ce-work` uses swarm mode — breaks the plan into tasks and launches parallel subagents. Review, browser testing, and de-slop reporting run simultaneously as background Tasks. After all three complete, `/unslop fix` auto-applies safe fixes, then the pipeline finalizes with video and knowledge compounding.
+### `/slfg` — parallel swarm variant
+
+Same steps. Planning is sequential, review + test + unslop run in parallel.
+
+```
+plan → deepen → work (swarm) ──→ review    ⎤              resolve → unslop fix → video → compound
+                                  test     ⎥ (parallel) →
+                                  unslop   ⎦
+```
+
+`unslop fix` removes AI slop after review. `compound` saves learnings for future `ce-plan` runs.
 
 <details>
 <summary><strong>Full skill reference (45 skills)</strong></summary>

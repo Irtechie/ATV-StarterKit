@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.5.1] — 2026-04-07
+
+### Changed
+
+- **README overhauled** — eliminated repetitive sections (continuous learning explained 3x, installation covered 2x, guided installer described 3x), consolidated into a single-pass flow. Same details, no redundancy.
+- **`/lfg` and `/slfg` pipeline diagrams added** — visual pipeline flows showing step order, parallel execution in `/slfg`, and where `/unslop` and `/ce-compound` fit
+- **De-slop and memory sections tightened** — cut verbose pipeline diagrams and filler phrase tables; kept the core pitch and usage
+
 ## [2.5.0] — 2026-04-07
 
 ### Fixed
