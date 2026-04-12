@@ -32,6 +32,9 @@ jobs:
   npm-publish:
     needs: goreleaser
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -40,11 +43,6 @@ jobs:
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
-
-      - name: Configure npm authentication
-        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Set package version from tag
         run: |
@@ -58,6 +56,4 @@ jobs:
           fi
 
       - name: Publish to npm
-        run: cd npm && npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: cd npm && npm publish --access public --provenance
