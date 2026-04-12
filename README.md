@@ -567,10 +567,6 @@ MIT — Built by [All The Vibes](https://github.com/All-The-Vibes)
 
 Powered by [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) · [gstack](https://github.com/garrytan/gstack) · [agent-browser](https://github.com/vercel-labs/agent-browser)
 
+Special thanks to [blazingbeard](https://github.com/blazingbeard) for building out the training content.
+
 </div>
-
-## Contributors
-
-<a href="https://github.com/blazingbeard"><img src="https://github.com/blazingbeard.png" width="60" height="60" style="border-radius:50%" alt="blazingbeard"></a>
-
-[blazingbeard](https://github.com/blazingbeard) — [ATV Starter Kit Quest](https://blazingbeard.github.io/quests/atv-starterkit.html)
