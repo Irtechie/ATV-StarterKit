@@ -33,7 +33,7 @@ type Watcher struct {
 	mu          sync.RWMutex
 	debounceWin time.Duration
 	onChange    func(LiveState) // notify TUI of state changes
-	stateFile   string         // .atv/dashboard-state.json
+	stateFile   string          // .atv/dashboard-state.json
 	cancel      context.CancelFunc
 	done        chan struct{}
 }

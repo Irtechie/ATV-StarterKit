@@ -22,6 +22,7 @@
        <a href="#the-three-pillars">Three pillars</a> ·
        <a href="#the-full-sprint">Full sprint</a> ·
        <a href="#how-learning-works">Learning</a> ·
+       <a href="#training">Training</a> ·
        <a href="#development">Development</a>
 </p>
 
@@ -531,6 +532,12 @@ All templates are embedded at compile time — no runtime network calls for the 
 
 ---
 
+## Training
+
+New to ATV? The **[ATV Starter Kit Quest](https://blazingbeard.github.io/quests/atv-starterkit.html)** is a guided, gamified training experience that walks you through the full toolkit step by step — from first install to advanced workflows.
+
+---
+
 ## Development
 
 ```bash
@@ -555,5 +562,7 @@ go test ./test/sandbox/ -v               # integration tests (E2E scenarios)
 MIT — Built by [All The Vibes](https://github.com/All-The-Vibes)
 
 Powered by [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) · [gstack](https://github.com/garrytan/gstack) · [agent-browser](https://github.com/vercel-labs/agent-browser)
+
+**Contributors:** [blazingbeard](https://github.com/blazingbeard)
 
 </div>

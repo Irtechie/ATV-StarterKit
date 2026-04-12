@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.5.7] — 2026-04-12
+
+### Added
+
+- **Training quest link in README** — added link to the [ATV Starter Kit Quest](https://blazingbeard.github.io/quests/atv-starterkit.html), a guided and gamified training experience by [blazingbeard](https://github.com/blazingbeard).
+- **blazingbeard added as contributor** in README footer.
+
 ## [2.5.6] — 2026-04-12
 
 ### Fixed

@@ -51,7 +51,7 @@ func ComputeDrift(root string, manifest installstate.InstallManifest) []DriftEnt
 				DiskHash:    diskHash,
 				InstallHash: installHash,
 			})
-		// diskHash == installHash → no drift, skip
+			// diskHash == installHash → no drift, skip
 		}
 	}
 
