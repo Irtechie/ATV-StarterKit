@@ -16,13 +16,16 @@
 </p>
 
 <p align="center">
+       <a href="https://blazingbeard.github.io/quests/atv-starterkit.html"><img src="https://img.shields.io/badge/🎮_New%3F_Start_the_Guided_Training_Quest-ff8c00?style=for-the-badge" alt="Start ATV Quest"></a>
+</p>
+
+<p align="center">
        <a href="#quick-start">Quick start</a> ·
        <a href="#installation">Installation</a> ·
        <a href="#uninstalling">Uninstalling</a> ·
        <a href="#the-three-pillars">Three pillars</a> ·
        <a href="#the-full-sprint">Full sprint</a> ·
        <a href="#how-learning-works">Learning</a> ·
-       <a href="#training">Training</a> ·
        <a href="#development">Development</a>
 </p>
 
@@ -529,16 +532,6 @@ atv-installer init --guided
 ```
 
 All templates are embedded at compile time — no runtime network calls for the core scaffold. gstack requires a network clone (~22MB). Re-running is idempotent: existing files are skipped, JSON configs are merged.
-
----
-
-## Training
-
-<p align="center">
-       <a href="https://blazingbeard.github.io/quests/atv-starterkit.html"><img src="https://img.shields.io/badge/🎮_ATV_Quest-Start_Training-ff8c00?style=for-the-badge" alt="Start ATV Quest"></a>
-</p>
-
-New to ATV? The **[ATV Starter Kit Quest](https://blazingbeard.github.io/quests/atv-starterkit.html)** is a guided, gamified training experience that walks you through the full toolkit step by step — from first install to advanced workflows.
 
 ---
 
