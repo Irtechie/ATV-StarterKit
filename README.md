@@ -16,10 +16,6 @@
 </p>
 
 <p align="center">
-       <a href="https://blazingbeard.github.io/quests/atv-starterkit.html"><img src="https://img.shields.io/badge/🎮_New%3F_Start_the_Guided_Training_Quest-ff8c00?style=for-the-badge" alt="Start ATV Quest"></a>
-</p>
-
-<p align="center">
        <a href="#quick-start">Quick start</a> ·
        <a href="#installation">Installation</a> ·
        <a href="#uninstalling">Uninstalling</a> ·
