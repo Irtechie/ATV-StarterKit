@@ -22,6 +22,7 @@
        <a href="#the-three-pillars">Three pillars</a> ·
        <a href="#the-full-sprint">Full sprint</a> ·
        <a href="#how-learning-works">Learning</a> ·
+       <a href="https://blazingbeard.github.io/quests/atv-starterkit.html">🎮 Training Quest</a> ·
        <a href="#development">Development</a>
 </p>
 
@@ -556,6 +557,6 @@ MIT — Built by [All The Vibes](https://github.com/All-The-Vibes)
 
 Powered by [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) · [gstack](https://github.com/garrytan/gstack) · [agent-browser](https://github.com/vercel-labs/agent-browser)
 
-Special thanks to [blazingbeard](https://github.com/blazingbeard) for building out the training content.
+Special thanks to [blazingbeard](https://github.com/blazingbeard) for building out the [guided training quest](https://blazingbeard.github.io/quests/atv-starterkit.html).
 
 </div>
