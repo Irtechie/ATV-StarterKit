@@ -534,6 +534,10 @@ All templates are embedded at compile time — no runtime network calls for the 
 
 ## Training
 
+<p align="center">
+       <a href="https://blazingbeard.github.io/quests/atv-starterkit.html"><img src="https://img.shields.io/badge/🎮_ATV_Quest-Start_Training-ff8c00?style=for-the-badge" alt="Start ATV Quest"></a>
+</p>
+
 New to ATV? The **[ATV Starter Kit Quest](https://blazingbeard.github.io/quests/atv-starterkit.html)** is a guided, gamified training experience that walks you through the full toolkit step by step — from first install to advanced workflows.
 
 ---
@@ -563,6 +567,10 @@ MIT — Built by [All The Vibes](https://github.com/All-The-Vibes)
 
 Powered by [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) · [gstack](https://github.com/garrytan/gstack) · [agent-browser](https://github.com/vercel-labs/agent-browser)
 
-**Contributors:** [blazingbeard](https://github.com/blazingbeard)
-
 </div>
+
+## Contributors
+
+<a href="https://github.com/blazingbeard"><img src="https://github.com/blazingbeard.png" width="60" height="60" style="border-radius:50%" alt="blazingbeard"></a>
+
+[blazingbeard](https://github.com/blazingbeard) — [ATV Starter Kit Quest](https://blazingbeard.github.io/quests/atv-starterkit.html)
