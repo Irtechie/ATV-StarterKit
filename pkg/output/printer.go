@@ -224,7 +224,7 @@ func guidedSummaryText(outcomes []installstate.InstallOutcome, manifestPath stri
 	b.WriteString(titleStyle.Render("  Guided install summary"))
 	b.WriteString("\n\n")
 	for _, outcome := range outcomes {
-		b.WriteString(fmt.Sprintf("  %s %s", guidedOutcomeIcon(outcome.Status), outcome.Step))
+		fmt.Fprintf(&b, "  %s %s", guidedOutcomeIcon(outcome.Status), outcome.Step)
 		detailParts := make([]string, 0, 2)
 		if outcome.Detail != "" {
 			detailParts = append(detailParts, outcome.Detail)

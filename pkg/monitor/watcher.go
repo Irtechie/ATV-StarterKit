@@ -312,9 +312,9 @@ func (w *Watcher) scanMemoryLayer() {
 	w.state.Solutions = scanArtifactDir(filepath.Join(w.root, "docs", "solutions"))
 
 	// Also update snapshot counts
-	w.state.InstallSnapshot.RepoState.BrainstormCount = len(w.state.Brainstorms)
-	w.state.InstallSnapshot.RepoState.PlanCount = len(w.state.Plans)
-	w.state.InstallSnapshot.RepoState.SolutionCount = len(w.state.Solutions)
+	w.state.RepoState.BrainstormCount = len(w.state.Brainstorms)
+	w.state.RepoState.PlanCount = len(w.state.Plans)
+	w.state.RepoState.SolutionCount = len(w.state.Solutions)
 }
 
 // scanContextLayer scans Copilot context surface (skills, agents, instructions, prompts).
@@ -360,10 +360,10 @@ func (w *Watcher) scanContextLayer() {
 	}
 
 	// Update snapshot fields
-	w.state.InstallSnapshot.RepoState.InstalledSkills = skillCount
-	w.state.InstallSnapshot.RepoState.InstalledAgents = agentCount
-	w.state.InstallSnapshot.RepoState.PromptFileCount = promptCount
-	w.state.InstallSnapshot.RepoState.MCPServerCount = mcpCount
+	w.state.RepoState.InstalledSkills = skillCount
+	w.state.RepoState.InstalledAgents = agentCount
+	w.state.RepoState.PromptFileCount = promptCount
+	w.state.RepoState.MCPServerCount = mcpCount
 }
 
 // scanHealthLayer scans install manifest and drift.

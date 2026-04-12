@@ -12,10 +12,10 @@ import (
 
 // UninstallResult reports what happened during uninstallation.
 type UninstallResult struct {
-	Removed  []string // paths that were removed
-	Skipped  []string // paths skipped (modified by user)
-	Missing  []string // paths that didn't exist
-	Errors   []string // paths that failed to remove
+	Removed []string // paths that were removed
+	Skipped []string // paths skipped (modified by user)
+	Missing []string // paths that didn't exist
+	Errors  []string // paths that failed to remove
 }
 
 // Summary returns a human-readable summary.
@@ -58,6 +58,7 @@ var atvFiles = []string{
 	".github/rails.instructions.md",
 	".github/python.instructions.md",
 	".github/typescript.instructions.md",
+	".vscode/extensions.json",
 }
 
 // atvDocDirectories are documentation directories ATV creates.
@@ -134,6 +135,7 @@ func Uninstall(targetDir string, checksums map[string]string, force bool) Uninst
 	// 4. Clean up empty parent directories
 	cleanEmptyDir(filepath.Join(targetDir, "docs"))
 	cleanEmptyDir(filepath.Join(targetDir, ".github"))
+	cleanEmptyDir(filepath.Join(targetDir, ".vscode"))
 
 	return result
 }
@@ -143,7 +145,7 @@ func fileChecksum(path string) string {
 	if err != nil {
 		return ""
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {
 		return ""
@@ -161,6 +163,6 @@ func isDirEmpty(path string) bool {
 
 func cleanEmptyDir(path string) {
 	if isDirEmpty(path) {
-		os.Remove(path)
+		_ = os.Remove(path)
 	}
 }

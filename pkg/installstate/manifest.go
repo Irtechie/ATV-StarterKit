@@ -100,7 +100,7 @@ func ComputeFileChecksums(root string, relPaths []string) map[string]string {
 		}
 		h := sha256.New()
 		_, err = io.Copy(h, f)
-		f.Close()
+		_ = f.Close()
 		if err != nil {
 			continue
 		}

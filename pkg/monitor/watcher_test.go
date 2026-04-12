@@ -14,7 +14,7 @@ func TestNewWatcher(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewWatcher: %v", err)
 	}
-	defer w.fsWatcher.Close()
+	defer func() { _ = w.fsWatcher.Close() }()
 
 	if w.debounceWin != 300*time.Millisecond {
 		t.Errorf("debounce = %v, want 300ms", w.debounceWin)
@@ -27,7 +27,7 @@ func TestNewWatcher_CustomDebounce(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewWatcher: %v", err)
 	}
-	defer w.fsWatcher.Close()
+	defer func() { _ = w.fsWatcher.Close() }()
 
 	if w.debounceWin != 100*time.Millisecond {
 		t.Errorf("debounce = %v, want 100ms", w.debounceWin)
