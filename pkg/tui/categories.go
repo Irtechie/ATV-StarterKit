@@ -46,6 +46,9 @@ var atvCategoryMapping = map[string][]CategorySkill{
 	gstack.CategoryQATesting: {
 		{Label: "agent-browser — real browser automation with screenshots and form fills", Key: "agent-browser", Source: "atv"},
 	},
+	gstack.CategoryGuidelines: {
+		{Label: "Karpathy Guidelines — think before coding, simplicity, surgical changes, goal-driven execution", Key: "core-skills:karpathy-guidelines", Source: "atv"},
+	},
 }
 
 // BuildCategoryGroups creates the full list of TUI category groups,
@@ -109,6 +112,8 @@ func categoryDescription(cat string, prereqs gstack.Prerequisites) string {
 		return "Systematic investigation patterns that push the agent toward root cause before fixes."
 	case gstack.CategoryRetrospective:
 		return "Capture learnings after shipping so the repo compounds team knowledge over time."
+	case gstack.CategoryGuidelines:
+		return "Behavioral guidelines that shape how Copilot approaches work: assumptions, simplicity, change scope, and verification."
 	default:
 		return "Additional workflow capabilities for this repo."
 	}

@@ -173,6 +173,8 @@ var coreSkillDirectories = []string{
 	"observe",
 	// ATV Quality
 	"unslop",
+	// Behavioral Guidelines
+	"karpathy-guidelines",
 }
 
 var orchestratorSkillDirectories = []string{

@@ -10,6 +10,7 @@ const (
 	CategorySafety        = "safety"
 	CategoryDebugging     = "debugging"
 	CategoryRetrospective = "retrospective"
+	CategoryGuidelines    = "guidelines"
 )
 
 // GstackSkill describes a single gstack skill with its metadata.
@@ -108,6 +109,7 @@ func AllCategories() []string {
 		CategorySafety,
 		CategoryDebugging,
 		CategoryRetrospective,
+		CategoryGuidelines,
 	}
 }
 
@@ -122,6 +124,7 @@ func CategoryLabel(cat string) string {
 		CategorySafety:        "🛡️ Safety Guardrails",
 		CategoryDebugging:     "🐛 Debugging",
 		CategoryRetrospective: "📊 Retrospective",
+		CategoryGuidelines:    "📐 Coding Guidelines",
 	}
 	if l, ok := labels[cat]; ok {
 		return l

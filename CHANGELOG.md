@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.5.7] — 2026-04-15
+
+### Added
+
+- **Karpathy Guidelines skill** — behavioral guardrails derived from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls, ported from [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) (Claude Code plugin) to GitHub Copilot's instruction system. Installs as `.github/skills/karpathy-guidelines/SKILL.md` with four principles: Think Before Coding, Simplicity First, Surgical Changes, and Goal-Driven Execution.
+- **Coding Guidelines TUI category** — new `📐 Coding Guidelines` category in the guided installer's customization screen. Karpathy Guidelines are included in all three presets (Starter, Pro, Full) as a core skill and can be toggled in the customize step.
+
 ## [2.5.6] — 2026-04-12
 
 ### Added

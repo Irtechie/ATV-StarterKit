@@ -594,6 +594,9 @@ func TestE2EFullGuidedInstallLifecycle(t *testing.T) {
 			skillPath := filepath.Join(skillsDir, skill, "SKILL.md")
 			assertFileExists(t, skillPath)
 		}
+		// Verify behavioral guidelines skill exists
+		karpathyPath := filepath.Join(skillsDir, "karpathy-guidelines", "SKILL.md")
+		assertFileExists(t, karpathyPath)
 	})
 
 	t.Run("hook5_agents_installed", func(t *testing.T) {

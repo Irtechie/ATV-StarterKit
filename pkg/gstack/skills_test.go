@@ -73,8 +73,8 @@ func TestFilterSkillsEmpty(t *testing.T) {
 
 func TestAllCategories(t *testing.T) {
 	cats := AllCategories()
-	if len(cats) != 8 {
-		t.Errorf("expected 8 categories, got %d", len(cats))
+	if len(cats) != 9 {
+		t.Errorf("expected 9 categories, got %d", len(cats))
 	}
 }
 

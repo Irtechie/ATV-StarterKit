@@ -27,13 +27,14 @@
 
 ## What is ATV 2.0?
 
-ATV 2.0 is a one-command installer that wires together three open-source systems into a single coherent agentic coding environment for GitHub Copilot:
+ATV 2.0 is a one-command installer that wires together three open-source systems into a single coherent agentic coding environment for GitHub Copilot — grounded in the behavioral principles from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls:
 
 - **[Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin)** — planning-to-knowledge pipeline
 - **[gstack](https://github.com/garrytan/gstack)** — sprint execution engine (by Garry Tan / Y Combinator)
 - **[agent-browser](https://github.com/vercel-labs/agent-browser)** — browser automation layer (by Vercel)
+- **[Karpathy Guidelines](https://github.com/forrestchang/andrej-karpathy-skills)** — behavioral guardrails: think before coding, simplicity first, surgical changes, goal-driven execution
 
-Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45 skills, 29 agents, and a learning system that makes your repo smarter with every session.
+Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45+ skills, 29 agents, and a learning system that makes your repo smarter with every session.
 
 ---
 
@@ -106,6 +107,19 @@ Removes `.github/skills/`, `.github/agents/`, `.github/hooks/`, `.github/copilot
 ---
 
 ## The Three Pillars
+
+### Karpathy Guidelines — the behavioral foundation
+
+Every skill and agent in ATV operates under four principles derived from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on how LLMs fail at coding. These are installed as a skill (`.github/skills/karpathy-guidelines/SKILL.md`) and shape how Copilot approaches all work:
+
+| Principle | What it prevents |
+|---|---|
+| **Think Before Coding** | Wrong assumptions, hidden confusion, silently picking one interpretation |
+| **Simplicity First** | Overcomplication, bloated abstractions, speculative features |
+| **Surgical Changes** | Drive-by refactoring, touching code you shouldn't, cosmetic "improvements" |
+| **Goal-Driven Execution** | Vague success criteria, no verification loop, "make it work" without checking |
+
+These aren't just instructions — they're the operating contract between you and the AI. Without them, Copilot tends toward the exact pitfalls Karpathy described: "The models make wrong assumptions on your behalf and just run along with them."
 
 ### Compound Engineering — knowledge compounds
 
@@ -550,7 +564,7 @@ go test ./test/sandbox/ -v               # integration tests (E2E scenarios)
 
 MIT — Built by [All The Vibes](https://github.com/All-The-Vibes)
 
-Powered by [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) · [gstack](https://github.com/garrytan/gstack) · [agent-browser](https://github.com/vercel-labs/agent-browser)
+Powered by [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) · [gstack](https://github.com/garrytan/gstack) · [agent-browser](https://github.com/vercel-labs/agent-browser) · [Karpathy Guidelines](https://github.com/forrestchang/andrej-karpathy-skills)
 
 Special thanks to [blazingbeard](https://github.com/blazingbeard) for building out the [guided training quest](https://blazingbeard.github.io/quests/atv-starterkit.html).
 
