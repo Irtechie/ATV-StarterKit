@@ -41,7 +41,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           registry-url: "https://registry.npmjs.org"
 
       - name: Set package version from tag
@@ -56,4 +56,4 @@ jobs:
           fi
 
       - name: Publish to npm
-        run: cd npm && npm publish
+        run: cd npm && npm publish --access public
