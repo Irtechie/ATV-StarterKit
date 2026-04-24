@@ -1,7 +1,7 @@
 ---
 name: atv-security
 description: "Audit agentic config security — secrets, permissions, hooks, MCP servers, agents. Adapts AgentShield's rule taxonomy for Copilot's .github/ layout. Triggers on 'security scan', 'audit security', 'check config security', 'atv-security', 'security audit', 'scan for vulnerabilities'."
-argument-hint: "[mode: report (default) | fix | deep scan]"
+argument-hint: "[mode: report (default) | fix]"
 ---
 
 # /atv-security — Agentic Config Security Auditor
@@ -14,7 +14,7 @@ Scan your ATV Starter Kit configuration for security vulnerabilities across 7 co
 
 <mode> #$ARGUMENTS </mode>
 
-**Mode detection:** Check if arguments *contain* "fix" → fix mode. Check if arguments *contain* "deep" or "deep scan" → deep scan mode. Otherwise → report mode (default).
+**Mode detection:** Check if arguments *contain* "fix" → fix mode. Otherwise → report mode (default).
 
 ## Execution Flow
 
@@ -23,7 +23,7 @@ Phase 1: Discovery     → Find all config files across 7 surfaces
 Phase 2: Tier 1 Scan   → Deterministic grep_search with regex patterns
 Phase 3: Tier 2 Scan   → read_file + LLM assessment for semantic rules
 Phase 4: Score & Grade  → Per-category weighted scoring → A–F grade
-Phase 5: Output         → Report (default) | Fix (opt-in) | Deep Scan (opt-in)
+Phase 5: Output         → Report (default) | Fix (opt-in)
 ```
 
 ---
@@ -267,7 +267,6 @@ Print the following report in chat. Do not modify any files.
 |---------------|-------|----------|------|--------|-----|-------------|
 | [N] | [N] | [N] | [N] | [N] | [N] | [N] |
 
-For deeper analysis: `npx ecc-agentshield@1.4.0 scan --path .`
 For OWASP Top 10 + STRIDE on application code: run `/cso`
 ```
 
@@ -303,7 +302,7 @@ After printing the report in chat, persist it to disk so it survives the convers
    ```markdown
    ## /atv-security Scan — <ISO timestamp>
 
-   - **Mode:** report | fix | deep
+   - **Mode:** report | fix
    - **Grade:** <A–F> · **Score:** <0–100>/100
    - **Files scanned:** <N>
 
@@ -352,38 +351,6 @@ After generating the report (Phase 5a), apply safe fixes for auto-fixable findin
 - Only value replacements within existing keys — never add, remove, or restructure JSON/YAML keys
 - Never apply fixes without user confirmation
 - Never apply fixes to files that failed parse validation
-
-### 5c. Deep Scan Mode (opt-in)
-
-After the skill-based scan (Phases 2–4), run the AgentShield CLI for comprehensive coverage.
-
-**Step 1 — Check availability:**
-Run in terminal: `npx ecc-agentshield@1.4.0 --version`
-
-If it fails or is not found:
-```
-ℹ️ AgentShield CLI not available. Showing skill-based scan results only.
-   Install for deeper analysis: npm install -g ecc-agentshield
-```
-Then output the skill-based report (Phase 5a) and stop.
-
-**Step 2 — Run scan:**
-Run in terminal: `npx ecc-agentshield@1.4.0 scan --path . --format json`
-
-**Step 3 — Parse results:**
-Parse the JSON output. Extract `findings[]` array. Each finding has: `id`, `severity`, `category`, `title`, `description`, `file`.
-
-**Step 4 — Deduplicate:**
-For each CLI finding, check if a skill-based finding exists with matching `category + file + title` (fuzzy match on title). If duplicate, keep the skill-based finding and skip the CLI finding.
-
-**Step 5 — Merge and re-score:**
-Add unique CLI findings to the findings list with a `[deep]` tag. Recompute category scores and overall grade with the merged set.
-
-**Step 6 — Output:**
-Print the unified report (Phase 5a format) with `[deep]` tagged findings clearly marked. Add a note:
-```
-Deep scan by AgentShield v1.4.0 added [N] additional findings.
-```
 
 ---
 
