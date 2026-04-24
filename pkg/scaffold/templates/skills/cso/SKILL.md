@@ -74,7 +74,7 @@ For each category, use `grep_search` for Tier 1 patterns and `read_file` + LLM a
 
 | Pattern | What it catches | Severity |
 |---------|----------------|----------|
-| `md5\|sha1\|DES\|RC4` in crypto/hash contexts | Weak/deprecated algorithms | 🟡 high |
+| `(?:md5|sha1|DES|RC4)` in crypto/hash contexts | Weak/deprecated algorithms | 🟡 high |
 | `http://` in API endpoint URLs (not localhost) | Unencrypted data in transit | 🟢 medium |
 | `password.*=.*["'][^$]` | Hardcoded passwords | 🔴 critical |
 
@@ -87,13 +87,18 @@ For each category, use `grep_search` for Tier 1 patterns and `read_file` + LLM a
 
 **Tier 1 — grep patterns:**
 
-| Pattern | What it catches | Severity |
-|---------|----------------|----------|
-| `query\s*\(\s*["'\x60].*\$\{` or `query\s*\(.*\+\s*` | SQL injection via string concatenation | 🔴 critical |
-| `eval\s*\(` or `exec\s*\(` or `Function\s*\(` with variable input | Code injection | 🔴 critical |
-| `innerHTML\s*=` or `dangerouslySetInnerHTML` or `\| safe` or `\|raw` | XSS via unsafe HTML rendering | 🟡 high |
-| `child_process\.\(exec\|spawn\).*\$\{` or `subprocess\.call.*\+` | OS command injection | 🔴 critical |
-| `\.find\(\{.*\$` or `\.aggregate\(\[.*\$` in Mongo contexts | NoSQL injection | 🟡 high |
+For A03 alternation patterns, use the entries below instead of markdown table rows so the raw `|` characters remain valid for `isRegexp: true`:
+
+- **SQL injection via string concatenation** — 🔴 critical
+  - **Pattern:** `query\s*\(\s*["'\x60].*\$\{` or `query\s*\(.*\+\s*`
+- **Code injection** — 🔴 critical
+  - **Pattern:** `(?:eval|exec|Function)\s*\(` with variable input
+- **XSS via unsafe HTML rendering** — 🟡 high
+  - **Pattern:** `(?:innerHTML\s*=|dangerouslySetInnerHTML|\| safe|\|raw)`
+- **OS command injection** — 🔴 critical
+  - **Pattern:** `child_process\.(?:exec|spawn).*\$\{` or `subprocess\.call.*\+`
+- **NoSQL injection** — 🟡 high
+  - **Pattern:** `\.find\(\{.*\$` or `\.aggregate\(\[.*\$` in Mongo contexts
 
 **Tier 2 — LLM assessment:**
 - Read files with database queries. Are all queries parameterized?
@@ -112,17 +117,18 @@ For each category, use `grep_search` for Tier 1 patterns and `read_file` + LLM a
 
 **Tier 1 — grep patterns:**
 
-| Pattern | What it catches | Severity |
-|---------|----------------|----------|
-| `DEBUG\s*=\s*True\|debug:\s*true` | Debug mode enabled | 🟡 high |
-| `cors\(\)` without origin restriction, or `origin:\s*["']\*["']` | Unrestricted CORS | 🟡 high |
-| `helmet` not imported/used (Node.js) | Missing security headers | 🟢 medium |
-| `ALLOWED_HOSTS\s*=\s*\[["']\*["']\]` | Django wildcard hosts | 🟡 high |
+- **Debug mode enabled** — 🟡 high
+  - **Pattern:** `(?:DEBUG\s*=\s*True|debug:\s*true)`
+- **Unrestricted CORS** — 🟡 high
+  - **Pattern:** `cors\(\)` without origin restriction, or `origin:\s*["']\*["']`
+- **Django wildcard hosts** — 🟡 high
+  - **Pattern:** `ALLOWED_HOSTS\s*=\s*\[["']\*["']\]`
 
 **Tier 2 — LLM assessment:**
 - Check: Are default credentials changed?
 - Check: Are error pages custom (not showing stack traces)?
 - Check: Are unnecessary features/endpoints disabled in production config?
+- Check: In Node.js/Express apps, are security headers configured appropriately (for example, via `helmet` or equivalent middleware)? This is an absence check that requires reading the app setup, not a grep pattern.
 
 ### A06: Vulnerable and Outdated Components
 
@@ -142,11 +148,12 @@ For each category, use `grep_search` for Tier 1 patterns and `read_file` + LLM a
 
 **Tier 1 — grep patterns:**
 
-| Pattern | What it catches | Severity |
-|---------|----------------|----------|
-| `jwt\.sign.*expiresIn.*["']30d\|["']365d\|["']never` | Excessive token lifetime | 🟡 high |
-| `session.*maxAge.*86400000` (>24h in ms) | Long session duration | 🟢 medium |
-| `bcrypt.*rounds.*[1-5][^0-9]` or `salt.*rounds.*[1-5][^0-9]` | Weak bcrypt rounds (<6) | 🟡 high |
+- **Excessive token lifetime** — 🟡 high
+  - **Pattern:** `jwt\.sign.*expiresIn.*(?:["']30d|["']365d|["']never)`
+- **Long session duration** — 🟢 medium
+  - **Pattern:** `session.*maxAge.*86400000` (>24h in ms)
+- **Weak bcrypt rounds (<6)** — 🟡 high
+  - **Pattern:** `(?:bcrypt|salt).*rounds.*[1-5][^0-9]`
 
 **Tier 2 — LLM assessment:**
 - Check: Is there brute-force protection (account lockout, progressive delays)?
@@ -159,12 +166,12 @@ For each category, use `grep_search` for Tier 1 patterns and `read_file` + LLM a
 
 | Pattern | What it catches | Severity |
 |---------|----------------|----------|
-| `deserialize\|unserialize\|pickle\.load\|yaml\.load\b` | Unsafe deserialization | 🔴 critical |
-| `integrity=` absent in `<script src="https://` | Missing SRI on CDN scripts | 🟢 medium |
+| `(?:deserialize|unserialize|pickle\.load|yaml\.load\b)` | Unsafe deserialization | 🔴 critical |
 
 **Tier 2 — LLM assessment:**
 - Check: Is CI/CD pipeline protected against tampering?
 - Check: Are software updates verified with signatures?
+- Check: Do HTML pages include `<script src="https://...">` tags that load third-party/CDN scripts without an `integrity` attribute (Subresource Integrity)? This requires reading/parsing the tag — a simple grep can't validate absence of an attribute reliably.
 
 ### A09: Security Logging and Monitoring Failures
 
@@ -178,10 +185,10 @@ For each category, use `grep_search` for Tier 1 patterns and `read_file` + LLM a
 
 **Tier 1 — grep patterns:**
 
-| Pattern | What it catches | Severity |
-|---------|----------------|----------|
-| `fetch\s*\(\s*\w+\|axios\.\w+\(\s*\w+\|requests\.\w+\(\s*\w+` where the URL is a variable | Potential SSRF if URL is user-controlled | 🟡 high |
-| `http\.Get\(\s*\w+\|urllib\.request\.urlopen\(\s*\w+` | Same pattern in Go/Python | 🟡 high |
+- **Potential SSRF if URL is user-controlled** — 🟡 high
+  - **Pattern:** `(?:fetch\s*\(\s*\w+|axios\.\w+\(\s*\w+|requests\.\w+\(\s*\w+)`
+- **Same pattern in Go/Python** — 🟡 high
+  - **Pattern:** `(?:http\.Get\(\s*\w+|urllib\.request\.urlopen\(\s*\w+)`
 
 **Tier 2 — LLM assessment:**
 - Check: Is user input validated/allowlisted before being used in server-side HTTP requests?
