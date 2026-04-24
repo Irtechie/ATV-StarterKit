@@ -11,6 +11,11 @@ This project uses the ATV (Agentic Tool & Workflow) Starter Kit.
 - `/ce-compound` — Document solutions for future reference
 - `/lfg` — Full autonomous pipeline (plan → work → review)
 
+## Session Bookends
+
+- `/takeoff` — Prioritized backlog briefing to start a session
+- `/land` — Commit → push → PR → handoff to finish a session (never merges)
+
 ## Documentation Structure
 
 - `docs/plans/` — Implementation plans (living documents with checkboxes)
