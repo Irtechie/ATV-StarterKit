@@ -9,6 +9,7 @@ This project uses the ATV (Agentic Tool & Workflow) Starter Kit.
 - `/ce-work` — Execute the plan with quality checks
 - `/ce-review` — Multi-agent code review
 - `/ce-compound` — Document solutions for future reference
+- `/atv-security` — Audit agentic config security (secrets, permissions, hooks, MCP, agents)
 - `/lfg` — Full autonomous pipeline (plan → work → review)
 
 ## Documentation Structure

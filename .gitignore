@@ -42,6 +42,7 @@ PROGRESS.md
 
 # Local build/output artifacts
 atv-installer
+atv-installer.exe
 banner-block.txt
 
 # Node
