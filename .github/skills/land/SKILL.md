@@ -42,13 +42,17 @@ Skip silently if nothing remains.
 Detect the stack from the repo root and run the matching build + test/lint commands. For ATV-starterkit specifically, this means Go at the root plus an optional Node subproject under `npm/`.
 
 ```bash
-# Go (repo root) — run when go.mod is present. Do NOT suppress failure.
+# Go (repo root) — run when go.mod is present AND Go files changed this session.
+# Quality gates run BEFORE commit, so we cannot rely on HEAD~1; check working tree.
 if [ -f go.mod ]; then
-  go build ./... && go vet ./...
+  if { git diff --name-only;
+       git diff --name-only --cached;
+       git ls-files --others --exclude-standard; } | grep -qE '\.go$|^go\.(mod|sum)$'; then
+    go build ./... && go vet ./...
+  fi
 fi
 
 # Node subproject — run when npm/ files have changed (staged, unstaged, or untracked).
-# Quality gates run BEFORE commit, so we cannot rely on HEAD~1.
 if [ -f npm/package.json ]; then
   if { git diff --name-only;
        git diff --name-only --cached;
@@ -92,6 +96,10 @@ Work is not complete until this step succeeds.
 
 ```bash
 branch=$(git branch --show-current)
+if [ -z "$branch" ]; then
+  echo "ERROR: detached HEAD — refusing to push. Check out a branch first." >&2
+  exit 1
+fi
 # only rebase if this branch already tracks a remote — new branches have no upstream yet
 if git rev-parse --verify "origin/$branch" >/dev/null 2>&1; then
   git pull --rebase origin "$branch"
@@ -149,7 +157,12 @@ Confirm a clean state:
 
 ```bash
 git status                                          # working tree clean (or only untracked)
-git log "origin/$(git branch --show-current)..HEAD" # must be empty — all pushed
+branch=$(git branch --show-current)
+if [ -n "$branch" ] && git rev-parse --verify "origin/$branch" >/dev/null 2>&1; then
+  git log "origin/$branch..HEAD"                    # must be empty — all pushed
+else
+  echo "WARNING: no upstream tracking ref for '$branch' — cannot verify pushed state"
+fi
 ```
 
 If either check fails, loop back and fix. Do not hand off a dirty or unpushed tree.
@@ -191,4 +204,4 @@ These are non-negotiable when `/land` is invoked:
 
 ## Project-specific considerations
 
-Some repos have local conventions layered on top of this protocol — read `.github/copilot-instructions.md` and `AGENTS.md` at the repo root for project-specific rules (e.g., branch protection, PR comment workflows, backlog linkage requirements). Project rules override these defaults where they conflict.
+Some repos have local conventions layered on top of this protocol — read `.github/copilot-instructions.md` (and any `AGENTS.md` or `CLAUDE.md` at the repo root, when present) for project-specific rules (e.g., branch protection, PR comment workflows, backlog linkage requirements). Project rules override these defaults where they conflict.

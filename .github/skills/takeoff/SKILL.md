@@ -38,19 +38,16 @@ test -d backlog && echo "backlog present" || echo "no backlog — will fall back
 
 ### Step 2: Pull the backlog (preferred path)
 
-Shell out to the backlog CLI when it's available and `backlog/` exists:
+Shell out to the backlog CLI only when both the CLI and `backlog/` directory are present. Otherwise fall through to Step 2b:
 
 ```bash
-backlog task list --plain --sort priority
+if command -v backlog >/dev/null 2>&1 && [ -d backlog ]; then
+  backlog task list --plain --sort priority
+  backlog sequence list --plain
+fi
 ```
 
-Also pull sequence info to detect dependencies:
-
-```bash
-backlog sequence list --plain
-```
-
-Parse both. Extract: id, title, priority, status, assignee, dependencies, blocked-by.
+Parse both outputs. Extract: id, title, priority, status, assignee, dependencies, blocked-by.
 
 If the `backlog` CLI is absent but the `backlog/` directory is present, read the task markdown files directly and parse frontmatter for the same fields.
 
@@ -135,7 +132,7 @@ Start with **AGENTSAPI-1**. It's the next unblocked HIGH-priority item and clear
 - Group headers use H3 (`###`) for top-priority only; secondary groups use a bold-emoji line (e.g., `🔵 DOCREVIEW epic subtasks`), not an H-level heading.
 - Omit groups that have zero tasks. If In Progress is empty, skip the section.
 - Never emit a table. No pipes, no box-drawing characters.
-- **Escape any pipes inside task titles** with `\|` as a defensive measure. Do not truncate titles.
+- Do not truncate titles; rely on bullets to wrap cleanly at any width.
 
 ### Step 5: Offer a next step
 
