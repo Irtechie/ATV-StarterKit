@@ -18,6 +18,7 @@ This is a Python project using the ATV (Agentic Tool & Workflow) Starter Kit.
 - `/ce-review` — Multi-agent code review
 - `/ce-compound` — Document solutions for future reference
 - `/atv-security` — Audit agentic config security (secrets, permissions, hooks, MCP, agents)
+- `/cso` — OWASP Top 10 + STRIDE threat model for application source code
 - `/lfg` — Full autonomous pipeline (plan → work → review)
 
 ## Documentation Structure
@@ -34,7 +35,6 @@ This is a Python project using the ATV (Agentic Tool & Workflow) Starter Kit.
 - `/review` — Staff-level code review; auto-fix obvious issues
 - `/qa` — Test app in real browser, find and fix bugs (requires Bun)
 - `/ship` — Sync main, run tests, push, open PR
-- `/cso` — OWASP Top 10 + STRIDE threat model
 - `/careful` — Warn before destructive commands
 - `/investigate` — Systematic root-cause debugging
 - `/retro` — Weekly retrospective with trends
