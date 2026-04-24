@@ -6,7 +6,7 @@ argument-hint: "[mode: report (default) | fix]"
 
 # /atv-security — Agentic Config Security Auditor
 
-Scan your ATV Starter Kit configuration for security vulnerabilities across 7 config surfaces using 30 rules adapted from [AgentShield](https://github.com/affaan-m/agentshield)'s proven taxonomy.
+Scan your ATV Starter Kit configuration for security vulnerabilities across 7 config surfaces using 33 rules adapted from [AgentShield](https://github.com/affaan-m/agentshield)'s proven taxonomy.
 
 **5 categories:** Secrets · Permissions · Hooks · MCP Servers · Agents & Skills
 
@@ -59,8 +59,19 @@ Run `grep_search` with `isRegexp: true` for each pattern below. For each match, 
 | SEC-01 | `sk-ant-[a-zA-Z0-9]{20,}` | All `.github/**`, `.vscode/**` | 🔴 critical | Replace with `${ANTHROPIC_API_KEY}` env var reference |
 | SEC-02 | `sk-proj-[a-zA-Z0-9]{20,}` | All `.github/**`, `.vscode/**` | 🔴 critical | Replace with `${OPENAI_API_KEY}` env var reference |
 | SEC-03 | `AKIA[0-9A-Z]{16}` | All `.github/**`, `.vscode/**` | 🔴 critical | Replace with `${AWS_ACCESS_KEY_ID}` env var reference |
-| SEC-04 | `ghp_[a-zA-Z0-9]{36}\|github_pat_[a-zA-Z0-9]{22,}` | All `.github/**`, `.vscode/**` | 🔴 critical | Replace with `${GITHUB_TOKEN}` env var reference |
-| SEC-05 | `Bearer [a-zA-Z0-9_\-\.]{20,}\|mongodb(\+srv)?://[^\s]+\|postgres(ql)?://[^\s]+\|mysql://[^\s]+\|redis://[^\s]+` | All `.github/**`, `.vscode/**` | 🟡 high | Replace with `${ENV_VAR}` reference appropriate to the service |
+
+For rules whose regex patterns require alternation, use the entries below instead of markdown table rows so the raw `|` characters remain valid for `isRegexp: true`:
+
+- **SEC-04**
+  - **Pattern:** `(?:ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22,})`
+  - **Scope:** All `.github/**`, `.vscode/**`
+  - **Severity:** 🔴 critical
+  - **Fix:** Replace with `${GITHUB_TOKEN}` env var reference
+- **SEC-05**
+  - **Pattern:** `(?:Bearer [a-zA-Z0-9_\-\.]{20,}|mongodb(\+srv)?://[^\s]+|postgres(ql)?://[^\s]+|mysql://[^\s]+|redis://[^\s]+)`
+  - **Scope:** All `.github/**`, `.vscode/**`
+  - **Severity:** 🟡 high
+  - **Fix:** Replace with `${ENV_VAR}` reference appropriate to the service
 
 ### MCP Server Rules (grep-detectable)
 
@@ -68,14 +79,28 @@ Run `grep_search` with `isRegexp: true` for each pattern below. For each match, 
 |------|---------|-------|----------|-----|
 | MCP-02 | `"tools"\s*:\s*\["?\*"?\]` | `.github/copilot-mcp-config.json` | 🟡 high | Scope to specific tools needed: `["tool1", "tool2"]` |
 | MCP-03 | `autoApprove` | `.github/copilot-mcp-config.json` | 🟢 medium | Remove autoApprove or restrict to safe read-only tools |
-| MCP-04 | `sk-ant-\|sk-proj-\|AKIA\|ghp_\|Bearer ` | `.github/copilot-mcp-config.json` env sections | 🔴 critical | Use `${input:VAR}` or `${ENV_VAR}` references |
+
+- **MCP-04**
+  - **Pattern:** `(?:sk-ant-|sk-proj-|AKIA|ghp_|Bearer )`
+  - **Scope:** `.github/copilot-mcp-config.json` env sections
+  - **Severity:** 🔴 critical
+  - **Fix:** Use `${input:VAR}` or `${ENV_VAR}` references
 
 ### Hook Rules (grep-detectable)
 
+- **HOOK-01**
+  - **Pattern:** `(?:curl.*\$\{|wget.*\$\{|eval.*\$\{)`
+  - **Scope:** `.github/hooks/scripts/**`
+  - **Severity:** 🟡 high
+  - **Fix:** Validate/sanitize variables before use in network/eval commands
+- **HOOK-02**
+  - **Pattern:** `(?:curl\s+-X\s+POST.*\$|wget\s+--post)`
+  - **Scope:** `.github/hooks/scripts/**`
+  - **Severity:** 🔴 critical
+  - **Fix:** Remove data exfiltration patterns or restrict to known-safe URLs
+
 | Rule | Pattern | Scope | Severity | Fix |
 |------|---------|-------|----------|-----|
-| HOOK-01 | `curl.*\$\{\|wget.*\$\{\|eval.*\$\{` | `.github/hooks/scripts/**` | 🟡 high | Validate/sanitize variables before use in network/eval commands |
-| HOOK-02 | `curl\s+-X\s+POST.*\$\|wget\s+--post` | `.github/hooks/scripts/**` | 🔴 critical | Remove data exfiltration patterns or restrict to known-safe URLs |
 | HOOK-03a | `2>/dev/null` | `.github/hooks/scripts/**` | 🟢 medium | Log errors instead of suppressing them silently |
 | HOOK-03b | `\|\| true$` | `.github/hooks/scripts/**` | 🟢 medium | Log errors instead of suppressing them silently |
 | HOOK-03c | `\|\| exit 0$` | `.github/hooks/scripts/**` | 🟢 medium | Log errors instead of suppressing them silently |
@@ -377,7 +402,7 @@ Every finding must include these fields:
 | File | Repo-relative path to the affected file |
 | Evidence | Matched text or assessment reason (truncated to 100 chars) |
 | Fix | Actionable remediation suggestion |
-| Auto-fixable | Yes/No — only for Tier 1 secret and permission rules |
+| Auto-fixable | Yes/No — applies to rules supported by fix mode (Tier 1 secret rules SEC-01–SEC-05 plus MCP-02 and MCP-04) |
 
 ---
 
