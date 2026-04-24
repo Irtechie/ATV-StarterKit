@@ -1,5 +1,6 @@
 ---
 description: Use this agent when you need to run linting and code quality checks on Ruby and ERB files. Run before pushing to origin.
+user-invocable: true
 ---
 
 Your workflow process:

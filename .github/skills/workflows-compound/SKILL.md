@@ -1,6 +1,6 @@
 ---
 name: workflows-compound
-description: "[DEPRECATED] Use /ce:compound instead — renamed for clarity."
+description: "[DEPRECATED] Use /ce:compound instead -- renamed for clarity."
 ---
 
 ## Arguments

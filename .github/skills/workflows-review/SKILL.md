@@ -1,6 +1,6 @@
 ---
 name: workflows-review
-description: "[DEPRECATED] Use /ce:review instead — renamed for clarity."
+description: "[DEPRECATED] Use /ce:review instead -- renamed for clarity."
 ---
 
 ## Arguments

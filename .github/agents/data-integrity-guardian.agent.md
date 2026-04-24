@@ -1,5 +1,6 @@
 ---
 description: Reviews database migrations, data models, and persistent data code for safety. Use when checking migration safety, data constraints, transaction boundaries, or privacy compliance.
+user-invocable: true
 ---
 
 <examples>
