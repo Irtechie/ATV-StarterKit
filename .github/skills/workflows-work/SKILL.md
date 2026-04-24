@@ -1,6 +1,6 @@
 ---
 name: workflows-work
-description: "[DEPRECATED] Use /ce:work instead — renamed for clarity."
+description: "[DEPRECATED] Use /ce:work instead -- renamed for clarity."
 ---
 
 ## Arguments

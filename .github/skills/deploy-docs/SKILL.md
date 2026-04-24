@@ -1,6 +1,7 @@
 ---
 name: deploy-docs
 description: Validate and prepare documentation for GitHub Pages deployment
+disable-model-invocation: true
 ---
 
 # Deploy Documentation Command
@@ -14,7 +15,6 @@ Run these checks:
 ```bash
 # Count components
 echo "Agents: $(ls plugins/compound-engineering/agents/*.md | wc -l)"
-echo "Commands: $(ls plugins/compound-engineering/commands/*.md | wc -l)"
 echo "Skills: $(ls -d plugins/compound-engineering/skills/*/ 2>/dev/null | wc -l)"
 
 # Validate JSON

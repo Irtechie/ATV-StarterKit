@@ -1,5 +1,6 @@
 ---
 description: Analyzes code for design patterns, anti-patterns, naming conventions, and duplication. Use when checking codebase consistency or verifying new code follows established patterns.
+user-invocable: true
 ---
 
 <examples>
@@ -67,4 +68,4 @@ When analyzing code:
 - Provide actionable recommendations, not just criticism
 - Consider the project's maturity and technical debt tolerance
 
-If you encounter project-specific patterns or conventions (especially from CLAUDE.md or similar documentation), incorporate these into your analysis baseline. Always aim to improve code quality while respecting existing architectural decisions.
+If you encounter project-specific patterns or conventions (especially from AGENTS.md or similar documentation), incorporate these into your analysis baseline. Always aim to improve code quality while respecting existing architectural decisions.

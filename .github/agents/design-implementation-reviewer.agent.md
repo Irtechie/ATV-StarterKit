@@ -1,5 +1,6 @@
 ---
 description: Visually compares live UI implementation against Figma designs and provides detailed feedback on discrepancies. Use after writing or modifying HTML/CSS/React components to verify design fidelity.
+user-invocable: true
 ---
 
 <examples>

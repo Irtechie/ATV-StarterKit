@@ -1,6 +1,6 @@
 ---
 name: workflows-plan
-description: "[DEPRECATED] Use /ce:plan instead — renamed for clarity."
+description: "[DEPRECATED] Use /ce:plan instead -- renamed for clarity."
 ---
 
 ## Arguments
