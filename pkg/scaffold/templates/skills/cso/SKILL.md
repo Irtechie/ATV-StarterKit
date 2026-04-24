@@ -25,6 +25,7 @@ Phase 1: Discover    → Detect stack, find source files
 Phase 2: OWASP Scan  → Check Top 10 vulnerability categories
 Phase 3: STRIDE      → Threat model the application architecture
 Phase 4: Report      → Graded report with findings + threat matrix
+Phase 5: Persist     → Upsert report into docs/security/YYYY-MM-DD-security-report.md
 ```
 
 ---
@@ -280,7 +281,7 @@ For agentic config security: run `/atv-security`
 
 If zero OWASP findings and zero unmitigated STRIDE threats: "Your application code looks secure! No findings detected."
 
-### Phase 5: Persist Report (always, after report is generated)
+## Phase 5: Persist Report (always, after report is generated)
 
 After printing the report in chat, persist it to disk so it survives the conversation.
 

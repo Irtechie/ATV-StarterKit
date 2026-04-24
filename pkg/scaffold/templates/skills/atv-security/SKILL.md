@@ -76,7 +76,9 @@ Run `grep_search` with `isRegexp: true` for each pattern below. For each match, 
 |------|---------|-------|----------|-----|
 | HOOK-01 | `curl.*\$\{\|wget.*\$\{\|eval.*\$\{` | `.github/hooks/scripts/**` | 🟡 high | Validate/sanitize variables before use in network/eval commands |
 | HOOK-02 | `curl\s+-X\s+POST.*\$\|wget\s+--post` | `.github/hooks/scripts/**` | 🔴 critical | Remove data exfiltration patterns or restrict to known-safe URLs |
-| HOOK-03 | `2>/dev/null\|\|\| true\|\|\| exit 0` | `.github/hooks/scripts/**` | 🟢 medium | Log errors instead of suppressing them silently |
+| HOOK-03a | `2>/dev/null` | `.github/hooks/scripts/**` | 🟢 medium | Log errors instead of suppressing them silently |
+| HOOK-03b | `\|\| true$` | `.github/hooks/scripts/**` | 🟢 medium | Log errors instead of suppressing them silently |
+| HOOK-03c | `\|\| exit 0$` | `.github/hooks/scripts/**` | 🟢 medium | Log errors instead of suppressing them silently |
 
 ### Agent & Skill Rules (grep-detectable)
 
@@ -89,7 +91,7 @@ Run `grep_search` with `isRegexp: true` for each pattern below. For each match, 
 
 | Rule | Pattern | Scope | Severity | Fix |
 |------|---------|-------|----------|-----|
-| PERM-01 | `workspace\.trust\.enabled.*false\|allowMkdir.*true` | `.vscode/settings.json` | 🟢 medium | Enable workspace trust; restrict mkdir permissions |
+| PERM-01 | `security\.workspace\.trust\.enabled"?\s*:\s*false\|chat\.tools\.autoApprove"?\s*:\s*true` | `.vscode/settings.json` | 🟢 medium | Enable workspace trust; disable agent-tool auto-approval |
 
 **Execution:** For each rule, run `grep_search` with the pattern and `includePattern` matching the scope. Record every match as a finding with: rule ID, category, severity, title, file path, matched evidence (truncated to 100 chars), and fix suggestion.
 
@@ -215,7 +217,15 @@ Round to nearest integer.
 - ≥1 critical finding in category → 🔴
 - ≥1 high finding (no critical) → 🟡
 - Otherwise → 🟢
-- Overall grade = worst category status
+- Overall category status = worst category status
+
+When using the simplified alternative, map the worst category status to the report fields so the Phase 5a template stays fillable:
+
+| Worst status | Grade | Score |
+|--------------|-------|-------|
+| 🟢 | A | 95 |
+| 🟡 | C | 70 |
+| 🔴 | F | 40 |
 
 ---
 
@@ -272,9 +282,45 @@ For OWASP Top 10 + STRIDE on application code: run `/cso`
 
 If zero findings: report Grade A, Score 100/100, all categories 🟢, and congratulate: "Your ATV configuration looks secure! No findings detected."
 
-### 5d. Persist Report (always, after report is generated)
+### 5b. Fix Mode (opt-in)
 
-After printing the report in chat, persist it to disk so it survives the conversation.
+After generating the report (Phase 5a), apply safe fixes for auto-fixable findings.
+
+**Auto-fixable rules:** SEC-01 through SEC-05 (secret→env var), MCP-02 (wildcard→scoped tools), MCP-04 (secret→env var in MCP env).
+
+**Safety protocol:**
+
+1. **Snapshot:** Before touching any file, use `read_file` to load its entire content. Hold in context as rollback backup.
+
+2. **Present fix:** Show the user a before/after diff for each proposed fix:
+   ```
+   Fix [RULE-ID]: Replace hardcoded secret with env var reference
+   File: .github/copilot-mcp-config.json
+   Before: "ANTHROPIC_API_KEY": "sk-ant-abc123..."
+   After:  "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}"
+   Apply? (y/n)
+   ```
+
+3. **Confirm:** Wait for explicit user confirmation before each fix.
+
+4. **Apply:** Use `replace_string_in_file` to apply the change.
+
+5. **Validate:** Re-read the file with `read_file`. Confirm JSON/YAML parses correctly:
+   - For JSON: check for balanced braces, no trailing commas, valid syntax
+   - For YAML: check for valid indentation and structure
+
+6. **Revert on failure:** If validation fails, use `replace_string_in_file` with the saved original content to restore the file. Report the error to the user.
+
+7. **Summary:** After all fixes, report: "Applied N fixes, skipped M. Re-run `/atv-security` to verify."
+
+**Constraints:**
+- Only value replacements within existing keys — never add, remove, or restructure JSON/YAML keys
+- Never apply fixes without user confirmation
+- Never apply fixes to files that failed parse validation
+
+### 5d. Persist Report (always, after report is rendered and before any Fix Mode prompts)
+
+After printing the report in chat, persist it to disk so it survives the conversation. Persistence happens immediately after Phase 5a renders the report — before the user is prompted for Fix Mode (5b). This ensures the on-disk record reflects the un-fixed state of the scan; re-running with fixes applied will produce a new dated section on the next run.
 
 **Target file:** `docs/security/YYYY-MM-DD-security-report.md` (today's date, UTC). One shared file per day with separate sections for `/atv-security` and `/cso`.
 
@@ -315,42 +361,6 @@ After printing the report in chat, persist it to disk so it survives the convers
 - Never delete or modify the `<!-- cso:* -->` section.
 - Always keep both marker pairs intact so `/cso` can upsert into the same file later.
 - If `replace_string_in_file` cannot find the marker block (file was hand-edited), fall back to overwriting the file with a fresh skeleton containing the new `/atv-security` section and an empty `/cso` placeholder, and warn the user that prior `/cso` content may have been preserved separately.
-
-### 5b. Fix Mode (opt-in)
-
-After generating the report (Phase 5a), apply safe fixes for auto-fixable findings.
-
-**Auto-fixable rules:** SEC-01 through SEC-05 (secret→env var), MCP-02 (wildcard→scoped tools), MCP-04 (secret→env var in MCP env).
-
-**Safety protocol:**
-
-1. **Snapshot:** Before touching any file, use `read_file` to load its entire content. Hold in context as rollback backup.
-
-2. **Present fix:** Show the user a before/after diff for each proposed fix:
-   ```
-   Fix [RULE-ID]: Replace hardcoded secret with env var reference
-   File: .github/copilot-mcp-config.json
-   Before: "ANTHROPIC_API_KEY": "sk-ant-abc123..."
-   After:  "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}"
-   Apply? (y/n)
-   ```
-
-3. **Confirm:** Wait for explicit user confirmation before each fix.
-
-4. **Apply:** Use `replace_string_in_file` to apply the change.
-
-5. **Validate:** Re-read the file with `read_file`. Confirm JSON/YAML parses correctly:
-   - For JSON: check for balanced braces, no trailing commas, valid syntax
-   - For YAML: check for valid indentation and structure
-
-6. **Revert on failure:** If validation fails, use `replace_string_in_file` with the saved original content to restore the file. Report the error to the user.
-
-7. **Summary:** After all fixes, report: "Applied N fixes, skipped M. Re-run `/atv-security` to verify."
-
-**Constraints:**
-- Only value replacements within existing keys — never add, remove, or restructure JSON/YAML keys
-- Never apply fixes without user confirmation
-- Never apply fixes to files that failed parse validation
 
 ---
 
