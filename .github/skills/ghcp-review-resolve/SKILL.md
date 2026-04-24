@@ -75,8 +75,8 @@ else:
     SIZE_CLASS = "large"
 ```
 
-`small` → Step 5 uses the full-diff path (`gh pr diff`).
-`large` → Step 5 uses the per-file paginated path (`gh api .../pulls/{n}/files --paginate`). This avoids `gh pr diff`'s 20k-line API cap.
+`small` → Step 4 uses the full-diff path (`gh pr diff`).
+`large` → Step 4 uses the per-file paginated path (`gh api .../pulls/{n}/files --paginate`). This avoids `gh pr diff`'s 20k-line API cap.
 
 ### 0e. Check merge state
 
@@ -99,17 +99,28 @@ Recommended next action — resolve conflicts before re-running this skill:
 
 No reviewers are contacted. No comments are posted. No commits are made. The skill exits cleanly.
 
-### 0f. Probe Copilot availability
+### 0f. Probe Copilot availability (non-mutating)
 
-Attempt the reviewer assignment. Use it as a probe, not a hard requirement:
+Determine whether Copilot code review is available on this repo **without** actually requesting a review — preflight must have no side effects so that short-circuiting at 0i is truly free.
+
+Use the repo's suggested reviewers and/or the Copilot code-review config to probe. Two practical non-mutating checks, in order of preference:
 
 ```bash
-gh pr edit "$PR_NUMBER" --add-reviewer @copilot 2>&1
+# 1. Ask GitHub which reviewers can be requested for this PR. Copilot, when
+#    available, shows up in the suggested/possible reviewer list.
+gh api "repos/{owner}/{repo}/pulls/$PR_NUMBER/requested_reviewers" >/dev/null 2>&1
+
+# 2. Inspect any prior Copilot review on the PR (from /reviews). If the bot has
+#    ever posted here, it is available.
+gh api "repos/{owner}/{repo}/pulls/$PR_NUMBER/reviews" --paginate \
+  | jq -e '.[] | select(.user.login | test("copilot.*\\[bot\\]|github-copilot\\[bot\\]"))' \
+  >/dev/null 2>&1
 ```
 
-- Success (exit 0) → `COPILOT_AVAILABLE=true`
-- Exit non-zero with `422` or `403` in the error output, or a message like "not a collaborator" / "review cannot be requested" → `COPILOT_AVAILABLE=false`
-- Any other failure → `COPILOT_AVAILABLE=false`, log the raw error for the user
+- Either check succeeding (prior Copilot review found, or suggested-reviewers query succeeds and the repo is known to have Copilot code review enabled) → `COPILOT_AVAILABLE=true`.
+- Otherwise → `COPILOT_AVAILABLE=false`. The **actual** `--add-reviewer @copilot` call happens in Step 1, where its failure with `422`/`403`/`not a collaborator` is the authoritative signal and causes the skill to demote to single-reviewer mode for the rest of the run.
+
+This split matters: 0f must not mutate PR state. Running `gh pr edit --add-reviewer @copilot` here would request a Copilot review, and if 0i then short-circuits (or 0e flags a merge conflict blocker), the user is left with a spurious review request. All mutations live in Step 1.
 
 When `COPILOT_AVAILABLE=false`, the skill continues in **single-reviewer mode** with pr-review-toolkit only. Log this clearly:
 
@@ -121,33 +132,62 @@ To enable dual review, configure Copilot code review on the repo settings.
 
 ### 0g. Check for prior resolved reviews (idempotency)
 
-Use GraphQL to fetch review threads and resolution state. The exact field shape should be verified against the current GitHub GraphQL schema at edit time, but the intent is:
+Use GraphQL to fetch review threads and resolution state. Paginate through **all** review threads before deciding whether a prior Copilot review was already resolved — a 100-thread cap will silently miss findings on large PRs. Align the query shape with the repo's existing working reviewer script (`.github/skills/resolve-pr-parallel/scripts/get-pr-comments`), which is the source of truth for field names that actually exist on `PullRequestReviewThread`:
 
 ```bash
-gh api graphql -f query='
-  query($owner:String!, $repo:String!, $number:Int!) {
-    repository(owner:$owner, name:$repo) {
-      pullRequest(number:$number) {
-        reviewThreads(first: 100) {
-          nodes {
-            isResolved
-            comments(first: 1) {
+all_threads='[]'
+after=null
+
+while :; do
+  page="$(gh api graphql \
+    -F owner=<owner> \
+    -F repo=<repo> \
+    -F number=$PR_NUMBER \
+    -F after="$after" \
+    -f query='
+      query($owner:String!, $repo:String!, $number:Int!, $after:String) {
+        repository(owner:$owner, name:$repo) {
+          pullRequest(number:$number) {
+            reviewThreads(first: 100, after: $after) {
+              pageInfo { hasNextPage endCursor }
               nodes {
-                author { login }
-                commit { oid }
+                isResolved
+                isOutdated
+                path
+                line
+                comments(last: 1) {
+                  nodes {
+                    author { login }
+                    updatedAt
+                  }
+                }
               }
             }
           }
         }
-      }
-    }
-  }' -F owner=<owner> -F repo=<repo> -F number=$PR_NUMBER
+      }')"
+
+  all_threads="$(jq -c \
+    --argjson existing "$all_threads" \
+    '$existing + (.data.repository.pullRequest.reviewThreads.nodes // [])' \
+    <<<"$page")"
+
+  has_next="$(jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.hasNextPage' <<<"$page")"
+  [ "$has_next" = "true" ] || break
+  after="$(jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.endCursor' <<<"$page")"
+done
+# Evaluate PRIOR_RESOLVED from "$all_threads" only after pagination completes.
 ```
+
+Notes on the shape:
+
+- `comments(last: 1)` returns the most recent comment in the thread, not the oldest (GraphQL default order on this connection is oldest-first, so `first: 1` would give the wrong record for any freshness check).
+- `commit { oid }` is intentionally **not** requested — it isn't reliably available on the review-comment node across schema versions. Freshness is derived from `isOutdated` (GitHub's own signal that HEAD has moved past the comment's anchor) instead of comparing commit SHAs by hand.
 
 Classify each Copilot-authored thread (author login matching `github-copilot[bot]` or `copilot-pull-request-reviewer[bot]`):
 
-- **resolved-and-fresh** — `isResolved=true` AND the thread's most recent commit SHA is an ancestor of (or equals) `PR_HEAD_SHA`. Head has not moved past resolution.
-- **resolved-but-stale** — `isResolved=true` BUT `PR_HEAD_SHA` is newer than the thread's resolution SHA. The fix might have been reverted or other code changed around it.
+- **resolved-and-fresh** — `isResolved=true` AND `isOutdated=false`. The resolution still applies to current HEAD.
+- **resolved-but-stale** — `isResolved=true` AND `isOutdated=true`. The code around the fix has moved; the resolution may no longer apply.
 - **open** — `isResolved=false`.
 
 Derive:
@@ -325,7 +365,9 @@ Run tests/build before adjudication if cheap — a failing test is ground-truth 
 
 ## Step 5 — Post inline PR comments for accepted findings only
 
-For each accepted finding, post an inline review comment on the PR at the exact file/line. Use `gh api` with a review that has `event: COMMENT` (not APPROVE, not REQUEST_CHANGES):
+Post **one** PR review (`event: COMMENT`) that batches every accepted finding as a `comments[]` entry. One review, many inline comments — not one review per finding. This keeps the PR timeline readable and makes it obvious which comments were produced by this skill vs. the original bots.
+
+Use `gh api` with a single call, repeating the `-F "comments[][...]=..."` flags for each finding (`gh`/`curl` build an array from repeated keys):
 
 ```bash
 gh api "repos/{owner}/{repo}/pulls/$PR_NUMBER/reviews" \
@@ -335,8 +377,13 @@ gh api "repos/{owner}/{repo}/pulls/$PR_NUMBER/reviews" \
   -f body="ghcp-review-resolve: verified findings to address" \
   -F "comments[][path]=path/to/file.go" \
   -F "comments[][line]=42" \
-  -F "comments[][body]=**Verified finding** (from: copilot, pr-toolkit)\n\n<rationale>\n\n**Proposed fix:** <proposed_fix>"
+  -F "comments[][body]=**Verified finding** (from: copilot, pr-toolkit)\n\n<rationale>\n\n**Proposed fix:** <proposed_fix>" \
+  -F "comments[][path]=path/to/other.go" \
+  -F "comments[][line]=17" \
+  -F "comments[][body]=**Verified finding** (from: copilot)\n\n<rationale>\n\n**Proposed fix:** <proposed_fix>"
 ```
+
+Skip Step 5 entirely when every accepted finding is a verbatim confirmation of an existing bot comment already anchored at the correct file/line — re-posting the same finding as a `ghcp-review-resolve` comment just duplicates noise. In that case, move straight to Step 6 and reply on each original thread. Log the decision ("accepted findings already anchored as bot comments; skipping duplicate post").
 
 Prefix each comment body with `ghcp-review-resolve:` so later steps can identify comments this skill created vs. comments from the bots themselves.
 
