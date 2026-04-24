@@ -32,12 +32,20 @@ Thumbs.db
 # gstack runtime state
 .gstack/
 
+# ATV observation logs (ephemeral)
+.atv/observations.jsonl
+
+# Local planning and session artifacts
+PRD.md
+PROGRESS.md
+.omc/
+
+# Local build/output artifacts
+atv-installer
+banner-block.txt
+
 # Node
 node_modules/
-
-# VS Code extension build output
-vscode-atv-launchpad/out/
-vscode-atv-launchpad/preview.html
 
 # Env files (keep .env.example)
 .env
@@ -45,3 +53,13 @@ vscode-atv-launchpad/preview.html
 
 # SQLite databases
 *.db
+
+# Screenshots
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+
+# Demo video source — built video lives in assets/demo.mp4
+demo-video/

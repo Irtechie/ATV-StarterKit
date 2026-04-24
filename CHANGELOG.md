@@ -4,6 +4,74 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- **memeIQ Easter Egg installer option** — guided installs now expose a `🥚 Easter Eggs` category with an opt-in `memeIQ` entry that scaffolds `.github/skills/meme-iq/SKILL.md` and `.github/agents/meme-iq.agent.md`.
+
+### Changed
+
+- **meme generation rebranded to memeIQ** — the repo skill and agent now use `meme-iq` naming and branding, and the installer templates ship the same memegen.link reference content.
+- **Local planning and session artifacts are ignored** — `PRD.md`, `PROGRESS.md`, `.omc/`, `atv-installer`, and `banner-block.txt` are now excluded from git so local work products do not leak into releases or PRs.
+
+## [2.5.7] — 2026-04-15
+
+### Added
+
+- **Karpathy Guidelines skill** — behavioral guardrails derived from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls, ported from [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) (Claude Code plugin) to GitHub Copilot's instruction system. Installs as `.github/skills/karpathy-guidelines/SKILL.md` with four principles: Think Before Coding, Simplicity First, Surgical Changes, and Goal-Driven Execution.
+- **Coding Guidelines TUI category** — new `📐 Coding Guidelines` category in the guided installer's customization screen. Karpathy Guidelines are included in all three presets (Starter, Pro, Full) as a core skill and can be toggled in the customize step.
+
+## [2.5.6] — 2026-04-12
+
+### Added
+
+- **Training quest link in README** — added link to the [ATV Starter Kit Quest](https://blazingbeard.github.io/quests/atv-starterkit.html), a guided and gamified training experience by [blazingbeard](https://github.com/blazingbeard).
+
+### Fixed
+
+- **Suppressed noisy gstack output during guided install** — gstack's setup generates skills for every supported host (Cursor, Slate, OpenClaw, Kiro, Factory, OpenCode) then ATV prunes them. Previously all that per-file generation output and token budget tables leaked to stdout. Now subprocess output is captured silently — users see only the TUI spinner and final summary.
+- **Copilot hooks hardened against missing node** — observer hook commands now suppress errors (`2>/dev/null || true` on bash, `try/catch` on PowerShell) so projects without Node.js don't get hook failures on every session.
+- **Removed excessive observer hooks** — stripped `userPromptSubmitted`, `preToolUse`, `postToolUse`, and `errorOccurred` hooks that fired on every interaction. Only `sessionStart` and `sessionEnd` remain, reducing hook overhead.
+- **Prune ordering fixed** — non-GitHub platform dirs are now pruned before copying skills (was after), preventing any chance of non-GitHub artifacts leaking into `.github/skills/`.
+
+## [2.5.5] — 2026-04-09
+
+### Added
+
+- **`atv-installer uninstall` command** — cleanly removes all ATV-installed files from a project. Removes `.github/skills/`, `.github/agents/`, `.github/hooks/`, `.github/copilot-*` config files, `.gstack/`, `.atv/`, and empty doc directories. Preserves user-modified files by default (checksum comparison against install manifest). Use `--force` to remove everything.
+
+## [2.5.3] — 2026-04-09
+
+### Fixed
+
+- **Prune non-GitHub platform dirs from gstack staging** — after cloning gstack, the installer now removes `.cursor/`, `.factory/`, `.kiro/`, `.openclaw/`, `.opencode/`, `.slate/`, `codex/`, `openclaw/`, `node_modules/`, `.git/`, `.github/`, `extension/`, `hosts/`, `contrib/`, `supabase/`, `test/`, `scripts/`, and `docs/` from `.gstack/`. These are gstack's multi-platform outputs (OpenClaw, OpenCode, Cursor, Kiro, Slate, Factory) and build artifacts that are irrelevant to GitHub Copilot users.
+
+## [2.5.1] — 2026-04-07
+
+### Changed
+
+- **README overhauled** — eliminated repetitive sections (continuous learning explained 3x, installation covered 2x, guided installer described 3x), consolidated into a single-pass flow. Same details, no redundancy.
+- **`/lfg` and `/slfg` pipeline diagrams added** — visual pipeline flows showing step order, parallel execution in `/slfg`, and where `/unslop` and `/ce-compound` fit
+- **De-slop and memory sections tightened** — cut verbose pipeline diagrams and filler phrase tables; kept the core pitch and usage
+
+## [2.5.0] — 2026-04-07
+
+### Fixed
+
+- **ce-brainstorm and brainstorming templates restored** — the compound-engineering update (v2.4.0) accidentally flattened both SKILL.md files into single lines, breaking YAML frontmatter parsing and making `/ce-brainstorm` undiscoverable. Both templates now have proper multi-line content with valid frontmatter.
+
+### Changed
+
+- **Learning pipeline skills renamed** — removed `atv-` prefix from all learning pipeline skills for cleaner slash commands:
+  - `atv-learn` → `learn` (`/learn`)
+  - `atv-instincts` → `instincts` (`/instincts`)
+  - `atv-evolve` → `evolve` (`/evolve`)
+  - `atv-observe` → `observe` (`/observe`)
+  - `atv-unslop` → `unslop` (`/unslop`)
+- **`/lfg` workflow updated** — now includes `/observe` and `/learn` steps after `/unslop fix` to capture patterns from the completed work
+- **`/slfg` workflow updated** — added a new Learning Phase with `/observe` and `/learn` between the Autofix Phase and Finalize Phase
+
 ## [2.0.1] — 2026-04-01
 
 Patch release to fix npm distribution. The v2.0.0 npm package was published before any corresponding GitHub release with goreleaser binaries existed, so the postinstall binary download would fail. This release publishes a GitHub release for v2.0.1 with pre-built binaries and a matching npm version that resolves correctly via `releases/latest`.

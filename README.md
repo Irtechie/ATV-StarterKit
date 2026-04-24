@@ -7,83 +7,47 @@
 <p align="center"><strong>One command. Full agentic coding setup. Maximum tasteful chaos.</strong></p>
 
 <p align="center">
-       <a href="https://www.npmjs.com/package/atv-starterkit"><img alt="npm version" src="https://img.shields.io/npm/v/atv-starterkit?style=flat-square&logo=npm&logoColor=white&color=cb3837"></a>
-       <a href="https://go.dev"><img alt="Go 1.26+" src="https://img.shields.io/badge/Go-1.26+-00ADD8?style=flat-square&logo=go&logoColor=white"></a>
-       <a href="https://opensource.org/licenses/MIT"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-ffd700?style=flat-square"></a>
-       <a href="https://github.com/features/copilot"><img alt="GitHub Copilot Ready" src="https://img.shields.io/badge/GitHub%20Copilot-Ready-8957e5?style=flat-square&logo=github"></a>
-       <a href="#the-full-sprint"><img alt="45 skills" src="https://img.shields.io/badge/Skills-45-ff8c00?style=flat-square"></a>
-       <a href="#the-agent-roster"><img alt="28 agents" src="https://img.shields.io/badge/Agents-28-f97316?style=flat-square"></a>
+       <a href="https://blazingbeard.github.io/quests/atv-starterkit.html"><img src="https://img.shields.io/badge/🎮_New%3F_Start_the_Guided_Training_Quest-ff8c00?style=for-the-badge" alt="Start ATV Quest"></a>
 </p>
 
 <p align="center">
        <a href="#quick-start">Quick start</a> ·
-       <a href="#the-launchpad">Launchpad</a> ·
        <a href="#installation">Installation</a> ·
+       <a href="#uninstalling">Uninstalling</a> ·
        <a href="#the-three-pillars">Three pillars</a> ·
        <a href="#the-full-sprint">Full sprint</a> ·
+       <a href="#how-learning-works">Learning</a> ·
+       <a href="https://blazingbeard.github.io/quests/atv-starterkit.html">🎮 Training Quest</a> ·
        <a href="#development">Development</a>
 </p>
+
+<video src="https://github.com/user-attachments/assets/7b6bf18a-2bab-482b-a72d-fac9ab7436c2" width="100%" autoplay loop muted playsinline controls></video>
 
 ---
 
 ## What is ATV 2.0?
 
-ATV 2.0 is a one-command installer that wires together three open-source systems into a single coherent agentic coding environment for GitHub Copilot:
+ATV 2.0 is a one-command installer that wires together three open-source systems into a single coherent agentic coding environment for GitHub Copilot — grounded in the behavioral principles from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls:
 
-- **Compound Engineering** — the planning-to-knowledge pipeline
-- **gstack** — the sprint execution engine
-- **agent-browser** — the browser automation layer
+- **[Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin)** — planning-to-knowledge pipeline
+- **[gstack](https://github.com/garrytan/gstack)** — sprint execution engine (by Garry Tan / Y Combinator)
+- **[agent-browser](https://github.com/vercel-labs/agent-browser)** — browser automation layer (by Vercel)
+- **[Karpathy Guidelines](https://github.com/forrestchang/andrej-karpathy-skills)** — behavioral guardrails: think before coding, simplicity first, surgical changes, goal-driven execution
 
-Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45 skills, 28 agents, a memory-aware launchpad, and a knowledge system that makes your repo smarter with every PR.
+Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45+ skills, 29 agents, and a learning system that makes your repo smarter with every session.
 
 ---
 
 ## Quick Start
 
-### 1. Install
-
 ```bash
 cd your-project
-npx atv-starterkit@latest init
+npx atv-starterkit@latest init           # auto-detect stack, install everything
+npx atv-starterkit@latest init --guided  # interactive TUI with multi-stack selection
+npx atv-starterkit@latest uninstall      # cleanly remove everything ATV installed
 ```
 
-Auto-detects your stack. Installs 13 core skills, 29 agents, MCP servers, and docs structure. Done in seconds.
-
-For the interactive TUI with multi-stack selection:
-
-```bash
-npx atv-starterkit@latest init --guided
-```
-
-**What `init` does:**
-
-```
-  ⚡ All The Vibes 2.0 ⚡
-  One command. Full agentic coding setup.
-
-  Auto-detected primary: typescript project (tsconfig.json found, existing git repo)
-  Likely stack packs: TypeScript
-
-  📁 .github/skills
-  📁 .github/agents
-  📁 .vscode
-  📁 docs/plans
-  📁 docs/brainstorms
-  📁 docs/solutions
-  ✅ .github/copilot-instructions.md
-  ✅ .github/copilot-setup-steps.yml
-  ✅ .github/copilot-mcp-config.json
-  ✅ .github/skills/ce-brainstorm/SKILL.md
-  ✅ .github/skills/ce-plan/SKILL.md
-  ✅ .github/skills/ce-work/SKILL.md
-  ✅ .github/skills/ce-review/SKILL.md
-  ✅ .github/skills/ce-compound/SKILL.md
-  ...
-```
-
-### 2. Use
-
-Open **Copilot Chat** in VS Code (⌃⌘I / Ctrl+Shift+I) and run skills as slash commands:
+Then open **Copilot Chat** (⌃⌘I / Ctrl+Shift+I) and go:
 
 ```text
 /ce-brainstorm   →  Explore the problem, produce a design doc
@@ -91,191 +55,9 @@ Open **Copilot Chat** in VS Code (⌃⌘I / Ctrl+Shift+I) and run skills as slas
 /ce-work         →  Build against the plan with incremental commits
 /ce-review       →  Multi-agent code review (security, architecture, performance)
 /ce-compound     →  Document what you learned for future sessions
+
+/lfg             →  Run the full pipeline in one shot
 ```
-
-Or run the full pipeline in one shot:
-
-```text
-/lfg             →  Plan → deepen → build → review → test → compound
-```
-
-### 3. Open the Launchpad
-
-```bash
-npx atv-starterkit launchpad
-```
-
-Shows your live memory dashboard with install intelligence and next-step recommendations. Reopenable any time — no reinstall needed.
-
----
-
-## The Launchpad
-
-The launchpad is available in two forms: a **live terminal TUI** and a **VS Code webview extension**. Both show the same four signal-oriented tabs and update in real time when your files change.
-
-### Terminal TUI
-
-Run `npx atv-starterkit launchpad` for the interactive terminal dashboard. Arrow keys or `1`-`4` to switch tabs, `r` to refresh, `q` to quit.
-
-<details>
-<summary><strong>Tab 1: Memory</strong> — repo memory artifacts with timestamps</summary>
-
-```
-  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
-
-  [ 1:Memory ]│  2:Context  │  3:Health  │  4:Moves  
-
-  Repo Memory Artifacts
-
-  Brainstorms (1)
-    • 2026-04-01-my-feature-brainstorm.md  12m ago
-
-  Plans (1)
-    • 2026-04-01-001-feat-my-feature-plan.md  12m ago
-
-  Solutions (1)
-    • 2026-04-01-fixing-the-widget.md  12m ago
-
-  Copilot Memory Files (1)
-    • project-patterns.md
-
-  ⚠ Active plan has unchecked work
-
-  Last FS event: 2s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
-```
-</details>
-
-<details>
-<summary><strong>Tab 2: Context</strong> — instruction budget and capability matrix</summary>
-
-```
-  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
-
-   1:Memory  │[ 2:Context ]│  3:Health  │  4:Moves  
-
-  Context Estimate
-
-  Instruction bytes  24680
-  Estimated tokens   ~6170
-
-  Capability Matrix
-
-  19 agents   14 skills   1 instructions   1 prompts
-  0 MCP servers   5 extensions   0 gstack skills
-
-  Copilot Config
-
-  ● copilot-instructions.md
-  ● copilot-setup-steps.yml
-  ● MCP servers (0 configured)
-  ○ compound-engineering.local.md
-
-  Last FS event: 1s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
-```
-</details>
-
-<details>
-<summary><strong>Tab 3: Health</strong> — install drift detection and runtime status</summary>
-
-```
-  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
-
-   1:Memory  │  2:Context  │[ 3:Health ]│  4:Moves  
-
-  Install Intelligence
-
-  ● Manifest    .atv/install-manifest.json
-  │ Last run    2026-04-02 15:58 UTC
-  │ Preset      Starter
-  │ Stacks      General, TypeScript
-  ╰ Outcomes    1 done  0 warn  0 fail  0 skip
-
-  Install Drift
-
-  ✓ No drift detected
-
-  Runtime
-
-  ○ gstack staging
-  ○ gstack runtime
-  ○ agent-browser skill
-  ● ~/.gstack/ user config
-  ○ ~/.agent-browser/ sessions
-
-  Last FS event: 5s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
-```
-
-When files have been modified or deleted since install, drift is shown:
-
-```
-  Install Drift
-
-  ⚠ .github/copilot-instructions.md  user-modified
-  ✗ .github/copilot-setup-steps.yml  missing
-```
-</details>
-
-<details>
-<summary><strong>Tab 4: Moves</strong> — prioritized next-step recommendations</summary>
-
-```
-  ⚡ ATV Launchpad ⚡  Live dashboard · event-driven
-
-   1:Memory  │  2:Context  │  3:Health  │[ 4:Moves ]
-
-  Recommended Next Moves
-
-  ▸ 1. Continue the active plan with /ce-work       [Enter to run]
-    At least one plan still has unchecked items.
-
-    2. Create prompt files for repeatable workflows
-    No .prompt.md files found in .github/prompts/.
-
-    3. Add compound-engineering.local.md
-    Configure CE review agents for structured code review.
-
-  Last FS event: 3s ago  │  ← → tab  1-4 jump  j/k navigate  r refresh  q quit
-```
-
-Select a recommendation and press Enter to see the confirm dialog:
-
-```
-  Confirm Action
-
-  ▸ Reinitialize ATV files to restore drifted config
-  Command: atv-installer init
-  Risk:    safe
-
-  Enter to approve   Esc to cancel
-```
-</details>
-
-For non-interactive contexts (piped output, CI, VS Code Copilot Chat), use `--static` for a one-shot printable view:
-
-```bash
-npx atv-starterkit launchpad --static
-```
-
-### VS Code Webview Extension
-
-The `vscode-atv-launchpad/` extension provides the same 4-tab dashboard as a VS Code webview panel. It watches `.atv/launchpad-state.json` for live updates from the filesystem watcher and detects active VS Code extensions (GitHub Copilot, Copilot Chat).
-
-| Memory | Context |
-|:---:|:---:|
-| ![Memory tab](docs/screenshots/webview-memory.png) | ![Context tab](docs/screenshots/webview-context.png) |
-
-| Health | Moves |
-|:---:|:---:|
-| ![Health tab](docs/screenshots/webview-health.png) | ![Moves tab](docs/screenshots/webview-moves.png) |
-
-**Tab descriptions:**
-
-| Tab | What it shows |
-|---|---|
-| **Memory** | Brainstorms, plans, solutions, and Copilot memory files with relative timestamps |
-| **Context** | Instruction byte count, estimated tokens, capability matrix (agents/skills/instructions/prompts/MCP/extensions), Copilot config status |
-| **Health** | Install manifest status, outcome summary, install drift detection (modified/missing files), VS Code extension status |
-| **Moves** | Priority-scored recommendations based on local repo state analysis |
 
 ---
 
@@ -285,11 +67,11 @@ The `vscode-atv-launchpad/` extension provides the same 4-tab dashboard as a VS 
 
 ```bash
 npx atv-starterkit@latest init       # quick run — downloads binary automatically
-npm install -g atv-starterkit        # global install
+npm install -g atv-starterkit        # or global install
 atv-starterkit init                  # then run from anywhere
 ```
 
-The npm package downloads the correct platform binary from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases) during install — no Go toolchain needed.
+The npm package downloads the correct platform binary from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases) — no Go toolchain needed.
 
 ### Binary (direct download)
 
@@ -313,138 +95,86 @@ cd ATV-StarterKit && go build -o atv-installer .
 
 Without Bun, text-based gstack skills still work. `agent-browser` works independently of Bun.
 
----
+### Uninstalling
 
-## The Guided Experience
-
-The guided installer (`--guided`) walks you through:
-
-### Screen 1: Stack Packs
-
-```text
-┃ Which stack packs should be included?
-┃ [✓] General
-┃ [✓] TypeScript    (tsconfig.json detected)
-┃ [ ] Python
-┃ [ ] Rails
+```bash
+npx atv-starterkit@latest uninstall          # remove ATV files, preserve user-modified configs
+npx atv-starterkit@latest uninstall --force  # remove everything including modified files
 ```
 
-Multi-select — auto-detected packs are pre-selected. Stack packs are additive.
-
-### Screen 2: Preset
-
-```text
-┃ Choose your setup level
-┃
-┃ > ⚡ Starter — Core workflow (13 skills, instant)
-┃     Plan, build, review, compound. No browser tools.
-┃
-┃   🚀 Pro — Full sprint process (35+ skills)
-┃     + gstack review, ship, safety, security, debugging
-┃
-┃   🔥 Full — Complete engineering team (45+ skills)
-┃     + browser QA, benchmarks, agent-browser, Chrome
-┃     Requires: Bun, ~2min install
-```
-
-**Starter** is pure Compound Engineering — no network calls, instant install. **Pro** adds gstack sprint skills. **Full** is everything: all 45 skills, gstack browser runtime, agent-browser CLI, and Chrome for Testing.
-
-### Screen 3: Customize?
-
-Power users can drill into category-grouped multi-select. Beginners skip straight to install.
-
-### Screen 4: Install Progress
-
-```text
-  Installing Pro preset for typescript...
-
-  ✅ Scaffolding ATV files (24 files created, 8 directories) · 340ms
-  ⚠️  Syncing gstack skills — setup failed, fell back to docs · 2.1s
-  ✅ Installing agent-browser (CLI ready, skill copied) · 1.8s
-```
-
-Real-time animated spinners with structured telemetry: durations, skip reasons, substep events.
-
-### Screen 5: Summary + Recommendations
-
-```text
-  Guided install summary
-
-  ✅ Scaffolding ATV files (24 files created) · 340ms
-  ⚠️  Syncing gstack skills — fell back to markdown-only · 2.1s
-  ✅ Installing agent-browser (CLI ready, skill copied) · 1.8s
-
-  Recommended next moves
-
-    1. Fix installer warnings before relying on every capability
-    2. Start with /ce-brainstorm to shape the first feature
-
-  🎉 ATV Starter Kit ready!
-  Install state saved to .atv/install-manifest.json
-  Reopen later with: npx atv-starterkit launchpad
-```
+Removes `.github/skills/`, `.github/agents/`, `.github/hooks/`, `.github/copilot-*` config files, `.gstack/`, `.atv/`, and empty doc directories. Files you've customized since installation are preserved by default (checksum comparison against the install manifest). `.vscode/` is never touched.
 
 ---
 
 ## The Three Pillars
 
-### Compound Engineering — knowledge compounds
+### Karpathy Guidelines — the behavioral foundation
 
-**Origin:** [compound-engineering](https://github.com/EveryInc/compound-engineering-plugin) by Every
+Every skill and agent in ATV operates under four principles derived from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on how LLMs fail at coding. These are installed as a skill (`.github/skills/karpathy-guidelines/SKILL.md`) and shape how Copilot approaches all work:
+
+| Principle | What it prevents |
+|---|---|
+| **Think Before Coding** | Wrong assumptions, hidden confusion, silently picking one interpretation |
+| **Simplicity First** | Overcomplication, bloated abstractions, speculative features |
+| **Surgical Changes** | Drive-by refactoring, touching code you shouldn't, cosmetic "improvements" |
+| **Goal-Driven Execution** | Vague success criteria, no verification loop, "make it work" without checking |
+
+These aren't just instructions — they're the operating contract between you and the AI. Without them, Copilot tends toward the exact pitfalls Karpathy described: "The models make wrong assumptions on your behalf and just run along with them."
+
+### Compound Engineering — knowledge compounds
 
 A gated pipeline where each step produces an artifact the next step consumes:
 
-- `/ce-brainstorm` → `/ce-plan` → `/ce-work` → `/ce-review` → `/ce-compound`
-- `docs/solutions/` — structured solution docs, searchable by the `learnings-researcher` agent during future planning
-- `docs/plans/` and `docs/brainstorms/` — living documents that track decisions, not just code
+```text
+/ce-brainstorm → /ce-plan → /ce-work → /ce-review → /ce-compound
+```
 
-**The key insight:** Every time you run `/ce-compound`, solved problems get saved to `docs/solutions/`. Next time `/ce-plan` runs, the `learnings-researcher` agent searches those files first. Your repo gets smarter with every PR.
+Every time you run `/ce-compound`, solved problems get saved to `docs/solutions/`. Next time `/ce-plan` runs, the `learnings-researcher` agent searches those files first. Your repo gets smarter with every PR.
 
 ### gstack — the AI sprint process
 
-**Origin:** [gstack](https://github.com/garrytan/gstack) by Garry Tan (Y Combinator)
+30 slash-command skills covering office hours, engineering review, browser QA, shipping, deploy verification, security audits, and weekly retros. gstack doesn't just give the AI more tools — it gives it a *role*. `/gstack-review` acts as a staff engineer. `/gstack-cso` acts as a chief security officer. The skills are opinionated engineering processes encoded as markdown.
 
-- 30 slash-command skills covering office hours, engineering review, browser QA, shipping, deploy verification, security audits, safety guardrails, and weekly retros
-- A real Chromium browser the agent controls with sub-second commands and cookie state
-- Safety guardrails (`/gstack-careful`, `/gstack-freeze`, `/gstack-guard`) that prevent destructive commands
-
-**The key insight:** gstack doesn't just give the AI more tools — it gives the AI a *role*. `/gstack-review` acts as a staff engineer. `/gstack-cso` acts as a chief security officer. The skills are opinionated engineering processes encoded as markdown.
+Includes safety guardrails (`/gstack-careful`, `/gstack-freeze`, `/gstack-guard`) that prevent destructive commands like `rm -rf` or force-pushes.
 
 ### agent-browser — the eyes of the agent
 
-**Origin:** [agent-browser](https://github.com/vercel-labs/agent-browser) by Vercel
-
-- A native Rust CLI that controls Chrome via CDP with ~100ms latency per command
-- Snapshot refs (`@e1`, `@e2`) — deterministic element selection for AI tool-calling loops
-- Sessions, profiles, authentication vault, cookie persistence
-
-**The key insight:** The snapshot-ref workflow (`open → snapshot → interact → re-snapshot`) fits cleanly into an LLM's tool-calling loop. No CSS selectors or XPath needed.
+A native Rust CLI that controls Chrome via CDP with ~100ms latency. Uses snapshot refs (`@e1`, `@e2`) for deterministic element selection — no CSS selectors or XPath needed. The `open → snapshot → interact → re-snapshot` workflow fits cleanly into an LLM's tool-calling loop.
 
 ---
 
-## Why Memory Matters
+## The Guided Experience
 
-| Layer | What remembers | Where it lives | Who reads it |
-|---|---|---|---|
-| **Institutional knowledge** | Solved problems, gotchas, patterns | `docs/solutions/*.md` | `learnings-researcher` agent during `/ce-plan` and `/ce-review` |
-| **Design decisions** | Why we chose approach A over B | `docs/brainstorms/*.md` | `/ce-plan` auto-discovers recent brainstorms |
-| **Implementation plans** | What to build, acceptance criteria | `docs/plans/*.md` | `/ce-work` reads and checks off items |
-| **Install manifest** | What the installer intended, attempted, skipped, failed | `.atv/install-manifest.json` | `npx atv-starterkit launchpad` |
-| **Project config** | Which review agents to run | `compound-engineering.local.md` | `/ce-review`, `/ce-work` |
-| **gstack session state** | Active sessions, preferences | `~/.gstack/` | Every gstack skill |
-| **Browser state** | Cookies, localStorage, login sessions | `~/.agent-browser/sessions/` | `agent-browser` |
+The guided installer (`--guided`) walks you through four screens:
 
-The compound engineering memory loop:
+**1. Stack Packs** — Multi-select your stacks (TypeScript, Python, Rails). Auto-detected packs are pre-selected.
+
+**2. Preset** — Choose your depth:
+
+| Preset | What you get |
+|---|---|
+| **Starter** | Core CE workflow (13 skills). No network calls, instant install. |
+| **Pro** | + gstack sprint skills (35+ skills total) |
+| **Full** | + browser QA, benchmarks, agent-browser, Chrome (45+ skills). Requires Bun. |
+
+**3. Customize** — Power users can drill into category-grouped multi-select. Beginners skip straight to install.
+
+**4. Install + Summary** — Real-time progress with structured telemetry, then actionable next steps.
 
 ```text
-solve problem → /ce-compound documents it → docs/solutions/
-                                                    ↓
-future /ce-plan → learnings-researcher searches docs/solutions/ → avoids past mistakes
+  ✅ Scaffolding ATV files (24 files created, 8 directories) · 340ms
+  ⚠️  Syncing gstack skills — fell back to markdown-only · 2.1s
+  ✅ Installing agent-browser (CLI ready, skill copied) · 1.8s
+
+  🎉 ATV Starter Kit ready!
+  Install state saved to .atv/install-manifest.json
 ```
 
 ---
 
 ## The Full Sprint
+
+Every skill maps to a phase of the development lifecycle:
 
 <table>
        <tr>
@@ -475,7 +205,6 @@ future /ce-plan → learnings-researcher searches docs/solutions/ → avoids pas
                      <sub>Find what you missed</sub><br /><br />
                      <code>/ce-review</code><br />
                      <code>/gstack-review</code><br />
-                     <code>/gstack-design-review</code><br />
                      <code>/gstack-cso</code><br />
                      <code>/gstack-codex</code>
               </td>
@@ -486,7 +215,6 @@ future /ce-plan → learnings-researcher searches docs/solutions/ → avoids pas
                      <sub>Use real browser eyes</sub><br /><br />
                      <code>agent-browser</code><br />
                      <code>/gstack-qa</code><br />
-                     <code>/gstack-qa-only</code><br />
                      <code>/gstack-benchmark</code><br />
                      <code>/gstack-browse</code>
               </td>
@@ -502,16 +230,37 @@ future /ce-plan → learnings-researcher searches docs/solutions/ → avoids pas
                      <strong>📊 Reflect</strong><br />
                      <sub>Compound what you learned</sub><br /><br />
                      <code>/ce-compound</code><br />
-                     <code>/gstack-retro</code><br />
-                     <code>/gstack-learn</code>
+                     <code>/learn</code><br />
+                     <code>/evolve</code><br />
+                     <code>/unslop</code><br />
+                     <code>/gstack-retro</code>
               </td>
        </tr>
 </table>
 
-> 🛡️ Safety guardrails apply across the whole sprint: `/gstack-careful`, `/gstack-freeze`, `/gstack-guard`, and `/gstack-investigate`.
+### `/lfg` — full pipeline, one command
+
+Each step must produce output before the next starts (plan file exists, plan was deepened, code was changed). Retries on failure.
+
+```
+plan → deepen → work → review → unslop → resolve → test → video → compound
+  ✓       ✓       ✓
+```
+
+### `/slfg` — parallel swarm variant
+
+Same steps. Planning is sequential, review + test + unslop run in parallel.
+
+```
+plan → deepen → work (swarm) ──→ review    ⎤              resolve → unslop fix → video → compound
+                                  test     ⎥ (parallel) →
+                                  unslop   ⎦
+```
+
+`unslop fix` removes AI slop after review. `compound` saves learnings for future `ce-plan` runs.
 
 <details>
-<summary><strong>Skill reference by phase</strong></summary>
+<summary><strong>Full skill reference (45 skills)</strong></summary>
 
 ### Think
 
@@ -555,7 +304,7 @@ future /ce-plan → learnings-researcher searches docs/solutions/ → avoids pas
 |---|---|
 | `agent-browser` | Direct browser automation: open, snapshot, click, fill, screenshot, inspect |
 | `/gstack-qa` | Full QA loop: find bugs in real browser, fix them, write regressions, re-verify |
-| `/gstack-qa-only` | Report-only QA |
+| `/gstack-qa-only` | Report-only QA (no fixes) |
 | `/gstack-benchmark` | Page load baselines, Core Web Vitals, resource sizes |
 | `/gstack-browse` | Persistent browser runtime for deeper sessions |
 
@@ -572,7 +321,12 @@ future /ce-plan → learnings-researcher searches docs/solutions/ → avoids pas
 
 | Skill | What it does |
 |---|---|
-| `/ce-compound` | Documents solved problems in `docs/solutions/` — compounds knowledge for future sessions |
+| `/ce-compound` | Documents solved problems in `docs/solutions/` for future sessions |
+| `/learn` | Extracts coding patterns from recent work into instincts with confidence scoring |
+| `/instincts` | Dashboard showing all learned patterns grouped by domain |
+| `/evolve` | Promotes mature instincts (confidence >0.8) into permanent Copilot skills |
+| `/observe` | Focused pattern analysis on a specific domain or file pattern |
+| `/unslop` | De-slop pass: code simplification + comment rot + design slop detection |
 | `/gstack-retro` | Team-aware weekly retro with per-person breakdowns |
 | `/gstack-learn` | Per-project self-learning infrastructure |
 
@@ -589,9 +343,121 @@ future /ce-plan → learnings-researcher searches docs/solutions/ → avoids pas
 
 ---
 
-## The Agent Roster
+## How Learning Works
 
-28 specialized agents in `.github/agents/`, invoked by skills during review, planning, and debugging:
+Most AI coding tools treat every session as day one. ATV remembers.
+
+Every time you start a Copilot session, the AI has no memory of how *your team* writes code — that you wrap errors with `%w`, prefer table-driven tests, or use constructor injection. ATV fixes this with a **continuous learning pipeline** that observes how you code, extracts reusable patterns, and graduates proven ones into permanent Copilot skills.
+
+### The Loop
+
+```text
+You code normally
+     ↓
+Observer hooks silently capture tool use → .atv/observations.jsonl
+     ↓
+/learn analyzes observations + git history → instincts with confidence scores
+     ↓
+Confidence grows with each session (0.5 → 0.6 → 0.7 → 0.8)
+     ↓
+/evolve promotes mature instincts → .github/skills/learned-*/SKILL.md
+     ↓
+Next session: Copilot already knows your patterns
+```
+
+### Observer Hooks
+
+ATV installs hooks for all 6 Copilot lifecycle events (`sessionStart`, `sessionEnd`, `preToolUse`, `postToolUse`, `userPromptSubmitted`, `errorOccurred`). A lightweight Node.js script captures every tool interaction to `.atv/observations.jsonl` — silently, with zero impact on your workflow.
+
+### Instincts
+
+`/learn` analyzes git history, diffs, observations, and existing solutions to find recurring patterns. Each becomes an "instinct" with a confidence score:
+
+```yaml
+# .atv/instincts/project.yaml
+instincts:
+  - id: always-wrap-errors
+    trigger: "when returning an error from a function"
+    behavior: "wrap with fmt.Errorf using %w"
+    confidence: 0.85
+    observations: 12
+```
+
+Run `/instincts` to see the dashboard:
+
+```text
+  Error Handling (2 instincts)
+    ★ always-wrap-errors        0.9  "wrap errors with fmt.Errorf %w"    15 obs
+    ● sentinel-errors           0.6  "use sentinel errors for expected"   5 obs
+
+  Testing (1 instinct)
+    ★ table-driven-tests        0.85 "use table-driven test pattern"     12 obs
+
+  Legend: ★ ready to evolve (>0.8)  ● active  ○ tentative (<0.5)
+```
+
+When an instinct reaches >0.8 confidence, `/evolve` promotes it into a full SKILL.md at `.github/skills/learned-*/`. Copilot auto-discovers these — your AI assistant now *permanently knows* your team's conventions.
+
+### Design Decisions
+
+- **Instincts are committed to git** — the whole team benefits, not just one developer
+- **Observations are gitignored** — raw data is ephemeral, instincts are permanent
+- **Generated skills use `learned-` prefix** — visually distinct from hand-written skills
+- **Confidence scoring prevents noise** — only well-established patterns get promoted
+
+---
+
+## De-Slop
+
+AI coding assistants have a tell: over-abstraction, `// This function handles the logic for...` comments, purple-to-blue gradients. Code review catches bugs — but nobody catches *slop*.
+
+`/unslop` runs three parallel analysis passes on your recent changes:
+
+```text
+/unslop                          →  Report slop in changed files
+/unslop src/components/          →  Scope to a directory
+/unslop fix                      →  Auto-apply safe fixes
+```
+
+| Pass | What it catches | Example |
+|------|----------------|---------|
+| **Code Slop** | Over-abstraction, YAGNI violations, nested ternaries | Interface used once → inline it |
+| **Comment Rot** | Obvious restatements, AI filler phrases, stale TODOs | `// This function handles auth` → delete |
+| **Design Slop** | Generic gradients, template layouts, missing hover states | Purple-to-blue default → use brand palette |
+
+`/unslop` is wired into both autonomous pipelines — `/lfg` runs `/unslop fix` after review, and `/slfg` runs the report pass in parallel with `ce-review` and browser testing for zero added wall-clock time.
+
+`/ce-review` asks "is this correct?" — `/unslop` asks "does this look human-written?" Run both.
+
+---
+
+## Memory Architecture
+
+ATV builds seven layers of memory across three reinforcing cycles:
+
+| Layer | Where | Timescale |
+|---|---|---|
+| **Observations** | `.atv/observations.jsonl` | Per-session (gitignored) |
+| **Instincts** | `.atv/instincts/project.yaml` | Grows every session |
+| **Evolved skills** | `.github/skills/learned-*/` | Permanent |
+| **Institutional knowledge** | `docs/solutions/*.md` | Permanent |
+| **Design decisions** | `docs/brainstorms/*.md` | Permanent |
+| **Implementation plans** | `docs/plans/*.md` | Per-feature |
+| **Install manifest** | `.atv/install-manifest.json` | Per-install |
+
+**How they reinforce each other:**
+
+- **Knowledge compounding** (per-PR): `/ce-compound` saves solved problems → future `/ce-plan` finds them via `learnings-researcher` → fewer repeated mistakes
+- **Pattern learning** (per-session): observer hooks → `/learn` → instincts → `/evolve` → permanent skills → Copilot knows your conventions
+- **Team propagation** (per-commit): instincts are committed to git → the whole team inherits learned patterns without a style guide
+
+Over weeks, your repo develops a memory that makes every Copilot session more effective than the last.
+
+---
+
+## Agents
+
+29 specialized agents in `.github/agents/`, invoked by skills during review, planning, learning, and debugging:
 
 | Category | Agents |
 |---|---|
@@ -603,6 +469,7 @@ future /ce-plan → learnings-researcher searches docs/solutions/ → avoids pas
 | **Design** | `design-implementation-reviewer`, `design-iterator`, `figma-design-sync` |
 | **Research** | `repo-research-analyst`, `best-practices-researcher`, `framework-docs-researcher`, `learnings-researcher`, `git-history-analyzer` |
 | **Process** | `pr-comment-resolver`, `spec-flow-analyzer`, `bug-reproduction-validator`, `pattern-recognition-specialist` |
+| **Learning** | `pattern-observer` |
 | **Meta** | `agent-native-reviewer`, `ankane-readme-writer` |
 | **Ops** | `lint` |
 
@@ -610,16 +477,17 @@ future /ce-plan → learnings-researcher searches docs/solutions/ → avoids pas
 
 ## What Gets Installed
 
-### All 6 Copilot Lifecycle Hooks
+### Copilot Integration Points
 
-| # | Hook | File | When it fires |
-|---|---|---|---|
-| 1 | **System Instructions** | `.github/copilot-instructions.md` | Every Copilot chat |
-| 2 | **Setup Steps** | `.github/copilot-setup-steps.yml` | Coding Agent initialization |
-| 3 | **MCP Servers** | `.github/copilot-mcp-config.json` | Copilot startup |
-| 4 | **Skills** | `.github/skills/*/SKILL.md` | When description matches request |
-| 5 | **Agents** | `.github/agents/*.agent.md` | Subagent orchestration |
-| 6 | **File Instructions** | `.github/*.instructions.md` | `applyTo` glob matches |
+| File | Purpose |
+|---|---|
+| `.github/copilot-instructions.md` | System instructions loaded into every chat |
+| `.github/copilot-setup-steps.yml` | Coding Agent initialization steps |
+| `.github/copilot-mcp-config.json` | MCP server configuration |
+| `.github/skills/*/SKILL.md` | Skills auto-discovered by description match |
+| `.github/agents/*.agent.md` | Agents for subagent orchestration |
+| `.github/*.instructions.md` | File-scoped instructions via `applyTo` globs |
+| `.github/hooks/copilot-hooks.json` | Observer hooks (silent, every tool use) |
 
 ### Supported Stacks
 
@@ -650,15 +518,16 @@ atv-installer init --guided
  Detect stack + prerequisites (git, bun, node)
         │
         ▼
- Screen 1: Stack Packs → Screen 2: Preset → Screen 3: Customize?
+ Stack Packs → Preset → Customize?
         │
         ▼
  Install with structured telemetry:
         │
         ├── ATV scaffold ──► Embedded templates → .github/skills/*/SKILL.md
         │
-        ├── gstack ──► git clone → .gstack/ (staging)
-        │               ├── gen:skill-docs → .agents/skills/gstack-*/
+        ├── Learning pipeline ──► Observer hooks + skills + instinct storage
+        │
+        ├── gstack ──► git clone → .gstack/ (staging, gitignored)
         │               └── Copy SKILL.md → .github/skills/gstack-*/
         │
         └── agent-browser ──► npm install -g → agent-browser install (Chrome)
@@ -666,15 +535,9 @@ atv-installer init --guided
         │
         ▼
  Write manifest to .atv/install-manifest.json
-        │
-        ▼
- npx atv-starterkit launchpad ──► Live terminal dashboard (4 tabs, event-driven)
 ```
 
-- `.gstack/` is gitignored — staging area with the full repo and runtime
-- `.github/skills/gstack-*/SKILL.md` are lightweight copies Copilot discovers
-- All skills at one level deep in `.github/skills/` — Copilot's discovery convention
-- Idempotent: re-running skips existing files, merges JSON configs
+All templates are embedded at compile time — no runtime network calls for the core scaffold. gstack requires a network clone (~22MB). Re-running is idempotent: existing files are skipped, JSON configs are merged.
 
 ---
 
@@ -686,14 +549,6 @@ go test ./...                            # all tests
 go test ./pkg/installstate/ -v           # manifest + recommendations tests
 go test ./pkg/monitor/ -v                # watcher + drift detection tests
 go test ./test/sandbox/ -v               # integration tests (E2E scenarios)
-
-# sandbox test
-mkdir /tmp/test && cd /tmp/test
-echo '{}' > tsconfig.json && git init
-npx atv-starterkit init --guided
-
-# verify launchpad
-npx atv-starterkit launchpad
 ```
 
 ## Limitations
@@ -709,6 +564,8 @@ npx atv-starterkit launchpad
 
 MIT — Built by [All The Vibes](https://github.com/All-The-Vibes)
 
-Powered by [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) · [gstack](https://github.com/garrytan/gstack) · [agent-browser](https://github.com/vercel-labs/agent-browser)
+Powered by [Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin) · [gstack](https://github.com/garrytan/gstack) · [agent-browser](https://github.com/vercel-labs/agent-browser) · [Karpathy Guidelines](https://github.com/forrestchang/andrej-karpathy-skills)
+
+Special thanks to [blazingbeard](https://github.com/blazingbeard) for building out the [guided training quest](https://blazingbeard.github.io/quests/atv-starterkit.html).
 
 </div>

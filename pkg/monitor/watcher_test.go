@@ -14,7 +14,7 @@ func TestNewWatcher(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewWatcher: %v", err)
 	}
-	defer w.fsWatcher.Close()
+	defer func() { _ = w.fsWatcher.Close() }()
 
 	if w.debounceWin != 300*time.Millisecond {
 		t.Errorf("debounce = %v, want 300ms", w.debounceWin)
@@ -27,7 +27,7 @@ func TestNewWatcher_CustomDebounce(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewWatcher: %v", err)
 	}
-	defer w.fsWatcher.Close()
+	defer func() { _ = w.fsWatcher.Close() }()
 
 	if w.debounceWin != 100*time.Millisecond {
 		t.Errorf("debounce = %v, want 100ms", w.debounceWin)
@@ -110,7 +110,7 @@ func TestWatcher_FullScan(t *testing.T) {
 	if err := w.Start(ctx); err != nil {
 		t.Fatal(err)
 	}
-	defer func() { _ = w.Stop() }()
+	defer w.Stop() //nolint:errcheck
 
 	state := w.State()
 	if len(state.Brainstorms) != 1 {
@@ -136,7 +136,7 @@ func TestWatcher_ForceRefresh(t *testing.T) {
 	if err := w.Start(ctx); err != nil {
 		t.Fatal(err)
 	}
-	defer func() { _ = w.Stop() }()
+	defer w.Stop() //nolint:errcheck
 
 	// Initially no brainstorms
 	state := w.State()
@@ -174,10 +174,10 @@ func TestWatcher_StateFile(t *testing.T) {
 	if err := w.Start(ctx); err != nil {
 		t.Fatal(err)
 	}
-	defer func() { _ = w.Stop() }()
+	defer w.Stop() //nolint:errcheck
 
 	// State file should be written
-	stateFile := filepath.Join(root, ".atv", "launchpad-state.json")
+	stateFile := filepath.Join(root, ".atv", "dashboard-state.json")
 	if _, err := os.Stat(stateFile); os.IsNotExist(err) {
 		t.Error("state file not written")
 	}
@@ -222,7 +222,7 @@ func TestWatcher_ContextEstimate(t *testing.T) {
 	if err := w.Start(ctx); err != nil {
 		t.Fatal(err)
 	}
-	defer func() { _ = w.Stop() }()
+	defer w.Stop() //nolint:errcheck
 
 	state := w.State()
 	if state.ContextEstimate.SkillCount != 2 {
@@ -295,14 +295,17 @@ func TestScanArtifactDir(t *testing.T) {
 	dir := t.TempDir()
 
 	// Create test files
-	if err := os.WriteFile(filepath.Join(dir, "a.md"), []byte("# A"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(dir, "b.md"), []byte("# B content here"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(dir, "not-md.txt"), []byte("skip"), 0o644); err != nil {
-		t.Fatal(err)
+	for _, f := range []struct {
+		name    string
+		content string
+	}{
+		{"a.md", "# A"},
+		{"b.md", "# B content here"},
+		{"not-md.txt", "skip"},
+	} {
+		if err := os.WriteFile(filepath.Join(dir, f.name), []byte(f.content), 0o644); err != nil {
+			t.Fatal(err)
+		}
 	}
 	if err := os.Mkdir(filepath.Join(dir, "subdir"), 0o755); err != nil {
 		t.Fatal(err)

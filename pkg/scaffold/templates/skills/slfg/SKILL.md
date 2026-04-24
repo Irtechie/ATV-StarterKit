@@ -1,33 +1,42 @@
 ---
 name: slfg
 description: Full autonomous engineering workflow using swarm mode for parallel execution
+argument-hint: "[feature description]"
+disable-model-invocation: true
 ---
-
-## Arguments
-[feature description]
 
 Swarm-enabled LFG. Run these steps in order, parallelizing where indicated. Do not stop between steps — complete every step through to the end.
 
 ## Sequential Phase
 
-1. `/ce-plan $ARGUMENTS`
-2. `/deepen-plan`
+1. **Optional:** If the `ralph-loop` skill is available, run `/ralph-loop-ralph-loop "finish all slash commands" --completion-promise "DONE"`. If not available or it fails, skip and continue to step 2 immediately.
+2. `/ce-plan $ARGUMENTS` — **Record the plan file path** from `docs/plans/` for steps 4 and 6.
 3. `/ce-work` — **Use swarm mode**: Make a Task list and launch an army of agent swarm subagents to build the plan
 
 ## Parallel Phase
 
-After work completes, launch steps 5 and 6 as **parallel swarm agents** (both only need code to be written):
+After work completes, launch steps 4, 5, and 6 as **parallel swarm agents** (all read-only, safe to run concurrently):
 
-4. `/ce-review` — spawn as background Task agent
-5. `/test-browser` — spawn as background Task agent
+4. `/ce-review mode:report-only plan:<plan-path-from-step-2>` — spawn as background Task agent
+5. `/compound-engineering-test-browser` — spawn as background Task agent
+6. `/unslop` — spawn as background Task agent (read-only de-slop report)
 
-Wait for both to complete before continuing.
+Wait for all three to complete before continuing.
+
+## Autofix Phase
+
+7. `/ce-review mode:autofix plan:<plan-path-from-step-2>` — run sequentially after the parallel phase so it can safely mutate the checkout, apply `safe_auto` fixes, and emit residual todos for step 8
+8. `/unslop fix` — run sequentially after ce-review autofix to strip AI slop (commented-out code, filler comments, stale TODOs)
+
+## Learning Phase
+
+9. `/observe` on the areas of code that were changed — analyze patterns in the modified files to capture what was done and how.
+10. `/learn` — extract reusable patterns from this session into project instincts.
 
 ## Finalize Phase
 
-6. `/resolve_todo_parallel` — resolve any findings from the review
-7. `/feature-video` — record the final walkthrough and add to PR
-8. `/ce-compound` — document the solution for future sessions
-9. Output `<promise>DONE</promise>` after the video is in the PR and the solution has been compounded
+11. `/compound-engineering-todo-resolve` — resolve findings, compound on learnings, clean up completed todos
+12. `/compound-engineering-feature-video` — record the final walkthrough and add to PR
+13. Output `<promise>DONE</promise>` when video is in PR
 
 Start with step 1 now.

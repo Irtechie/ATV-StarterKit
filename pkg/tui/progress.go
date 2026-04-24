@@ -167,7 +167,7 @@ func (m ProgressModel) View() string {
 	var b strings.Builder
 
 	// Header
-	b.WriteString(fmt.Sprintf("\n  Installing %s preset for %s...\n\n", m.presetName, m.stackName))
+	fmt.Fprintf(&b, "\n  Installing %s preset for %s...\n\n", m.presetName, m.stackName)
 
 	// Steps
 	for _, step := range m.steps {
@@ -191,7 +191,7 @@ func (m ProgressModel) View() string {
 		if step.Duration != "" && (step.Status == StepDone || step.Status == StepWarning || step.Status == StepSkipped) {
 			label = fmt.Sprintf("%s · %s", label, step.Duration)
 		}
-		b.WriteString(fmt.Sprintf("  %s %s\n", icon, label))
+		fmt.Fprintf(&b, "  %s %s\n", icon, label)
 	}
 
 	if m.done {

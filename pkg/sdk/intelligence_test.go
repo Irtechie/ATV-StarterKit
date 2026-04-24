@@ -137,7 +137,8 @@ func TestRateLimit_MinInterval(t *testing.T) {
 
 	// First query succeeds
 	i.lastQuery = time.Time{} // reset
-	if _, err := i.Query(context.Background()); err != nil {
+	_, err := i.Query(context.Background())
+	if err != nil {
 		t.Fatal(err)
 	}
 	// Second query should be rate-limited

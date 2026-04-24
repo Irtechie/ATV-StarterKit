@@ -54,3 +54,29 @@ When both ATV and gstack provide similar functionality, ATV takes priority:
 - **Plans**: Use `docs/plans/` with ATV naming (`YYYY-MM-DD-NNN-type-name-plan.md`)
 - **Reviews**: ATV's `/ce-review` agent selection governs; gstack's `/review` runs alongside
 - **Protected artifacts**: Never flag `docs/plans/`, `docs/solutions/`, `docs/brainstorms/`, `compound-engineering.local.md`, or `.github/skills/gstack/` for deletion
+
+## Continuous Learning Pipeline
+
+This project uses ATV's continuous learning system to capture and evolve patterns.
+
+### Learning Commands
+
+- `/learn` — Extract patterns from recent work into instincts
+- `/instincts` — View all learned patterns with confidence scores
+- `/evolve` — Promote mature instincts (confidence > 0.8) into full skills
+- `/observe` — Run a focused observation session on a specific domain
+- `/unslop` — Unified de-slop pass: strip AI-generated code slop, comment rot, and design slop
+
+### How It Works
+
+1. **Observer hooks** automatically capture tool use data to `.atv/observations.jsonl`
+2. **`/learn`** analyzes recent work and creates instincts in `.atv/instincts/project.yaml`
+3. **Instincts** build confidence over time through repeated observation
+4. **`/evolve`** promotes mature instincts into discoverable skills in `.github/skills/learned-*/`
+
+### Best Practices
+
+- Run `/learn` after completing features or at session end
+- Run `/instincts` to check what patterns the project has learned
+- Run `/evolve` periodically to graduate well-established conventions
+- Run `/unslop` before PRs to strip AI-generated slop from code, comments, and UI

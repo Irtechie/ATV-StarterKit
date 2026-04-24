@@ -49,6 +49,9 @@ func BuildCatalog(stack detect.Stack) []Component {
 	// Hook 6: File Instructions
 	catalog = append(catalog, fileInstructions(stack)...)
 
+	// Observer hooks (copilot-hooks.json + scripts)
+	catalog = append(catalog, observerHooks()...)
+
 	// VS Code config
 	catalog = append(catalog, vscodeConfig()...)
 
@@ -103,17 +106,29 @@ func BuildFilteredCatalogForPacks(packs []installstate.StackPack, primaryStack d
 			selectedSkillDirs[dir] = true
 		}
 	}
+	if layerSet["easter-eggs"] {
+		for _, dir := range easterEggSkillDirectories {
+			selectedSkillDirs[dir] = true
+		}
+	}
 	if len(selectedSkillDirs) > 0 {
 		catalog = append(catalog, skillComponents(selectedSkillDirs)...)
 	}
 	if layerSet["universal-agents"] || layerSet["stack-agents"] {
 		catalog = append(catalog, agentsForPacks(normalizedPacks, layerSet["universal-agents"], layerSet["stack-agents"])...)
 	}
+	if layerSet["easter-eggs"] {
+		catalog = append(catalog, easterEggAgents()...)
+	}
 	if layerSet["file-instructions"] {
 		catalog = append(catalog, fileInstructionsForPacks(normalizedPacks)...)
 	}
 	if layerSet["vscode-extensions"] {
 		catalog = append(catalog, vscodeConfig()...)
+	}
+	// Observer hooks are included when core-skills are selected (learning pipeline)
+	if layerSet["core-skills"] {
+		catalog = append(catalog, observerHooks()...)
 	}
 
 	return catalog
@@ -123,6 +138,7 @@ func directories() []Component {
 	dirs := []string{
 		".github/skills",
 		".github/agents",
+		".github/hooks/scripts",
 		".vscode",
 	}
 	var comps []Component
@@ -137,6 +153,7 @@ func documentationDirectories() []Component {
 		"docs/plans",
 		"docs/brainstorms",
 		"docs/solutions",
+		".atv/instincts",
 	}
 	var comps []Component
 	for _, d := range dirs {
@@ -149,20 +166,41 @@ var coreSkillDirectories = []string{
 	"brainstorming",
 	"ce-brainstorm",
 	"ce-compound",
+	"ce-compound-refresh",
+	"ce-ideate",
 	"ce-plan",
 	"ce-review",
 	"ce-work",
 	"deepen-plan",
 	"document-review",
 	"setup",
+	// ATV Learning Pipeline
+	"learn",
+	"instincts",
+	"evolve",
+	"observe",
+	// ATV Quality
+	"unslop",
+	// Behavioral Guidelines
+	"karpathy-guidelines",
 }
 
 var orchestratorSkillDirectories = []string{
+	"claude-permissions-optimizer",
 	"feature-video",
 	"lfg",
+	"ralph-loop",
 	"resolve_todo_parallel",
 	"slfg",
 	"test-browser",
+}
+
+var easterEggSkillDirectories = []string{
+	"meme-iq",
+}
+
+var easterEggAgentFiles = map[string]bool{
+	"meme-iq.agent.md": true,
 }
 
 func systemInstructions(stack detect.Stack) []Component {
@@ -241,6 +279,11 @@ func agentsForPacks(packs []installstate.StackPack, includeUniversal bool, inclu
 		relPath := strings.TrimPrefix(path, "templates/agents/")
 		destPath := filepath.Join(".github", "agents", relPath)
 
+		// Skip easter-egg agents; they're included separately when easter-eggs layer is selected
+		if easterEggAgentFiles[filepath.Base(relPath)] {
+			return nil
+		}
+
 		if isStackSpecific(relPath) {
 			if !includeStackSpecific {
 				return nil
@@ -289,6 +332,18 @@ func vscodeConfig() []Component {
 	}
 }
 
+// observerHooks returns the Copilot CLI hook configuration and observer scripts
+// for the ATV continuous learning pipeline.
+func observerHooks() []Component {
+	hookConfig := mustRead("templates/hooks/copilot-hooks.json")
+	observeScript := mustRead("templates/hooks/scripts/observe.js")
+
+	return []Component{
+		{Path: ".github/hooks/copilot-hooks.json", Content: hookConfig, MergeJSON: true},
+		{Path: ".github/hooks/scripts/observe.js", Content: observeScript},
+	}
+}
+
 func mustRead(path string) []byte {
 	data, err := templateFS.ReadFile(path)
 	if err != nil {
@@ -327,4 +382,19 @@ var stackAgents = map[string]detect.Stack{
 func isStackSpecific(filename string) bool {
 	_, ok := stackAgents[filepath.Base(filename)]
 	return ok
+}
+
+// easterEggAgents returns agent components for easter-egg features.
+func easterEggAgents() []Component {
+	var comps []Component
+	for filename := range easterEggAgentFiles {
+		path := "templates/agents/" + filename
+		content, err := templateFS.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		destPath := filepath.Join(".github", "agents", filename)
+		comps = append(comps, Component{Path: destPath, Content: content, HookType: 5})
+	}
+	return comps
 }

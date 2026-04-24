@@ -51,7 +51,7 @@ func ComputeDrift(root string, manifest installstate.InstallManifest) []DriftEnt
 				DiskHash:    diskHash,
 				InstallHash: installHash,
 			})
-		// diskHash == installHash → no drift, skip
+			// diskHash == installHash → no drift, skip
 		}
 	}
 
@@ -66,7 +66,7 @@ func hashFile(path string) string {
 	if err != nil {
 		return ""
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {
@@ -89,7 +89,7 @@ func loadDriftIgnore(root string) []string {
 	if err != nil {
 		return nil
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	var patterns []string
 	scanner := bufio.NewScanner(f)

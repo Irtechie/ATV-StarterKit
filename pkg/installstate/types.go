@@ -121,7 +121,7 @@ type RequestedState struct {
 	PresetName          string      `json:"presetName,omitempty"`
 }
 
-// Recommendation is the deterministic, local suggestion shape that later launchpad work will consume.
+// Recommendation is a deterministic, local suggestion derived from install state.
 type Recommendation struct {
 	ID       string `json:"id"`
 	Title    string `json:"title"`

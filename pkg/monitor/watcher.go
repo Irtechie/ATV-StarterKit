@@ -33,7 +33,7 @@ type Watcher struct {
 	mu          sync.RWMutex
 	debounceWin time.Duration
 	onChange    func(LiveState) // notify TUI of state changes
-	stateFile   string         // .atv/launchpad-state.json
+	stateFile   string          // .atv/dashboard-state.json
 	cancel      context.CancelFunc
 	done        chan struct{}
 }
@@ -54,7 +54,7 @@ func NewWatcher(root string, opts WatcherOptions) (*Watcher, error) {
 		root:        root,
 		fsWatcher:   fsw,
 		debounceWin: debounce,
-		stateFile:   filepath.Join(root, ".atv", "launchpad-state.json"),
+		stateFile:   filepath.Join(root, ".atv", "dashboard-state.json"),
 		done:        make(chan struct{}),
 	}
 
@@ -292,8 +292,8 @@ func (w *Watcher) fullScan() {
 	defer w.mu.Unlock()
 
 	// Rebuild base snapshot
-	snapshot, _ := installstate.BuildLaunchpadSnapshot(w.root)
-	w.state.LaunchpadSnapshot = snapshot
+	snapshot, _ := installstate.BuildInstallSnapshot(w.root)
+	w.state.InstallSnapshot = snapshot
 	w.state.SchemaVersion = stateSchemaVersion
 
 	w.scanMemoryLayer()
@@ -312,9 +312,9 @@ func (w *Watcher) scanMemoryLayer() {
 	w.state.Solutions = scanArtifactDir(filepath.Join(w.root, "docs", "solutions"))
 
 	// Also update snapshot counts
-	w.state.LaunchpadSnapshot.RepoState.BrainstormCount = len(w.state.Brainstorms)
-	w.state.LaunchpadSnapshot.RepoState.PlanCount = len(w.state.Plans)
-	w.state.LaunchpadSnapshot.RepoState.SolutionCount = len(w.state.Solutions)
+	w.state.RepoState.BrainstormCount = len(w.state.Brainstorms)
+	w.state.RepoState.PlanCount = len(w.state.Plans)
+	w.state.RepoState.SolutionCount = len(w.state.Solutions)
 }
 
 // scanContextLayer scans Copilot context surface (skills, agents, instructions, prompts).
@@ -360,10 +360,10 @@ func (w *Watcher) scanContextLayer() {
 	}
 
 	// Update snapshot fields
-	w.state.LaunchpadSnapshot.RepoState.InstalledSkills = skillCount
-	w.state.LaunchpadSnapshot.RepoState.InstalledAgents = agentCount
-	w.state.LaunchpadSnapshot.RepoState.PromptFileCount = promptCount
-	w.state.LaunchpadSnapshot.RepoState.MCPServerCount = mcpCount
+	w.state.RepoState.InstalledSkills = skillCount
+	w.state.RepoState.InstalledAgents = agentCount
+	w.state.RepoState.PromptFileCount = promptCount
+	w.state.RepoState.MCPServerCount = mcpCount
 }
 
 // scanHealthLayer scans install manifest and drift.
@@ -371,15 +371,21 @@ func (w *Watcher) scanHealthLayer() {
 	// Re-read manifest to update outcomes
 	manifest, err := installstate.ReadManifest(w.root)
 	if err == nil {
-		w.state.LaunchpadSnapshot.HasManifest = true
-		w.state.LaunchpadSnapshot.GeneratedAt = manifest.GeneratedAt
-		w.state.LaunchpadSnapshot.Requested = manifest.Requested
-		w.state.LaunchpadSnapshot.OutcomeSummary = installstate.SummarizeOutcomes(manifest.Outcomes)
-		w.state.LaunchpadSnapshot.Recommendations = installstate.BuildRecommendations(w.root, manifest)
+		w.state.InstallSnapshot.HasManifest = true
+		w.state.InstallSnapshot.GeneratedAt = manifest.GeneratedAt
+		w.state.InstallSnapshot.Requested = manifest.Requested
+		w.state.InstallSnapshot.OutcomeSummary = installstate.SummarizeOutcomes(manifest.Outcomes)
+		w.state.InstallSnapshot.Recommendations = installstate.BuildRecommendations(w.root, manifest)
 
 		// Compute drift
 		w.state.DriftEntries = ComputeDrift(w.root, manifest)
 	}
+
+	// Learning pipeline state
+	repoState := installstate.ScanRepoState(w.root)
+	w.state.InstinctCount = repoState.InstinctCount
+	w.state.ObservationCount = repoState.ObservationCount
+	w.state.HasObserverHooks = repoState.HasObserverHooks
 }
 
 // scanRuntimeLayer probes runtime tool availability.
@@ -417,7 +423,7 @@ func (w *Watcher) scanRuntimeLayer() {
 	}
 }
 
-// writeStateFile atomically writes state to .atv/launchpad-state.json for VS Code.
+// writeStateFile atomically writes state to .atv/dashboard-state.json for VS Code.
 func (w *Watcher) writeStateFile() {
 	dir := filepath.Dir(w.stateFile)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -431,7 +437,7 @@ func (w *Watcher) writeStateFile() {
 	data = append(data, '\n')
 
 	// Atomic write via temp file + rename (matches WriteManifest pattern)
-	tmp, err := os.CreateTemp(dir, "launchpad-state-*.json")
+	tmp, err := os.CreateTemp(dir, "dashboard-state-*.json")
 	if err != nil {
 		return
 	}

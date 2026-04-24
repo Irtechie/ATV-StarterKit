@@ -101,9 +101,9 @@ type RuntimeHealthState struct {
 	MCPServers   RuntimeHealthStatus `json:"mcpServers"`
 }
 
-// LiveState extends LaunchpadSnapshot with realtime monitoring data.
+// LiveState extends InstallSnapshot with realtime monitoring data.
 type LiveState struct {
-	installstate.LaunchpadSnapshot
+	installstate.InstallSnapshot
 
 	// Layer 1: Repo memory (live-tracked)
 	Brainstorms []ArtifactEntry `json:"brainstorms"`
@@ -122,6 +122,11 @@ type LiveState struct {
 
 	// Layer 5: Runtime health
 	RuntimeHealth RuntimeHealthState `json:"runtimeHealth"`
+
+	// Layer 6: Learning pipeline
+	InstinctCount    int  `json:"instinctCount"`
+	ObservationCount int  `json:"observationCount"`
+	HasObserverHooks bool `json:"hasObserverHooks"`
 
 	// SDK intelligence (zero values when offline)
 	SDKRecommendations []SDKRecommendation `json:"sdkRecommendations,omitempty"`

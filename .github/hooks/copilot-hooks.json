@@ -1,0 +1,49 @@
+{
+  "hooks": {
+    "errorOccurred": [
+      {
+        "bash": "node .github/hooks/scripts/observe.js errorOccurred",
+        "powershell": "node .github/hooks/scripts/observe.js errorOccurred",
+        "timeoutSec": 5,
+        "type": "command"
+      }
+    ],
+    "postToolUse": [
+      {
+        "bash": "echo '[hook-test] postToolUse fired' \u003e\u003e /tmp/copilot-hook-test.log",
+        "timeoutSec": 5,
+        "type": "command"
+      }
+    ],
+    "preToolUse": [
+      {
+        "bash": "echo '[hook-test] preToolUse fired' \u003e\u003e /tmp/copilot-hook-test.log",
+        "timeoutSec": 5,
+        "type": "command"
+      }
+    ],
+    "sessionEnd": [
+      {
+        "bash": "echo '[hook-test] sessionEnd fired' \u003e\u003e /tmp/copilot-hook-test.log",
+        "timeoutSec": 5,
+        "type": "command"
+      }
+    ],
+    "sessionStart": [
+      {
+        "bash": "echo '[hook-test] sessionStart fired' \u003e\u003e /tmp/copilot-hook-test.log",
+        "timeoutSec": 5,
+        "type": "command"
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "bash": "node .github/hooks/scripts/observe.js userPromptSubmitted",
+        "powershell": "node .github/hooks/scripts/observe.js userPromptSubmitted",
+        "timeoutSec": 5,
+        "type": "command"
+      }
+    ]
+  },
+  "version": 1
+}
