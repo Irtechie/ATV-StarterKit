@@ -150,6 +150,10 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		"karpathy-guidelines": true,
 		// unslop ships only as a template (ATV quality skill).
 		"unslop": true,
+		// atv-security and cso ship only as templates (security skills
+		// added via the installer template tree, not dogfooded yet).
+		"atv-security": true,
+		"cso":          true,
 	}
 
 	// pendingMirror: skills that exist under .github/skills/ but were never
@@ -181,6 +185,7 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		"frontend-design":           true,
 		"gemini-imagegen":           true,
 		"generate_command":          true,
+		"ghcp-review-resolve":       true,
 		"git-clean-gone-branches":   true,
 		"git-commit":                true,
 		"git-commit-push-pr":        true,

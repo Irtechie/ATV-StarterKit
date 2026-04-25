@@ -186,6 +186,9 @@ var coreSkillDirectories = []string{
 	"unslop",
 	// Behavioral Guidelines
 	"karpathy-guidelines",
+	// Security
+	"atv-security",
+	"cso",
 }
 
 var orchestratorSkillDirectories = []string{
