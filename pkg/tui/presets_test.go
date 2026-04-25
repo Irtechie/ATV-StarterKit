@@ -73,3 +73,21 @@ func TestPresetSelectionSummaryExplainsCapabilitiesAndDowngrades(t *testing.T) {
 		}
 	}
 }
+
+// TestPresetsContainCoreSkills guards the regression class that motivated
+// PR #27: every preset must include LayerCoreSkills, otherwise --guided
+// users silently lose land/takeoff (and every other core skill).
+func TestPresetsContainCoreSkills(t *testing.T) {
+	for _, p := range AllPresets() {
+		var found bool
+		for _, layer := range p.ATVLayers {
+			if layer == LayerCoreSkills {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("preset %q dropped LayerCoreSkills — land/takeoff would not ship", p.Key)
+		}
+	}
+}

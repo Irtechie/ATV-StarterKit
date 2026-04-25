@@ -35,13 +35,19 @@ var atvCategoryMapping = map[string][]CategorySkill{
 	gstack.CategoryReview: {
 		{Label: "CE Review — multi-agent code review", Key: "core-skills:ce-review", Source: "atv"},
 	},
+	gstack.CategorySecurity: {
+		{Label: "ATV Security — agentic config security audit", Key: "core-skills:atv-security", Source: "atv"},
+		{Label: "CSO — OWASP Top 10 + STRIDE source-code review", Key: "core-skills:cso", Source: "atv"},
+	},
 	gstack.CategoryShipping: {
+		{Label: "Takeoff — backlog briefing at session start", Key: "core-skills:takeoff", Source: "atv"},
 		{Label: "CE Work — execute plans with quality checks", Key: "core-skills:ce-work", Source: "atv"},
 		{Label: "LFG — full autonomous pipeline", Key: "orchestrators:lfg", Source: "atv"},
 		{Label: "SLFG — swarm mode parallel execution", Key: "orchestrators:slfg", Source: "atv"},
 		{Label: "CE Compound — document solutions", Key: "core-skills:ce-compound", Source: "atv"},
 		{Label: "CE Compound Refresh — refresh documented solutions", Key: "core-skills:ce-compound-refresh", Source: "atv"},
 		{Label: "Claude Permissions Optimizer — optimize tool permissions", Key: "orchestrators:claude-permissions-optimizer", Source: "atv"},
+		{Label: "Land — commit, push, and open a PR at session end", Key: "core-skills:land", Source: "atv"},
 	},
 	gstack.CategoryQATesting: {
 		{Label: "agent-browser — real browser automation with screenshots and form fills", Key: "agent-browser", Source: "atv"},

@@ -77,3 +77,80 @@ func TestBuildCategoryGroupsWarnsWhenQARuntimeUnavailable(t *testing.T) {
 	}
 	t.Fatal("expected QA category group")
 }
+
+// TestSecurityCategoryIncludesAtvSecurityAndCso ensures the customize-mode
+// TUI surfaces atv-security and cso as toggleable options. Both ship via
+// LayerCoreSkills, so without TUI entries users would receive them
+// silently with no way to opt out.
+func TestSecurityCategoryIncludesAtvSecurityAndCso(t *testing.T) {
+	groups := BuildCategoryGroups(gstack.Prerequisites{})
+
+	var security *CategoryGroup
+	for i, group := range groups {
+		if group.Category == gstack.CategorySecurity {
+			security = &groups[i]
+			break
+		}
+	}
+	if security == nil {
+		t.Fatal("expected security category group in BuildCategoryGroups output")
+	}
+
+	want := map[string]bool{
+		"core-skills:atv-security": false,
+		"core-skills:cso":          false,
+	}
+	for _, skill := range security.Skills {
+		if _, ok := want[skill.Key]; ok {
+			want[skill.Key] = true
+			if skill.Source != "atv" {
+				t.Errorf("%s should have source=atv, got %q", skill.Key, skill.Source)
+			}
+		}
+	}
+	for key, found := range want {
+		if !found {
+			t.Errorf("security category missing required skill: %s", key)
+		}
+	}
+}
+
+// TestShippingCategoryIncludesLandAndTakeoff is the customize-mode counterpart
+// to TestCoreLayerShipsLandAndTakeoff in pkg/scaffold. It guards against a
+// regression where Land or Takeoff are dropped from the Shipping category in
+// the customize-mode TUI even if they remain wired in the catalog.
+func TestShippingCategoryIncludesLandAndTakeoff(t *testing.T) {
+	groups := BuildCategoryGroups(gstack.Prerequisites{})
+
+	var shipping *CategoryGroup
+	for i, group := range groups {
+		if group.Category == gstack.CategoryShipping {
+			shipping = &groups[i]
+			break
+		}
+	}
+	if shipping == nil {
+		t.Fatal("expected shipping category group in BuildCategoryGroups output")
+	}
+
+	want := map[string]bool{
+		"core-skills:takeoff": false,
+		"core-skills:land":    false,
+	}
+	for _, skill := range shipping.Skills {
+		if _, ok := want[skill.Key]; ok {
+			want[skill.Key] = true
+			if skill.Source != "atv" {
+				t.Errorf("%s should have source=atv, got %q", skill.Key, skill.Source)
+			}
+			if skill.IsGstack {
+				t.Errorf("%s should not be marked as a gstack skill", skill.Key)
+			}
+		}
+	}
+	for key, found := range want {
+		if !found {
+			t.Errorf("shipping category missing required skill: %s", key)
+		}
+	}
+}
