@@ -248,6 +248,24 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		)
 	}
 
+	// Graduation check: a skill that has been mirrored into templates/skills/
+	// should be removed from pendingMirror so the list shrinks over time
+	// instead of fossilizing.
+	var graduatedPendingMirror []string
+	for name := range pendingMirror {
+		if templateSkills[name] {
+			graduatedPendingMirror = append(graduatedPendingMirror, name)
+		}
+	}
+	if len(graduatedPendingMirror) > 0 {
+		sort.Strings(graduatedPendingMirror)
+		t.Errorf(
+			"pendingMirror contains skills now mirrored under pkg/scaffold/templates/skills/: %v\n"+
+				"Remove each graduated entry — the tech debt has been paid down.",
+			graduatedPendingMirror,
+		)
+	}
+
 	var missingFromTemplates []string
 	for name := range dogfoodSkills {
 		if templateSkills[name] || pendingMirror[name] {
@@ -313,5 +331,9 @@ func repoRoot(t *testing.T) string {
 		t.Fatal("runtime.Caller failed")
 	}
 	// thisFile is .../pkg/scaffold/parity_test.go → climb two levels.
-	return filepath.Clean(filepath.Join(filepath.Dir(thisFile), "..", ".."))
+	root := filepath.Clean(filepath.Join(filepath.Dir(thisFile), "..", ".."))
+	if _, err := os.Stat(filepath.Join(root, "go.mod")); err != nil {
+		t.Fatalf("repoRoot %q does not contain go.mod — was the package moved?: %v", root, err)
+	}
+	return root
 }
