@@ -141,6 +141,9 @@ func TestDogfoodTemplateParity(t *testing.T) {
 	}
 
 	// Skills intentionally living in only one location.
+	//
+	// templateOnly: skills that ship via the installer but are not used to
+	// dogfood this repo. Small, justified per-entry.
 	templateOnly := map[string]bool{
 		// karpathy-guidelines ships only as a template; there is no
 		// .github/skills/karpathy-guidelines/ in this repo.
@@ -148,13 +151,19 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		// unslop ships only as a template (ATV quality skill).
 		"unslop": true,
 	}
-	dogfoodOnly := map[string]bool{
-		// Historical .github/skills/ entries that were never wired into the
-		// installer template tree. This baseline freezes the current state
-		// so the test catches future drift (a newly-added .github/skills/
-		// entry that someone forgets to mirror into templates/skills/).
-		// To ship one of these via --guided, copy it into
-		// pkg/scaffold/templates/skills/ and remove its entry here.
+
+	// pendingMirror: skills that exist under .github/skills/ but were never
+	// copied into the installer template tree. This list freezes the current
+	// state so future drift fails CI, but every entry here represents real
+	// tech debt: a skill that this repo dogfoods but that --guided users
+	// don't get. Shrink this list over time by either:
+	//   1. Copying the skill into pkg/scaffold/templates/skills/<name>/ and
+	//      registering it in catalog.go (then remove the entry here), or
+	//   2. Removing the unused .github/skills/<name>/ directory entirely.
+	//
+	// Do NOT add entries here without also opening a tracking issue. The
+	// presence of an entry should always be a question, not an answer.
+	pendingMirror := map[string]bool{
 		"agent-browser":             true,
 		"agent-native-architecture": true,
 		"agent-native-audit":        true,
@@ -200,9 +209,43 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		"workflows-work":            true,
 	}
 
+	// Stale-entry check: every name listed in templateOnly must actually
+	// exist under templates/skills/, and every name in pendingMirror must
+	// actually exist under .github/skills/. If a skill is removed or
+	// renamed and the allow-list isn't updated, fail loudly so the list
+	// stays honest instead of silently accumulating dead entries.
+	var staleTemplateOnly []string
+	for name := range templateOnly {
+		if !templateSkills[name] {
+			staleTemplateOnly = append(staleTemplateOnly, name)
+		}
+	}
+	if len(staleTemplateOnly) > 0 {
+		sort.Strings(staleTemplateOnly)
+		t.Errorf(
+			"templateOnly contains entries no longer present under pkg/scaffold/templates/skills/: %v\n"+
+				"Remove each stale entry from this test.",
+			staleTemplateOnly,
+		)
+	}
+	var stalePendingMirror []string
+	for name := range pendingMirror {
+		if !dogfoodSkills[name] {
+			stalePendingMirror = append(stalePendingMirror, name)
+		}
+	}
+	if len(stalePendingMirror) > 0 {
+		sort.Strings(stalePendingMirror)
+		t.Errorf(
+			"pendingMirror contains entries no longer present under .github/skills/: %v\n"+
+				"Remove each stale entry from this test (the underlying tech debt is gone).",
+			stalePendingMirror,
+		)
+	}
+
 	var missingFromTemplates []string
 	for name := range dogfoodSkills {
-		if templateSkills[name] || dogfoodOnly[name] {
+		if templateSkills[name] || pendingMirror[name] {
 			continue
 		}
 		missingFromTemplates = append(missingFromTemplates, name)
@@ -212,7 +255,8 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		t.Fatalf(
 			"skills present in .github/skills/ but missing from pkg/scaffold/templates/skills/: %v\n"+
 				"Copy each skill into pkg/scaffold/templates/skills/<name>/ so --guided installs ship it. "+
-				"If a skill is intentionally dogfood-only, add it to dogfoodOnly in this test.",
+				"If a skill is intentionally dogfood-only and shouldn't ship, add it to pendingMirror in this test "+
+				"(but treat that as recording tech debt, not closing the gap).",
 			missingFromTemplates,
 		)
 	}
