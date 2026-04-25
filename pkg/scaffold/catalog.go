@@ -174,6 +174,9 @@ var coreSkillDirectories = []string{
 	"deepen-plan",
 	"document-review",
 	"setup",
+	// Session lifecycle
+	"takeoff",
+	"land",
 	// ATV Learning Pipeline
 	"learn",
 	"instincts",
