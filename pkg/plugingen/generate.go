@@ -11,6 +11,18 @@ import (
 	"strings"
 )
 
+// pluginNameForSkill converts a template skill directory name into a
+// valid Copilot CLI plugin name. Plugin names must be kebab-case
+// (letters, numbers, hyphens only) per the spec, but our template
+// directories occasionally use underscores (e.g. resolve_todo_parallel).
+//
+// The skill's slash command and SKILL.md `name:` field are unaffected
+// — they continue to use the underscore form. Only the marketplace-
+// facing plugin name and plugin directory name get sanitized.
+func pluginNameForSkill(skill string) string {
+	return "atv-skill-" + strings.ReplaceAll(skill, "_", "-")
+}
+
 // KitVersion is the marketplace + per-plugin version. It is set by the
 // CLI from the repo VERSION file at runtime.
 //
@@ -131,18 +143,19 @@ func Generate(cfg Config) error {
 
 	// 1. Per-skill plugins (atv-skill-<name>).
 	for _, name := range skillNames {
-		dir := filepath.Join(pluginsDir, "atv-skill-"+name)
+		pluginName := pluginNameForSkill(name)
+		dir := filepath.Join(pluginsDir, pluginName)
 		if err := writeSkillFile(dir, name, skillBody[name]); err != nil {
 			return err
 		}
 		manifest := PluginManifest{
-			Name:        "atv-skill-" + name,
+			Name:        pluginName,
 			Description: skillPluginDescription(name),
 			Version:     cfg.KitVersion,
 			Author:      defaultAuthor(),
 			Repository:  defaultRepository(),
 			License:     "MIT",
-			Keywords:    []string{"atv", "skill", name},
+			Keywords:    []string{"atv", "skill", strings.ReplaceAll(name, "_", "-")},
 			Skills:      []string{"./skills"},
 		}
 		if err := writeManifest(dir, manifest); err != nil {
@@ -401,12 +414,13 @@ func writeMarketplace(cfg Config, skillNames []string, packs []Pack) error {
 		})
 	}
 	for _, name := range skillNames {
+		pluginName := pluginNameForSkill(name)
 		entries = append(entries, MarketplaceEntry{
-			Name:        "atv-skill-" + name,
-			Source:      "atv-skill-" + name,
+			Name:        pluginName,
+			Source:      pluginName,
 			Description: skillPluginDescription(name),
 			Version:     cfg.KitVersion,
-			Keywords:    []string{"atv", "skill", name},
+			Keywords:    []string{"atv", "skill", strings.ReplaceAll(name, "_", "-")},
 			Category:    "skill",
 		})
 	}

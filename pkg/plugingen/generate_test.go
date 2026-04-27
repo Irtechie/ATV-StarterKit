@@ -47,12 +47,37 @@ func TestGenerate_ProducesEveryPerSkillPlugin(t *testing.T) {
 		t.Fatal("no skills discovered — test setup is broken")
 	}
 	for _, name := range skillNames {
-		dir := filepath.Join(tmp, "plugins", "atv-skill-"+name)
+		dir := filepath.Join(tmp, "plugins", pluginNameForSkill(name))
 		if _, err := os.Stat(filepath.Join(dir, "plugin.json")); err != nil {
-			t.Errorf("missing plugin.json for atv-skill-%s: %v", name, err)
+			t.Errorf("missing plugin.json for %s: %v", pluginNameForSkill(name), err)
 		}
+		// Skill content directory inside the plugin keeps the original
+		// template directory name (so the SKILL.md name: field which
+		// drives the slash command stays intact).
 		if _, err := os.Stat(filepath.Join(dir, "skills", name, "SKILL.md")); err != nil {
-			t.Errorf("missing SKILL.md inside atv-skill-%s: %v", name, err)
+			t.Errorf("missing SKILL.md inside %s: %v", pluginNameForSkill(name), err)
+		}
+	}
+}
+
+// TestPluginNameForSkill_KebabCaseOnly is the regression guard for the
+// 2.6.1 marketplace bug where `resolve_todo_parallel` produced an
+// underscore-containing plugin name and the Copilot CLI rejected the
+// whole marketplace.json with "Plugin name must be kebab-case".
+func TestPluginNameForSkill_KebabCaseOnly(t *testing.T) {
+	cases := map[string]string{
+		"ce-plan":               "atv-skill-ce-plan",
+		"resolve_todo_parallel": "atv-skill-resolve-todo-parallel",
+		"atv-security":          "atv-skill-atv-security",
+		"meme-iq":               "atv-skill-meme-iq",
+	}
+	for in, want := range cases {
+		got := pluginNameForSkill(in)
+		if got != want {
+			t.Errorf("pluginNameForSkill(%q) = %q, want %q", in, got, want)
+		}
+		if strings.ContainsAny(got, "_ ./") {
+			t.Errorf("plugin name %q contains forbidden character", got)
 		}
 	}
 }
@@ -147,7 +172,7 @@ func TestGenerate_MarketplaceListsEveryPlugin(t *testing.T) {
 		wantNames = append(wantNames, p.Name)
 	}
 	for _, n := range skillNames {
-		wantNames = append(wantNames, "atv-skill-"+n)
+		wantNames = append(wantNames, pluginNameForSkill(n))
 	}
 	for _, n := range wantNames {
 		if !have[n] {

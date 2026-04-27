@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [2.6.2] — 2026-04-26
+
+### Fixed
+
+- **Marketplace registration was rejected by Copilot CLI** — the v2.6.1 marketplace contained a plugin entry named `atv-skill-resolve_todo_parallel` (sourced from the `resolve_todo_parallel` skill template, which uses an underscore). Copilot CLI's marketplace validator requires plugin names to be strict kebab-case (letters, numbers, hyphens only) and refused to load the marketplace with `Plugin name must be kebab-case`. The generator now sanitizes plugin names by converting underscores to hyphens (`atv-skill-resolve-todo-parallel`). The skill's slash command and SKILL.md `name:` field are unchanged — only the marketplace-facing plugin name is sanitized. Regression test added in `pkg/plugingen/generate_test.go`.
+
 ## [2.6.1] — 2026-04-26
 
 ### Added
