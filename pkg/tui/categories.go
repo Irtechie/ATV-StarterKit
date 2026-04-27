@@ -53,6 +53,7 @@ var atvCategoryMapping = map[string][]CategorySkill{
 	},
 	gstack.CategoryGuidelines: {
 		{Label: "Karpathy Guidelines — think before coding, simplicity, surgical changes, goal-driven execution", Key: "core-skills:karpathy-guidelines", Source: "atv"},
+		{Label: "Autoresearch — autonomous experiment loop: define goal + metric, agent iterates", Key: "core-skills:autoresearch", Source: "atv"},
 	},
 	gstack.CategoryEasterEgg: {
 		{Label: "memeIQ — AI-powered meme generation toolkit", Key: "easter-eggs:meme-iq", Source: "atv"},

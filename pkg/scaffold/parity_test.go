@@ -148,6 +148,9 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		// karpathy-guidelines ships only as a template; there is no
 		// .github/skills/karpathy-guidelines/ in this repo.
 		"karpathy-guidelines": true,
+		// autoresearch ships only as a template (sourced from
+		// github/awesome-copilot, MIT). No dogfooded copy in this repo.
+		"autoresearch": true,
 		// unslop ships only as a template (ATV quality skill).
 		"unslop": true,
 		// atv-security ships only as a template (security skill

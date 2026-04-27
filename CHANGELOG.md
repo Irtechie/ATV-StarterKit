@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [2.6.0] — 2026-04-26
+
+### Added
+
+- **Autoresearch skill** — autonomous iterative experimentation loop for any programming task with a measurable outcome. Define a goal + metric command + scope, and the agent works on a dedicated `autoresearch/<tag>` branch, committing each experiment, running the metric, and keeping or reverting based on the result. Every experiment is tracked in `results.tsv`. Sourced verbatim from [github/awesome-copilot](https://github.com/github/awesome-copilot/blob/main/skills/autoresearch/SKILL.md) (MIT, by [@luiscantero](https://github.com/luiscantero), inspired by [Karpathy's autoresearch](https://github.com/karpathy/autoresearch)). Installs as `.github/skills/autoresearch/SKILL.md`.
+- **Coding Guidelines TUI category now lists Autoresearch** — `📐 Coding Guidelines` shows both `Karpathy Guidelines` and `Autoresearch` as toggleable, both pre-selected. Autoresearch is included in all three presets (Starter, Pro, Full) as a core skill.
+- **`/autoresearch` discoverable in instruction templates** — added to the Available Workflows section of `general.md`, `python.md`, `rails.md`, and `typescript.md` so Copilot routes appropriate prompts (performance tuning, hill climbing, automated experimentation) to the skill.
+
 ## [2.5.9] — 2026-04-26
 
 ### Changed

@@ -186,6 +186,8 @@ var coreSkillDirectories = []string{
 	"unslop",
 	// Behavioral Guidelines
 	"karpathy-guidelines",
+	// Experimentation
+	"autoresearch",
 	// Security
 	"atv-security",
 }

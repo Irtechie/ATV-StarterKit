@@ -4,6 +4,7 @@ One command. Full agentic coding setup. 45 skills, 29 agents, and a memory syste
 
 ### Recent additions
 
+- **Autoresearch joins the core skills** — new `/autoresearch` skill scaffolds an autonomous experimentation loop: define a goal + metric, the agent iterates (edit → commit → run → measure → keep/revert) on a dedicated branch until interrupted. Sourced from [github/awesome-copilot](https://github.com/github/awesome-copilot/blob/main/skills/autoresearch/SKILL.md) (MIT). Listed under `📐 Coding Guidelines` in guided installs and shipped in all three presets.
 - **`/cso` folded into `/atv-security`** — the standalone `/cso` skill has been merged into `/atv-security`, which now scans both agentic config (`.github/`, `.vscode/`) AND application source code (OWASP Top 10 + STRIDE) in a single run. Old `/cso` triggers still route to `/atv-security`. Eliminates a long-standing name collision with gstack's separate `/cso` skill.
 - **memeIQ joins the guided installer** — the customize flow now includes a `🥚 Easter Eggs` category with an opt-in meme generation toolkit backed by memegen.link.
 - **Installer-ready memeIQ scaffolding** — guided installs can now write both `.github/skills/meme-iq/SKILL.md` and `.github/agents/meme-iq.agent.md` into the target repo.

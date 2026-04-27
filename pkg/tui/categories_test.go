@@ -30,6 +30,7 @@ func TestBuildCategoryGroupsIncludesGuidelinesCategory(t *testing.T) {
 		found = true
 		// Must contain the Karpathy skill
 		var hasKarpathy bool
+		var hasAutoresearch bool
 		for _, skill := range group.Skills {
 			if skill.Key == "core-skills:karpathy-guidelines" {
 				hasKarpathy = true
@@ -40,9 +41,21 @@ func TestBuildCategoryGroupsIncludesGuidelinesCategory(t *testing.T) {
 					t.Fatal("karpathy-guidelines should not be a gstack skill")
 				}
 			}
+			if skill.Key == "core-skills:autoresearch" {
+				hasAutoresearch = true
+				if skill.Source != "atv" {
+					t.Fatalf("autoresearch should have source atv, got %q", skill.Source)
+				}
+				if skill.IsGstack {
+					t.Fatal("autoresearch should not be a gstack skill")
+				}
+			}
 		}
 		if !hasKarpathy {
 			t.Fatal("guidelines category should contain karpathy-guidelines skill")
+		}
+		if !hasAutoresearch {
+			t.Fatal("guidelines category should contain autoresearch skill")
 		}
 	}
 	if !found {
