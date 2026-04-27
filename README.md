@@ -69,6 +69,9 @@ Then open **Copilot Chat** (⌃⌘I / Ctrl+Shift+I) and go:
 /ce-compound     →  Document what you learned for future sessions
 
 /lfg             →  Run the full pipeline in one shot
+
+/atv-doctor      →  Diagnose ATV install health
+/atv-update      →  Update ATV marketplace plugins
 ```
 
 ---

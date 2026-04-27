@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [2.6.3] — 2026-04-26
+
+### Added
+
+- **`/atv-doctor` skill** — diagnose ATV install health across both install paths. Detects install scope (project scaffold + marketplace plugins), reports version drift against the latest npm release, verifies file integrity via the install manifest's checksums (when available), validates `.github/hooks/copilot-hooks.json` and referenced scripts, parses `inputs[]` from the MCP config, and gates optional dependency warnings on actual user opt-in (no noisy "you don't have Bun" warnings if you didn't ask for gstack). Severity-graded report (🔴 / 🟡 / 🟢 / ⚪). Optional `fix` mode auto-updates stale marketplace plugins (with confirmation).
+- **`/atv-update` skill** — update ATV. For Copilot CLI marketplace plugins: runs `copilot plugin update` per installed ATV plugin with per-step `AskUserQuestion` confirmation. For project scaffold: prints a structured update plan and the exact commands you can run yourself, but does NOT auto-rerun the installer because today's installer is `additive-only` and would not refresh existing files. Best-effort CHANGELOG fetch + `dry-run` mode.
+- **`🩺 Maintenance & Health` TUI category** — new category in the guided installer between `📐 Coding Guidelines` and `🥚 Easter Eggs`. Both maintenance skills are pre-selected and ship in all three presets (Starter, Pro, Full).
+- **`atv-pack-maintenance` marketplace plugin** — bundles `/atv-doctor` and `/atv-update` for a one-shot install: `copilot plugin install atv-pack-maintenance@atv-starter-kit`. `atv-everything` also includes both new skills.
+
+### Notes
+
+- **`/atv-update` apply mode is scoped to marketplace plugins only.** The current installer (`pkg/scaffold/scaffold.go`) writes scaffold files with `writeIfNotExists` semantics — it will not overwrite existing user-edited files. Until a dedicated `--refresh` flag lands in the installer (read manifest → overwrite checksum-clean files → preserve drifted files), `/atv-update` for project scaffold remains advisory: it shows the version delta and the recommended commands, but does not run them. This is the safest behaviour and avoids any chance of surprise file changes.
+
 ## [2.6.2] — 2026-04-26
 
 ### Fixed

@@ -101,6 +101,13 @@ func Packs() []Pack {
 			Keywords:    []string{"atv", "learning", "memory", "compound-engineering"},
 			SkillNames:  []string{"evolve", "instincts", "learn", "observe"},
 		},
+		{
+			Name:        "atv-pack-maintenance",
+			Category:    "maintenance",
+			Description: "Maintenance & health pack — atv-doctor (diagnose ATV install health) and atv-update (update marketplace plugins; advisory for project scaffold). Keep your ATV install healthy and current.",
+			Keywords:    []string{"atv", "maintenance", "doctor", "update", "health"},
+			SkillNames:  []string{"atv-doctor", "atv-update"},
+		},
 	}
 }
 

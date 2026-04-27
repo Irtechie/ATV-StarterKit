@@ -188,6 +188,9 @@ var coreSkillDirectories = []string{
 	"karpathy-guidelines",
 	// Experimentation
 	"autoresearch",
+	// Maintenance
+	"atv-doctor",
+	"atv-update",
 	// Security
 	"atv-security",
 }

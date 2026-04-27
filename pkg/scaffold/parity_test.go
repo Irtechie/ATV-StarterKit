@@ -151,6 +151,10 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		// autoresearch ships only as a template (sourced from
 		// github/awesome-copilot, MIT). No dogfooded copy in this repo.
 		"autoresearch": true,
+		// atv-doctor and atv-update ship only as templates (maintenance
+		// skills added in v2.6.3). No dogfooded copy in this repo.
+		"atv-doctor": true,
+		"atv-update": true,
 		// unslop ships only as a template (ATV quality skill).
 		"unslop": true,
 		// atv-security ships only as a template (security skill
