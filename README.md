@@ -63,7 +63,16 @@ Then open **Copilot Chat** (⌃⌘I / Ctrl+Shift+I) and go:
 
 ## Installation
 
-### npm (recommended)
+ATV ships in **two flavours** — pick whichever matches your need (or use both):
+
+| | `npx atv-starterkit init` | Copilot CLI marketplace |
+|---|---|---|
+| **Files land in** | Your project's `.github/`, `.vscode/`, `docs/` | `~/.copilot/installed-plugins/` |
+| **Scope** | Project-level, committed, team-shared | Personal, follows you across projects |
+| **What ships** | Skills + agents + MCP + hooks + instructions + setup-steps + docs | Skills + agents only |
+| **Best for** | Bootstrapping a new repo, codifying team workflow | Personal cross-project skills |
+
+### Path 1 — npm scaffold (project-level, recommended for teams)
 
 ```bash
 npx atv-starterkit@latest init       # quick run — downloads binary automatically
@@ -73,25 +82,42 @@ atv-starterkit init                  # then run from anywhere
 
 The npm package downloads the correct platform binary from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases) — no Go toolchain needed.
 
-### Binary (direct download)
+#### Binary (direct download)
 
 Grab a pre-built binary from [GitHub Releases](https://github.com/All-The-Vibes/ATV-StarterKit/releases/latest) for your platform (macOS, Linux, Windows — amd64/arm64).
 
-### From source
+#### From source
 
 ```bash
 git clone https://github.com/All-The-Vibes/ATV-StarterKit.git
 cd ATV-StarterKit && go build -o atv-installer .
 ```
 
+### Path 2 — Copilot CLI marketplace (personal, cross-project)
+
+```bash
+copilot plugin marketplace add All-The-Vibes/ATV-StarterKit
+copilot plugin install atv-everything@atv-starter-kit       # all skills + all agents
+```
+
+Or pick a category bundle / single skill — full tier breakdown in **[docs/marketplace.md](docs/marketplace.md)**:
+
+```bash
+copilot plugin install atv-pack-planning@atv-starter-kit    # one category
+copilot plugin install atv-skill-autoresearch@atv-starter-kit  # one skill
+```
+
+The marketplace ships skills + agents only. For MCP config, hooks, instructions templates, and docs scaffolding use Path 1.
+
 ### Prerequisites
 
-**Required:** Git, Node.js 16+
+**Required:** Git, Node.js 16+ (for Path 1).
 
 **Optional:**
 - **Bun** — for gstack browser skills (`/gstack-qa`, `/gstack-browse`, `/gstack-benchmark`)
 - **GitHub PAT** — for GitHub MCP server
 - **Azure CLI** — for Azure MCP server
+- **Copilot CLI** — for Path 2 (`copilot` command)
 
 Without Bun, text-based gstack skills still work. `agent-browser` works independently of Bun.
 

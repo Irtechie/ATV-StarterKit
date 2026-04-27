@@ -1,0 +1,21 @@
+{
+  "name": "atv-pack-guidelines",
+  "description": "Coding guidelines pack — Karpathy Guidelines (behavioral) plus Autoresearch (autonomous experimentation loop).",
+  "version": "2.6.1",
+  "author": {
+    "name": "All The Vibes",
+    "url": "https://github.com/All-The-Vibes"
+  },
+  "repository": "https://github.com/All-The-Vibes/ATV-StarterKit",
+  "license": "MIT",
+  "keywords": [
+    "atv",
+    "guidelines",
+    "karpathy",
+    "autoresearch"
+  ],
+  "category": "guidelines",
+  "skills": [
+    "./skills"
+  ]
+}

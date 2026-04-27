@@ -1,0 +1,20 @@
+{
+  "name": "atv-pack-quality",
+  "description": "Quality pack — Unslop and Ralph Loop for tightening up code and iterating on solutions.",
+  "version": "2.6.1",
+  "author": {
+    "name": "All The Vibes",
+    "url": "https://github.com/All-The-Vibes"
+  },
+  "repository": "https://github.com/All-The-Vibes/ATV-StarterKit",
+  "license": "MIT",
+  "keywords": [
+    "atv",
+    "quality",
+    "ralph-loop"
+  ],
+  "category": "quality",
+  "skills": [
+    "./skills"
+  ]
+}

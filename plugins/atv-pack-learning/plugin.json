@@ -1,0 +1,21 @@
+{
+  "name": "atv-pack-learning",
+  "description": "Learning pipeline pack — Learn, Instincts, Evolve, and Observe for compounding institutional knowledge across sessions.",
+  "version": "2.6.1",
+  "author": {
+    "name": "All The Vibes",
+    "url": "https://github.com/All-The-Vibes"
+  },
+  "repository": "https://github.com/All-The-Vibes/ATV-StarterKit",
+  "license": "MIT",
+  "keywords": [
+    "atv",
+    "learning",
+    "memory",
+    "compound-engineering"
+  ],
+  "category": "learning",
+  "skills": [
+    "./skills"
+  ]
+}

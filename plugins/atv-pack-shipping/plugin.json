@@ -1,0 +1,22 @@
+{
+  "name": "atv-pack-shipping",
+  "description": "Shipping & deploy pack — Takeoff, CE Work, Land, LFG/SLFG orchestrators, CE Compound, and Claude Permissions Optimizer for executing and delivering work.",
+  "version": "2.6.1",
+  "author": {
+    "name": "All The Vibes",
+    "url": "https://github.com/All-The-Vibes"
+  },
+  "repository": "https://github.com/All-The-Vibes/ATV-StarterKit",
+  "license": "MIT",
+  "keywords": [
+    "atv",
+    "shipping",
+    "deploy",
+    "compound-engineering",
+    "orchestrator"
+  ],
+  "category": "shipping",
+  "skills": [
+    "./skills"
+  ]
+}

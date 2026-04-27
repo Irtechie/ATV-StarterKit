@@ -1,0 +1,21 @@
+{
+  "name": "atv-pack-planning",
+  "description": "Planning & design pack — Brainstorming, CE Brainstorm, CE Ideate, Plan, and Deepen Plan skills for shaping work before coding.",
+  "version": "2.6.1",
+  "author": {
+    "name": "All The Vibes",
+    "url": "https://github.com/All-The-Vibes"
+  },
+  "repository": "https://github.com/All-The-Vibes/ATV-StarterKit",
+  "license": "MIT",
+  "keywords": [
+    "atv",
+    "compound-engineering",
+    "planning",
+    "brainstorming"
+  ],
+  "category": "planning",
+  "skills": [
+    "./skills"
+  ]
+}

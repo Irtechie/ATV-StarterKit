@@ -1,0 +1,20 @@
+{
+  "name": "atv-pack-easter-eggs",
+  "description": "Easter eggs pack — fun extras like memeIQ for AI-powered meme generation.",
+  "version": "2.6.1",
+  "author": {
+    "name": "All The Vibes",
+    "url": "https://github.com/All-The-Vibes"
+  },
+  "repository": "https://github.com/All-The-Vibes/ATV-StarterKit",
+  "license": "MIT",
+  "keywords": [
+    "atv",
+    "easter-egg",
+    "fun"
+  ],
+  "category": "easter-eggs",
+  "skills": [
+    "./skills"
+  ]
+}

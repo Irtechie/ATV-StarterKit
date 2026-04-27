@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [2.6.1] — 2026-04-26
+
+### Added
+
+- **Copilot CLI plugin marketplace** — ATV Starter Kit is now installable via `copilot plugin marketplace add All-The-Vibes/ATV-StarterKit`. The marketplace ships three install tiers:
+  - **`atv-skill-<name>`** — 29 granular per-skill plugins for cherry-pick installs (note: not standalone — see `docs/marketplace.md`).
+  - **`atv-pack-<category>`** — 8 category bundles (`atv-pack-planning`, `atv-pack-review`, `atv-pack-shipping`, `atv-pack-security`, `atv-pack-quality`, `atv-pack-guidelines`, `atv-pack-easter-eggs`, `atv-pack-learning`).
+  - **`atv-everything`** + **`atv-agents`** — flagship bundle and standalone agents plugin.
+- **Plugin generator** (`pkg/plugingen/` and `cmd/plugingen/`) — single source of truth: `go run ./cmd/plugingen` regenerates the entire `plugins/` tree and `.github/plugin/marketplace.json` from `pkg/scaffold/templates/`. Deterministic output (sorted lists, slash-normalized paths, LF line endings) for reliable CI drift checks via `go run ./cmd/plugingen -check`.
+- **Two install paths documented** — new `docs/marketplace.md` plus a top-level README section comparing project-level (`atv init`) vs personal (marketplace) installs with a decision matrix.
+
+### Changed
+
+- **`atv init` is unchanged** — the marketplace is purely additive. Project scaffolding continues to read from the same templates.
+
+### Notes
+
+- **MCP server config plugin (`atv-mcp`) deferred** — generic server names (`github`, `azure`, `terraform`, `context7`) would silently override existing user MCP configs under last-wins precedence. Will ship in a future release once a namespacing strategy is designed.
+- **Hooks, instructions templates, and stack-specific reviewer agent splits** are also deferred — they require more design (substitution, runtime, etc.) and are out of MVP scope.
+
 ## [2.6.0] — 2026-04-26
 
 ### Added

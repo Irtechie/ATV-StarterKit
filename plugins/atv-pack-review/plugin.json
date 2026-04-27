@@ -1,0 +1,20 @@
+{
+  "name": "atv-pack-review",
+  "description": "Code review pack — multi-agent CE Review and document review skills for catching issues early.",
+  "version": "2.6.1",
+  "author": {
+    "name": "All The Vibes",
+    "url": "https://github.com/All-The-Vibes"
+  },
+  "repository": "https://github.com/All-The-Vibes/ATV-StarterKit",
+  "license": "MIT",
+  "keywords": [
+    "atv",
+    "code-review",
+    "compound-engineering"
+  ],
+  "category": "review",
+  "skills": [
+    "./skills"
+  ]
+}
