@@ -188,7 +188,6 @@ var coreSkillDirectories = []string{
 	"karpathy-guidelines",
 	// Security
 	"atv-security",
-	"cso",
 }
 
 var orchestratorSkillDirectories = []string{

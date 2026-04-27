@@ -1,36 +1,62 @@
 ---
 name: atv-security
-description: "Audit agentic config security — secrets, permissions, hooks, MCP servers, agents. Adapts AgentShield's rule taxonomy for Copilot's .github/ layout. Triggers on 'security scan', 'audit security', 'check config security', 'atv-security', 'security audit', 'scan for vulnerabilities'."
-argument-hint: "[mode: report (default) | fix]"
+description: "Unified ATV security audit. Scans agentic config (.github/, .vscode/) using AgentShield's 33-rule taxonomy AND application source code for OWASP Top 10 + STRIDE threats. Triggers on 'security scan', 'audit security', 'check config security', 'atv-security', 'security audit', 'scan for vulnerabilities', 'cso', 'owasp scan', 'threat model', 'stride analysis', 'application security', 'security review code'."
+argument-hint: "[mode: report (default) | fix] [scope: full (default) | config | owasp | stride | <path>]"
 ---
 
-# /atv-security — Agentic Config Security Auditor
+# /atv-security — Unified Security Auditor
 
-Scan your ATV Starter Kit configuration for security vulnerabilities across 7 config surfaces using 33 rules adapted from [AgentShield](https://github.com/affaan-m/agentshield)'s proven taxonomy.
+Scan your project for security issues across two surfaces:
 
-**5 categories:** Secrets · Permissions · Hooks · MCP Servers · Agents & Skills
+1. **Agentic configuration** — `.github/`, `.vscode/` configs (33 rules adapted from [AgentShield](https://github.com/affaan-m/agentshield)).
+2. **Application source code** — OWASP Top 10 (2021) static checks + STRIDE threat model.
+
+> **Heritage:** This skill absorbs the former `/cso` skill. Old `/cso` triggers still route here. The on-disk security report file keeps the legacy `<!-- cso -->` marker block so existing reports stay structurally compatible.
+
+**5 config categories:** Secrets · Permissions · Hooks · MCP Servers · Agents & Skills
 
 ## Arguments
 
-<mode> #$ARGUMENTS </mode>
+<args> #$ARGUMENTS </args>
 
-**Mode detection:** Check if arguments *contain* "fix" → fix mode. Otherwise → report mode (default).
+**Argument grammar:** Two independent axes, parsed in order.
+
+1. **Mode** — if any token in `$ARGUMENTS` matches `fix` (case-insensitive), mode = `fix`. Otherwise mode = `report` (default).
+2. **Scope** — examine the remaining tokens (after stripping `fix`):
+   - Token `config` → scope = `config` (config audit only; skip OWASP/STRIDE)
+   - Token `owasp` → scope = `owasp` (OWASP scan only; skip config + STRIDE)
+   - Token `stride` → scope = `stride` (STRIDE only; skip config + OWASP)
+   - Token that looks like a file/directory path (contains `/` or `\` or matches an existing path) → scope = `<path>` (run OWASP/STRIDE narrowed to that path; skip config)
+   - No remaining tokens, or token is `full` → scope = `full` (default; run everything available)
+
+**Examples:**
+- `/atv-security` → `mode=report scope=full`
+- `/atv-security fix` → `mode=fix scope=full`
+- `/atv-security config fix` or `/atv-security fix config` → `mode=fix scope=config`
+- `/atv-security owasp` → `mode=report scope=owasp`
+- `/atv-security src/api/` → `mode=report scope=src/api/`
 
 ## Execution Flow
 
 ```
-Phase 1: Discovery     → Find all config files across 7 surfaces
-Phase 2: Tier 1 Scan   → Deterministic grep_search with regex patterns
-Phase 3: Tier 2 Scan   → read_file + LLM assessment for semantic rules
-Phase 4: Score & Grade  → Per-category weighted scoring → A–F grade
-Phase 5: Output         → Report (default) | Fix (opt-in)
+Phase 1: Discovery       → Detect config surfaces + app source stack
+Phase 2: Tier 1 Config   → Deterministic regex scan of .github/, .vscode/   (skip if scope ∉ {full, config})
+Phase 3: Tier 2 Config   → LLM-assessed config rules                          (skip if scope ∉ {full, config})
+Phase 4: OWASP Top 10    → Application source code scan                       (skip if no source OR scope ∉ {full, owasp, <path>})
+Phase 5: STRIDE          → Threat model the application                       (skip if no source OR scope ∉ {full, stride, <path>})
+Phase 6: Score & Grade   → Per-surface grades with N/A semantics
+Phase 7: Output          → Combined report (config + OWASP + STRIDE)
+Phase 8: Persist         → Upsert into docs/security/YYYY-MM-DD-security-report.md (both marker blocks)
+Phase 9: Fix             → Opt-in safe fixes for auto-fixable config rules    (only when mode=fix)
 ```
 
 ---
 
 ## Phase 1: Discovery
 
-Use `file_search` and `list_dir` to locate all config files across these 7 surfaces:
+Use `file_search` and `list_dir` to detect both surfaces in parallel.
+
+### 1a. ATV configuration surfaces
 
 | Surface | File Pattern | Category |
 |---------|-------------|----------|
@@ -42,13 +68,35 @@ Use `file_search` and `list_dir` to locate all config files across these 7 surfa
 | Setup Steps | `.github/copilot-setup-steps.yml` | Hooks |
 | VS Code | `.vscode/settings.json`, `.vscode/extensions.json` | Permissions |
 
-If no `.github/` directory exists, report: "No ATV configuration found. Run `npx atv-starterkit init` to scaffold your agentic coding environment." and stop.
+Set `hasConfig = true` if any of the above are found.
 
-Record all discovered files for the report footer (files scanned count).
+### 1b. Application source stack
+
+| Signal | Stack | Key files to scan |
+|--------|-------|-------------------|
+| `package.json`, `*.ts`, `*.js` | Node.js / TypeScript | `src/**`, `routes/**`, `api/**`, `pages/**` |
+| `requirements.txt`, `*.py` | Python | `app/**`, `src/**`, `views/**`, `api/**` |
+| `Gemfile`, `*.rb` | Ruby / Rails | `app/**`, `config/**`, `db/**` |
+| `go.mod`, `*.go` | Go | `**/*.go` |
+| `*.cs`, `*.csproj` | .NET | `**/*.cs`, `Controllers/**` |
+| `pom.xml`, `*.java` | Java | `src/**/*.java` |
+
+Set `hasSource = true` if any application source files are found. If scope is a path, narrow source detection to that path.
+
+Record: list of discovered config files, detected stack, total source files found, entry points identified.
+
+### 1c. Bail rule
+
+If `!hasConfig && !hasSource`: report "No ATV configuration or application source detected. Run `npx atv-starterkit init` to scaffold an agentic environment, or run `/atv-security` from a project directory." and stop.
+
+If `scope=config` and `!hasConfig`: report "Scope `config` requested but no `.github/` directory found." and stop.
+If `scope ∈ {owasp, stride, <path>}` and `!hasSource`: report "Scope requires application source, but none found." and stop.
 
 ---
 
-## Phase 2: Tier 1 Scan — Deterministic Detection
+## Phase 2: Tier 1 Config Scan — Deterministic Detection
+
+> Run only when `hasConfig && scope ∈ {full, config}`.
 
 Run `grep_search` with `isRegexp: true` for each pattern below. For each match, record a finding with the specified fields.
 
@@ -122,7 +170,9 @@ For rules whose regex patterns require alternation, use the entries below instea
 
 ---
 
-## Phase 3: Tier 2 Scan — LLM-Assessed Detection
+## Phase 3: Tier 2 Config Scan — LLM-Assessed Detection
+
+> Run only when `hasConfig && scope ∈ {full, config}`.
 
 For each config surface, use `read_file` to load the content, then assess against the following rules. Apply judgment — distinguish benign patterns from genuinely suspicious ones.
 
@@ -192,15 +242,197 @@ For each config surface, use `read_file` to load the content, then assess agains
 |------|---------------|----------|----------|
 | AGENT-03 | Files with >8,000 characters of effective prose (exclude YAML frontmatter, fenced code blocks, and markdown tables from count) | 🟢 medium | Agents & Skills |
 
+**AGENT-03 exemptions:** Skip the following first-party security skill files. They intentionally bundle config + OWASP + STRIDE rule definitions and exceed 8,000 chars by design:
+- `.github/skills/atv-security/SKILL.md`
+
+This exemption applies to the file currently performing the scan and any other ATV-bundled security skills with the same purpose. Do **not** exempt user-authored skills — long custom skills are legitimate findings.
+
 **Execution:** For each rule, read the relevant files, assess content against criteria, and record findings. Include the specific evidence that triggered the finding (quoted text, line context). Distinguish benign patterns from suspicious ones using the exceptions listed.
 
 ---
 
-## Phase 4: Score & Grade
+## Phase 4: OWASP Top 10 (2021) Scan
 
-### Scoring Model
+> Run only when `hasSource && scope ∈ {full, owasp, <path>}`.
 
-Compute per-category scores, then a weighted aggregate.
+For each category, use `grep_search` for Tier 1 patterns and `read_file` + LLM assessment for Tier 2. Scan only application source files, not `.github/` configs. If scope is a path, scope all greps and reads to that path.
+
+### A01: Broken Access Control
+
+**Tier 1 — grep patterns:**
+
+| Pattern | What it catches | Severity |
+|---------|----------------|----------|
+| `role\s*===?\s*["']admin["']` scoped to route/controller files | Hardcoded role checks instead of RBAC | 🟢 medium |
+| `req\.user\s*&&` without authorization middleware | Ad-hoc auth checks bypassing middleware | 🟡 high |
+
+**Tier 2 — LLM assessment:**
+- Read route/controller files. Check: Are all state-changing endpoints protected by auth middleware?
+- Look for: direct object references without ownership validation (e.g., `/users/:id` without checking `req.user.id === id`)
+- Look for: missing authorization on admin/management endpoints
+- Severity: 🟡 high per unprotected endpoint
+
+### A02: Cryptographic Failures
+
+**Tier 1 — grep patterns:**
+
+| Pattern | What it catches | Severity |
+|---------|----------------|----------|
+| `(?:md5|sha1|DES|RC4)` in crypto/hash contexts | Weak/deprecated algorithms | 🟡 high |
+| `http://` in API endpoint URLs (not localhost) | Unencrypted data in transit | 🟢 medium |
+| `password.*=.*["'][^$]` | Hardcoded passwords | 🔴 critical |
+
+**Tier 2 — LLM assessment:**
+- Check: Are passwords hashed with bcrypt/scrypt/argon2, not MD5/SHA1?
+- Check: Is sensitive data (PII, tokens, cards) encrypted at rest?
+- Check: Are TLS/HTTPS enforced for external communications?
+
+### A03: Injection
+
+**Tier 1 — grep patterns:**
+
+For A03 alternation patterns, use the entries below instead of markdown table rows so the raw `|` characters remain valid for `isRegexp: true`:
+
+- **SQL injection via string concatenation** — 🔴 critical
+  - **Pattern:** `query\s*\(\s*["'\x60].*\$\{` or `query\s*\(.*\+\s*`
+- **Code injection** — 🔴 critical
+  - **Pattern:** `(?:eval|exec|Function)\s*\(` with variable input
+- **XSS via unsafe HTML rendering** — 🟡 high
+  - **Pattern:** `(?:innerHTML\s*=|dangerouslySetInnerHTML|\| safe|\|raw)`
+- **OS command injection** — 🔴 critical
+  - **Pattern:** `child_process\.(?:exec|spawn).*\$\{` or `subprocess\.call.*\+`
+- **NoSQL injection** — 🟡 high
+  - **Pattern:** `\.find\(\{.*\$` or `\.aggregate\(\[.*\$` in Mongo contexts
+
+**Tier 2 — LLM assessment:**
+- Read files with database queries. Are all queries parameterized?
+- Read template files. Is user input escaped before rendering?
+- Check for LDAP injection, XPath injection, header injection patterns
+
+### A04: Insecure Design
+
+**Tier 2 — LLM assessment only (no grep patterns):**
+- Check: Is there rate limiting on auth endpoints (login, register, password reset)?
+- Check: Are there business logic flaws (e.g., negative quantity in cart, price manipulation)?
+- Check: Is there account enumeration via different error messages for valid/invalid usernames?
+- Severity: 🟡 high per design flaw
+
+### A05: Security Misconfiguration
+
+**Tier 1 — grep patterns:**
+
+- **Debug mode enabled** — 🟡 high
+  - **Pattern:** `(?:DEBUG\s*=\s*True|debug:\s*true)`
+- **Unrestricted CORS** — 🟡 high
+  - **Pattern:** `cors\(\)` without origin restriction, or `origin:\s*["']\*["']`
+- **Django wildcard hosts** — 🟡 high
+  - **Pattern:** `ALLOWED_HOSTS\s*=\s*\[["']\*["']\]`
+
+**Tier 2 — LLM assessment:**
+- Check: Are default credentials changed?
+- Check: Are error pages custom (not showing stack traces)?
+- Check: Are unnecessary features/endpoints disabled in production config?
+- Check: In Node.js/Express apps, are security headers configured appropriately (for example, via `helmet` or equivalent middleware)? This is an absence check that requires reading the app setup, not a grep pattern.
+
+### A06: Vulnerable and Outdated Components
+
+**Tier 1 — grep patterns:**
+
+| Pattern | What it catches | Severity |
+|---------|----------------|----------|
+| `"dependencies"` in package.json | Check for known-vulnerable versions | 🟢 medium |
+
+**Tier 2 — LLM assessment:**
+- Read `package.json`, `requirements.txt`, `Gemfile`, or `go.mod`
+- Flag any dependency that hasn't been updated in >1 year (check version patterns)
+- Recommend: `npm audit`, `pip-audit`, `bundle audit`, `govulncheck`
+- Severity: 🟢 medium (recommend tooling, don't duplicate it)
+
+### A07: Identification and Authentication Failures
+
+**Tier 1 — grep patterns:**
+
+- **Excessive token lifetime** — 🟡 high
+  - **Pattern:** `jwt\.sign.*expiresIn.*(?:["']30d|["']365d|["']never)`
+- **Long session duration** — 🟢 medium
+  - **Pattern:** `session.*maxAge.*86400000` (>24h in ms)
+- **Weak bcrypt rounds (<6)** — 🟡 high
+  - **Pattern:** `(?:bcrypt|salt).*rounds.*[1-5][^0-9]`
+
+**Tier 2 — LLM assessment:**
+- Check: Is there brute-force protection (account lockout, progressive delays)?
+- Check: Is password complexity enforced?
+- Check: Are sessions invalidated on logout/password change?
+
+### A08: Software and Data Integrity Failures
+
+**Tier 1 — grep patterns:**
+
+| Pattern | What it catches | Severity |
+|---------|----------------|----------|
+| `(?:deserialize|unserialize|pickle\.load|yaml\.load\b)` | Unsafe deserialization | 🔴 critical |
+
+**Tier 2 — LLM assessment:**
+- Check: Is CI/CD pipeline protected against tampering?
+- Check: Are software updates verified with signatures?
+- Check: Do HTML pages include `<script src="https://...">` tags that load third-party/CDN scripts without an `integrity` attribute (Subresource Integrity)? This requires reading/parsing the tag — a simple grep can't validate absence of an attribute reliably.
+
+### A09: Security Logging and Monitoring Failures
+
+**Tier 2 — LLM assessment only:**
+- Check: Are login failures, access denied events, and input validation failures logged?
+- Check: Are logs protected against injection (structured logging vs string concat)?
+- Check: Is there alerting on suspicious patterns?
+- Severity: 🟢 medium per gap
+
+### A10: Server-Side Request Forgery (SSRF)
+
+**Tier 1 — grep patterns:**
+
+- **Potential SSRF if URL is user-controlled** — 🟡 high
+  - **Pattern:** `(?:fetch\s*\(\s*\w+|axios\.\w+\(\s*\w+|requests\.\w+\(\s*\w+)`
+- **Same pattern in Go/Python** — 🟡 high
+  - **Pattern:** `(?:http\.Get\(\s*\w+|urllib\.request\.urlopen\(\s*\w+)`
+
+**Tier 2 — LLM assessment:**
+- Check: Is user input validated/allowlisted before being used in server-side HTTP requests?
+- Check: Are internal network ranges (169.254.x.x, 10.x.x.x, 127.x.x.x) blocked?
+
+---
+
+## Phase 5: STRIDE Threat Model
+
+> Run only when `hasSource && scope ∈ {full, stride, <path>}`.
+
+Read the application's architecture by examining:
+- Entry points (routes, API endpoints, webhooks, event handlers)
+- Data flows (database queries, external API calls, file I/O)
+- Trust boundaries (auth middleware, API gateways, service boundaries)
+- Assets (user data, credentials, tokens, business logic)
+
+Produce a threat matrix:
+
+| Threat | Category | Description | Affected Component | Risk | Mitigation |
+|--------|----------|-------------|-------------------|------|------------|
+| **S**poofing | Identity | Can an attacker impersonate a user/service? | [auth system, API] | [H/M/L] | [existing or missing control] |
+| **T**ampering | Data integrity | Can data be modified in transit or at rest? | [database, API payload] | [H/M/L] | [existing or missing control] |
+| **R**epudiation | Accountability | Can actions be performed without audit trail? | [logging system] | [H/M/L] | [existing or missing control] |
+| **I**nformation Disclosure | Confidentiality | Can sensitive data leak? | [error pages, logs, API responses] | [H/M/L] | [existing or missing control] |
+| **D**enial of Service | Availability | Can the service be overwhelmed? | [endpoints without rate limiting] | [H/M/L] | [existing or missing control] |
+| **E**levation of Privilege | Authorization | Can a user gain unauthorized access? | [role system, admin endpoints] | [H/M/L] | [existing or missing control] |
+
+For each threat:
+- Identify whether a mitigation **already exists** in the codebase
+- If missing, provide a concrete recommendation
+- Rate risk as High/Medium/Low based on exploitability and impact
+
+---
+
+## Phase 6: Score & Grade
+
+Compute up to three independent grades. Surfaces that were not scanned (because they were absent or out of scope) render as **N/A** and are excluded from the aggregate.
+
+### 6a. Config Grade (only if Phase 2/3 ran)
 
 **Step 1 — Per-category deductions:**
 
@@ -223,12 +455,35 @@ Floor each category at 0 (never go negative).
 **Step 2 — Weighted aggregate:**
 
 ```
-Score = Secrets×0.20 + Permissions×0.15 + Hooks×0.25 + MCP×0.25 + Agents×0.15
+ConfigScore = Secrets×0.20 + Permissions×0.15 + Hooks×0.25 + MCP×0.25 + Agents×0.15
 ```
 
-Round to nearest integer.
+Round to nearest integer. Map to letter grade.
 
-**Step 3 — Letter grade:**
+**Simplified alternative:** If exact arithmetic is difficult, use per-category pass/fail:
+- ≥1 critical finding in category → 🔴
+- ≥1 high finding (no critical) → 🟡
+- Otherwise → 🟢
+- Overall config status = worst category status, mapped to: 🟢→A/95, 🟡→C/70, 🔴→F/40.
+
+### 6b. OWASP Grade (only if Phase 4 ran)
+
+Start at 100, deduct per OWASP finding:
+- 🔴 critical: −15
+- 🟡 high: −10
+- 🟢 medium: −5
+- 🔵 low: −2
+
+Floor at 0. Map to letter grade.
+
+### 6c. STRIDE Posture (only if Phase 5 ran)
+
+Count of unmitigated threats:
+- 0 unmitigated: 🟢 Strong posture
+- 1–2 unmitigated: 🟡 Moderate risk
+- 3+ unmitigated: 🔴 Weak posture
+
+### 6d. Letter grade table
 
 | Score | Grade |
 |-------|-------|
@@ -238,39 +493,37 @@ Round to nearest integer.
 | 50–64 | D |
 | 0–49 | F |
 
-**Simplified alternative:** If exact arithmetic is difficult, use per-category pass/fail instead:
-- ≥1 critical finding in category → 🔴
-- ≥1 high finding (no critical) → 🟡
-- Otherwise → 🟢
-- Overall category status = worst category status
+### 6e. Aggregate
 
-When using the simplified alternative, map the worst category status to the report fields so the Phase 5a template stays fillable:
+`OverallScore` = unweighted mean of the present grades among `{ConfigScore, OWASPScore}`. STRIDE contributes to `OverallScore` only as a `−5` penalty per unmitigated threat (capped at −20). Surfaces marked N/A are skipped — never scored as 0 or 100.
 
-| Worst status | Grade | Score |
-|--------------|-------|-------|
-| 🟢 | A | 95 |
-| 🟡 | C | 70 |
-| 🔴 | F | 40 |
+If only one surface ran, `OverallScore = <that surface's score>` and the other appears as N/A in the report.
 
 ---
 
-## Phase 5: Output
+## Phase 7: Output
 
-### 5a. Report Mode (Default)
+> Run regardless of mode. In `mode=fix`, this report is rendered before any fix prompts.
 
-Print the following report in chat. Do not modify any files.
+Print the following report in chat. Do not modify any files (file modifications happen in Phase 8 persistence and Phase 9 fix).
 
 **Severity indicators:** 🔴 critical, 🟡 high, 🟢 medium, 🔵 low, ⚪ info
 
 ```markdown
 ## 🛡️ ATV Security Report
 
+**Date:** YYYY-MM-DD
+**Scope:** [config | owasp | stride | <path> | full]
+**Surfaces scanned:** [config: yes/no/N/A] · [source: yes/no/N/A — stack: <detected>]
+
 | Metric | Value |
 |--------|-------|
-| **Grade** | [A–F] |
-| **Score** | [0–100]/100 |
+| **Overall Grade** | [A–F or N/A] |
+| **Config Grade** | [A–F]/[0–100] or N/A — no `.github/` configs |
+| **OWASP Grade** | [A–F]/[0–100] or N/A — no application source |
+| **STRIDE Posture** | [🟢/🟡/🔴] or N/A |
 
-### Category Breakdown
+### Config Category Breakdown _(omit if config N/A)_
 
 | Category | Score | Status |
 |----------|-------|--------|
@@ -280,7 +533,7 @@ Print the following report in chat. Do not modify any files.
 | MCP Servers | [0–100] | [🟢/🟡/🔴] |
 | Agents & Skills | [0–100] | [🟢/🟡/🔴] |
 
-### Findings
+### Config Findings _(omit if config N/A)_
 
 #### 🔴 Critical
 - **[RULE-ID] Title** in `file/path`
@@ -296,20 +549,108 @@ Print the following report in chat. Do not modify any files.
 #### 🔵 Low
 - ...
 
+### OWASP Findings _(omit if OWASP N/A)_
+
+#### 🔴 Critical
+- **[A03] SQL Injection** in `src/db/queries.ts:42`
+  Evidence: `db.query("SELECT * FROM users WHERE id = " + userId)`
+  Fix: Use parameterized query: `db.query("SELECT * FROM users WHERE id = $1", [userId])`
+
+#### 🟡 High / 🟢 Medium / 🔵 Low
+- ...
+
+### STRIDE Threat Matrix _(omit if STRIDE N/A)_
+
+| Threat | Risk | Status |
+|--------|------|--------|
+| Spoofing | [H/M/L] | [✅ Mitigated / ⚠️ Partial / ❌ Unmitigated] |
+| Tampering | [H/M/L] | [✅/⚠️/❌] |
+| Repudiation | [H/M/L] | [✅/⚠️/❌] |
+| Info Disclosure | [H/M/L] | [✅/⚠️/❌] |
+| Denial of Service | [H/M/L] | [✅/⚠️/❌] |
+| Elevation of Privilege | [H/M/L] | [✅/⚠️/❌] |
+
 ### Summary
 
-| Files scanned | Total | Critical | High | Medium | Low | Auto-fixable |
-|---------------|-------|----------|------|--------|-----|-------------|
-| [N] | [N] | [N] | [N] | [N] | [N] | [N] |
-
-For OWASP Top 10 + STRIDE on application code: run `/cso`
+| Files scanned | Config findings | OWASP findings | STRIDE unmitigated | Auto-fixable |
+|---------------|----------------|----------------|--------------------|--------------|
+| [N] | [N] | [N] | [N] | [N] |
 ```
 
-If zero findings: report Grade A, Score 100/100, all categories 🟢, and congratulate: "Your ATV configuration looks secure! No findings detected."
+If zero findings across all run phases: report Grade A, all surfaces 🟢, and congratulate: "Your project looks secure! No findings detected."
 
-### 5b. Fix Mode (opt-in)
+---
 
-After generating the report (Phase 5a), apply safe fixes for auto-fixable findings.
+## Phase 8: Persist Report (always, after report is rendered and before any Fix Mode prompts)
+
+After printing the report in chat, persist it to disk so it survives the conversation. Persistence happens immediately after Phase 7 — before the user is prompted for Fix Mode (Phase 9). This ensures the on-disk record reflects the un-fixed state of the scan; re-running with fixes applied will produce a new dated section on the next run.
+
+**Target file:** `docs/security/YYYY-MM-DD-security-report.md` (today's date, UTC). One shared file per day. The file retains two marker blocks for backwards compatibility with reports written by the legacy `/cso` skill.
+
+**Marker semantics (post-merge):**
+- The `<!-- atv-security:start --> ... <!-- atv-security:end -->` block holds the **config audit** section.
+- The `<!-- cso:start --> ... <!-- cso:end -->` block holds the **OWASP + STRIDE** section. The block heading remains `## /cso Scan` for backward compatibility, with a one-line subnote indicating it is now generated by `/atv-security`.
+
+**Steps:**
+
+1. Ensure `docs/security/` exists. If not, create it (write the file — the directory is created implicitly).
+2. Compute today's date as `YYYY-MM-DD` and the run timestamp as ISO-8601 (e.g., `2026-04-26T14:32:10Z`).
+3. Try to `read_file` the target path.
+   - **If the file does not exist:** `create_file` with this skeleton, then continue at step 4:
+     ```markdown
+     # Security Report — YYYY-MM-DD
+
+     <!-- atv-security:start -->
+     ## /atv-security Scan
+     _No scan recorded yet._
+     <!-- atv-security:end -->
+
+     <!-- cso:start -->
+     ## /cso Scan
+     _Generated by /atv-security after the /cso skill was folded in._
+
+     _No scan recorded yet._
+     <!-- cso:end -->
+     ```
+   - **If the file exists:** continue at step 4. If a marker block is missing on read, **append** a fresh block of that type to the end of the file (do NOT overwrite).
+4. Build the new section content for whichever phases ran:
+   - **Config block (if config was scanned):**
+     ```markdown
+     ## /atv-security Scan — <ISO timestamp>
+
+     - **Mode:** report | fix
+     - **Scope:** full | config
+     - **Config Grade:** <A–F> · **Score:** <0–100>/100
+     - **Files scanned:** <N>
+
+     <full config-section markdown from Phase 7>
+     ```
+   - **OWASP/STRIDE block (if OWASP and/or STRIDE was scanned):**
+     ```markdown
+     ## /cso Scan — <ISO timestamp>
+
+     _Generated by /atv-security (formerly /cso)._
+
+     - **Scope:** full | owasp | stride | <path>
+     - **Stack:** <detected stack>
+     - **OWASP Grade:** <A–F or N/A> · **Score:** <0–100 or N/A>/100
+     - **STRIDE Posture:** 🟢/🟡/🔴 or N/A
+
+     <OWASP findings + STRIDE matrix from Phase 7>
+     ```
+5. Use `replace_string_in_file` to swap the matching marker block(s). Only update the block(s) corresponding to phases that actually ran — never wipe the other block.
+6. Confirm in chat: `📄 Report saved to docs/security/YYYY-MM-DD-security-report.md.`
+
+**Constraints:**
+- Never delete or modify a marker block whose phase did not run this invocation.
+- Always keep both marker pairs intact in the on-disk file.
+- If a marker block cannot be found (file was hand-edited and markers stripped), **append** the full marker block to the end of the file rather than overwriting. Only fall back to a full-skeleton overwrite if the file is unparseable; in that case, write a backup copy first to `docs/security/YYYY-MM-DD-security-report.md.bak.<unix-timestamp>` and warn the user that prior content was preserved in the backup.
+
+---
+
+## Phase 9: Fix Mode (opt-in, only when mode=fix)
+
+After persisting the report (Phase 8), apply safe fixes for auto-fixable findings. **Fix mode applies only to config findings** — OWASP/STRIDE findings are reported but never auto-fixed (changing application source code requires human review).
 
 **Auto-fixable rules:** SEC-01 through SEC-05 (secret→env var), MCP-02 (wildcard→scoped tools), MCP-04 (secret→env var in MCP env).
 
@@ -342,50 +683,7 @@ After generating the report (Phase 5a), apply safe fixes for auto-fixable findin
 - Only value replacements within existing keys — never add, remove, or restructure JSON/YAML keys
 - Never apply fixes without user confirmation
 - Never apply fixes to files that failed parse validation
-
-### 5d. Persist Report (always, after report is rendered and before any Fix Mode prompts)
-
-After printing the report in chat, persist it to disk so it survives the conversation. Persistence happens immediately after Phase 5a renders the report — before the user is prompted for Fix Mode (5b). This ensures the on-disk record reflects the un-fixed state of the scan; re-running with fixes applied will produce a new dated section on the next run.
-
-**Target file:** `docs/security/YYYY-MM-DD-security-report.md` (today's date, UTC). One shared file per day with separate sections for `/atv-security` and `/cso`.
-
-**Steps:**
-
-1. Ensure `docs/security/` exists. If not, create it (write the file — the directory is created implicitly).
-2. Compute today's date as `YYYY-MM-DD` and the run timestamp as ISO-8601 (e.g., `2026-04-24T14:32:10Z`).
-3. Try to `read_file` the target path.
-   - **If the file does not exist:** `create_file` with this skeleton, then continue at step 4:
-     ```markdown
-     # Security Report — YYYY-MM-DD
-
-     <!-- atv-security:start -->
-     ## /atv-security Scan
-     _No scan recorded yet._
-     <!-- atv-security:end -->
-
-     <!-- cso:start -->
-     ## /cso Scan
-     _No scan recorded yet._
-     <!-- cso:end -->
-     ```
-   - **If the file exists:** continue at step 4.
-4. Build the new section content (everything between the markers, exclusive):
-   ```markdown
-   ## /atv-security Scan — <ISO timestamp>
-
-   - **Mode:** report | fix
-   - **Grade:** <A–F> · **Score:** <0–100>/100
-   - **Files scanned:** <N>
-
-   <full report markdown from Phase 5a, including category table and findings>
-   ```
-5. Use `replace_string_in_file` to swap the existing `<!-- atv-security:start -->` … `<!-- atv-security:end -->` block with the markers wrapping the new content. The `<!-- cso:* -->` block must be left untouched.
-6. Confirm in chat: `📄 Report saved to docs/security/YYYY-MM-DD-security-report.md (atv-security section).`
-
-**Constraints:**
-- Never delete or modify the `<!-- cso:* -->` section.
-- Always keep both marker pairs intact so `/cso` can upsert into the same file later.
-- If `replace_string_in_file` cannot find the marker block (file was hand-edited), fall back to overwriting the file with a fresh skeleton containing the new `/atv-security` section and an empty `/cso` placeholder, and warn the user that prior `/cso` content may have been preserved separately.
+- Never auto-fix OWASP/STRIDE findings — recommend manual remediation
 
 ---
 
@@ -395,22 +693,26 @@ Every finding must include these fields:
 
 | Field | Description |
 |-------|-------------|
-| Rule ID | e.g., SEC-01, MCP-02, INJ-03 |
-| Category | Secrets / Permissions / Hooks / MCP Servers / Agents & Skills |
+| Rule ID | e.g., SEC-01, MCP-02, INJ-03, A03 (OWASP), STRIDE-S/T/R/I/D/E |
+| Surface | Config / OWASP / STRIDE |
+| Category | Secrets / Permissions / Hooks / MCP Servers / Agents & Skills (config) — or OWASP A01–A10 — or STRIDE letter |
 | Severity | 🔴 critical / 🟡 high / 🟢 medium / 🔵 low / ⚪ info |
 | Title | Short descriptive title |
 | File | Repo-relative path to the affected file |
 | Evidence | Matched text or assessment reason (truncated to 100 chars) |
 | Fix | Actionable remediation suggestion |
-| Auto-fixable | Yes/No — applies to rules supported by fix mode (Tier 1 secret rules SEC-01–SEC-05 plus MCP-02 and MCP-04) |
+| Auto-fixable | Yes/No — applies to config Tier 1 secret rules SEC-01–SEC-05 plus MCP-02 and MCP-04. OWASP/STRIDE findings are always No. |
 
 ---
 
 ## What This Skill Does NOT Do
 
-- Scan application source code (that's SAST tooling)
+- Run dynamic application security testing (DAST/penetration testing)
+- Scan container images or infrastructure-as-code
+- Replace dedicated SAST tools (Semgrep, CodeQL, Snyk) — the OWASP phase is a fast triage layer, not a substitute
 - Perform runtime monitoring or sandbox execution
 - Replace ce-review's diff-based security persona
 - Run Opus 4.6 multi-agent adversarial analysis
 - Create CI/CD GitHub Actions or pre-commit hooks
-- Modify files without explicit user confirmation (fix mode only)
+- Modify application source code (OWASP/STRIDE findings are report-only)
+- Modify config files without explicit user confirmation (fix mode only)

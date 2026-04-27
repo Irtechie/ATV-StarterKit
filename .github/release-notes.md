@@ -4,6 +4,7 @@ One command. Full agentic coding setup. 45 skills, 29 agents, and a memory syste
 
 ### Recent additions
 
+- **`/cso` folded into `/atv-security`** — the standalone `/cso` skill has been merged into `/atv-security`, which now scans both agentic config (`.github/`, `.vscode/`) AND application source code (OWASP Top 10 + STRIDE) in a single run. Old `/cso` triggers still route to `/atv-security`. Eliminates a long-standing name collision with gstack's separate `/cso` skill.
 - **memeIQ joins the guided installer** — the customize flow now includes a `🥚 Easter Eggs` category with an opt-in meme generation toolkit backed by memegen.link.
 - **Installer-ready memeIQ scaffolding** — guided installs can now write both `.github/skills/meme-iq/SKILL.md` and `.github/agents/meme-iq.agent.md` into the target repo.
 - **Cleaner releases and PRs** — local planning, session, and build artifacts are now ignored so only intentional product changes ship.

@@ -17,8 +17,7 @@ This is a TypeScript project using the ATV (Agentic Tool & Workflow) Starter Kit
 - `/ce-work` — Execute the plan with quality checks
 - `/ce-review` — Multi-agent code review
 - `/ce-compound` — Document solutions for future reference
-- `/atv-security` — Audit agentic config security (secrets, permissions, hooks, MCP, agents)
-- `/cso` — OWASP Top 10 + STRIDE threat model for application source code
+- `/atv-security` — Unified security audit: agentic config (secrets, permissions, hooks, MCP, agents) + OWASP Top 10 + STRIDE threat model for application source code
 - `/lfg` — Full autonomous pipeline (plan → work → review)
 
 ## Documentation Structure

@@ -36,8 +36,7 @@ var atvCategoryMapping = map[string][]CategorySkill{
 		{Label: "CE Review — multi-agent code review", Key: "core-skills:ce-review", Source: "atv"},
 	},
 	gstack.CategorySecurity: {
-		{Label: "ATV Security — agentic config security audit", Key: "core-skills:atv-security", Source: "atv"},
-		{Label: "CSO — OWASP Top 10 + STRIDE source-code review", Key: "core-skills:cso", Source: "atv"},
+		{Label: "ATV Security — agentic config audit + OWASP Top 10 + STRIDE source-code review", Key: "core-skills:atv-security", Source: "atv"},
 	},
 	gstack.CategoryShipping: {
 		{Label: "Takeoff — backlog briefing at session start", Key: "core-skills:takeoff", Source: "atv"},

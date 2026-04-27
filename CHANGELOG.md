@@ -6,14 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [2.5.9] — 2026-04-26
+
+### Changed
+
+- **`/cso` folded into `/atv-security`** — the installer's standalone `/cso` skill (OWASP Top 10 + STRIDE for application source code) has been merged into `/atv-security`. The unified skill now scans both agentic configuration (`.github/`, `.vscode/`) AND application source code in a single run. This eliminates a name collision with gstack's separate `/cso` skill (which remains untouched and continues to ship via gstack). Old `/cso` triggers (`cso`, `owasp scan`, `stride analysis`, `threat model`, `application security`, `security review code`) still route to `/atv-security` for migration discoverability.
+- **Argument grammar for `/atv-security`** — now accepts two axes: `[mode: report|fix] [scope: full|config|owasp|stride|<path>]`. Defaults remain `report` + `full`. Examples: `/atv-security`, `/atv-security fix`, `/atv-security owasp`, `/atv-security src/api/`.
+- **N/A scoring semantics** — when only one surface (configs OR source) is present, the absent half renders as N/A in the report and is excluded from the aggregate grade rather than scored as 0 or 100.
+- **Backwards-compatible report persistence** — `docs/security/YYYY-MM-DD-security-report.md` retains both `<!-- atv-security -->` and `<!-- cso -->` marker blocks. `/atv-security` writes the config audit into the `atv-security` block and the OWASP/STRIDE results into the `cso` block, preserving the legacy `## /cso Scan` heading shape so existing reports continue to parse.
+- **AGENT-03 (oversized prompt) self-exemption** — the merged `/atv-security` skill file intentionally exceeds 8,000 chars. The AGENT-03 rule now exempts first-party ATV security skills so the auditor doesn't flag itself.
+- **Guided installer Security category** — the customize wizard's `🔒 Security` category now shows a single `ATV Security — agentic config audit + OWASP Top 10 + STRIDE source-code review` entry. Users with gstack installed still see gstack's `/cso` separately listed under `[gstack]`.
+- **Instruction templates broadened** — `general.md`, `python.md`, `rails.md`, and `typescript.md` now describe `/atv-security` as covering both config and application code; the `/cso` line was removed.
+
+### Removed
+
+- **`/cso` template skill** — `pkg/scaffold/templates/skills/cso/SKILL.md` and its directory have been deleted from the installer. Gstack's `/cso` is unaffected.
+
 ### Added
 
 - **memeIQ Easter Egg installer option** — guided installs now expose a `🥚 Easter Eggs` category with an opt-in `memeIQ` entry that scaffolds `.github/skills/meme-iq/SKILL.md` and `.github/agents/meme-iq.agent.md`.
 
-### Changed
+### Notes
 
-- **meme generation rebranded to memeIQ** — the repo skill and agent now use `meme-iq` naming and branding, and the installer templates ship the same memegen.link reference content.
-- **Local planning and session artifacts are ignored** — `PRD.md`, `PROGRESS.md`, `.omc/`, `atv-installer`, and `banner-block.txt` are now excluded from git so local work products do not leak into releases or PRs.
+- **Migration:** users who previously typed `/cso` will land in `/atv-security` thanks to preserved triggers. To explicitly invoke the OWASP/STRIDE phase only, use `/atv-security owasp` or `/atv-security stride`.
+- **Regression guard:** `pkg/tui/categories_test.go` now asserts that `core-skills:cso` does not reappear in the Security category, preventing accidental re-introduction of the name collision.
 
 ## [2.5.7] — 2026-04-15
 

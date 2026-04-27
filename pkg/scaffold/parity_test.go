@@ -150,10 +150,10 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		"karpathy-guidelines": true,
 		// unslop ships only as a template (ATV quality skill).
 		"unslop": true,
-		// atv-security and cso ship only as templates (security skills
+		// atv-security ships only as a template (security skill
 		// added via the installer template tree, not dogfooded yet).
+		// Note: the former `cso` template was folded into atv-security.
 		"atv-security": true,
-		"cso":          true,
 	}
 
 	// pendingMirror: skills that exist under .github/skills/ but were never

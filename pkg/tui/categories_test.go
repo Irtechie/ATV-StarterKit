@@ -78,11 +78,15 @@ func TestBuildCategoryGroupsWarnsWhenQARuntimeUnavailable(t *testing.T) {
 	t.Fatal("expected QA category group")
 }
 
-// TestSecurityCategoryIncludesAtvSecurityAndCso ensures the customize-mode
-// TUI surfaces atv-security and cso as toggleable options. Both ship via
-// LayerCoreSkills, so without TUI entries users would receive them
-// silently with no way to opt out.
-func TestSecurityCategoryIncludesAtvSecurityAndCso(t *testing.T) {
+// TestSecurityCategoryIncludesAtvSecurity ensures the customize-mode TUI
+// surfaces atv-security as a toggleable option. atv-security ships via
+// LayerCoreSkills, so without a TUI entry users would receive it silently
+// with no way to opt out.
+//
+// Also asserts that the legacy `core-skills:cso` key is ABSENT — `/cso` was
+// folded into `/atv-security`. A re-introduction would create the same
+// name-collision problem with gstack's `/cso` skill that motivated the merge.
+func TestSecurityCategoryIncludesAtvSecurity(t *testing.T) {
 	groups := BuildCategoryGroups(gstack.Prerequisites{})
 
 	var security *CategoryGroup
@@ -96,22 +100,20 @@ func TestSecurityCategoryIncludesAtvSecurityAndCso(t *testing.T) {
 		t.Fatal("expected security category group in BuildCategoryGroups output")
 	}
 
-	want := map[string]bool{
-		"core-skills:atv-security": false,
-		"core-skills:cso":          false,
-	}
+	var foundAtvSecurity bool
 	for _, skill := range security.Skills {
-		if _, ok := want[skill.Key]; ok {
-			want[skill.Key] = true
+		switch skill.Key {
+		case "core-skills:atv-security":
+			foundAtvSecurity = true
 			if skill.Source != "atv" {
-				t.Errorf("%s should have source=atv, got %q", skill.Key, skill.Source)
+				t.Errorf("core-skills:atv-security should have source=atv, got %q", skill.Source)
 			}
+		case "core-skills:cso":
+			t.Error("core-skills:cso must not reappear in the security category — it was folded into /atv-security to avoid collision with gstack's /cso")
 		}
 	}
-	for key, found := range want {
-		if !found {
-			t.Errorf("security category missing required skill: %s", key)
-		}
+	if !foundAtvSecurity {
+		t.Error("security category missing required skill: core-skills:atv-security")
 	}
 }
 
