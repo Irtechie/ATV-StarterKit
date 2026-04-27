@@ -13,6 +13,7 @@
 <p align="center">
        <a href="#quick-start">Quick start</a> ·
        <a href="#installation">Installation</a> ·
+       <a href="docs/marketplace.md">Marketplace</a> ·
        <a href="#uninstalling">Uninstalling</a> ·
        <a href="#the-three-pillars">Three pillars</a> ·
        <a href="#the-full-sprint">Full sprint</a> ·
@@ -40,12 +41,23 @@ Together they cover the full software lifecycle — from "what should I build?" 
 
 ## Quick Start
 
+**Project install** (scaffolds files into your repo, team-shared):
+
 ```bash
 cd your-project
 npx atv-starterkit@latest init           # auto-detect stack, install everything
 npx atv-starterkit@latest init --guided  # interactive TUI with multi-stack selection
 npx atv-starterkit@latest uninstall      # cleanly remove everything ATV installed
 ```
+
+**Personal install** (Copilot CLI plugin marketplace, follows you across projects):
+
+```bash
+copilot plugin marketplace add All-The-Vibes/ATV-StarterKit
+copilot plugin install atv-everything@atv-starter-kit
+```
+
+Both paths can coexist. See [Installation](#installation) for the decision matrix and [docs/marketplace.md](docs/marketplace.md) for category bundles and per-skill plugins.
 
 Then open **Copilot Chat** (⌃⌘I / Ctrl+Shift+I) and go:
 
