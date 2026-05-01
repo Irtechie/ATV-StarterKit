@@ -63,7 +63,7 @@ Copilot CLI:
 
 ```bash
 copilot plugin marketplace add All-The-Vibes/ATV-StarterKit
-copilot plugin install atv-everything@atv-starter-kit
+copilot plugin install atv-starter-kit@atv-starter-kit
 ```
 
 The VS Code source-install path gives one complete ATV option. The Copilot CLI marketplace keeps category bundles and per-skill plugins for CLI users. Both personal paths can coexist with the project scaffold. See [Installation](#installation) for the decision matrix and [docs/marketplace.md](docs/marketplace.md) for CLI bundles and per-skill plugins.
@@ -132,7 +132,7 @@ This installs the complete recommended ATV personal bundle: all ATV skills and a
 
 ```bash
 copilot plugin marketplace add All-The-Vibes/ATV-StarterKit
-copilot plugin install atv-everything@atv-starter-kit       # all skills + all agents
+copilot plugin install atv-starter-kit@atv-starter-kit       # all skills + all agents
 ```
 
 Or pick a category bundle / single skill — full tier breakdown in **[docs/marketplace.md](docs/marketplace.md)**:
