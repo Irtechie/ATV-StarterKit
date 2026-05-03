@@ -89,7 +89,7 @@
     {
       "name": "atv-pack-planning",
       "source": "atv-pack-planning",
-      "description": "Planning & design pack — Brainstorming, CE Brainstorm, CE Ideate, Plan, and Deepen Plan skills for shaping work before coding.",
+      "description": "Planning & design pack — Brainstorming, CE Brainstorm, CE Ideate, Plan, Deepen Plan, and Kanban Plan skills for shaping work before coding.",
       "version": "2.6.3",
       "keywords": [
         "atv",
@@ -102,12 +102,13 @@
     {
       "name": "atv-pack-quality",
       "source": "atv-pack-quality",
-      "description": "Quality pack — Unslop and Ralph Loop for tightening up code and iterating on solutions.",
+      "description": "Quality pack — TDD, Unslop, and Ralph Loop for tightening up code and iterating on solutions.",
       "version": "2.6.3",
       "keywords": [
         "atv",
         "quality",
-        "ralph-loop"
+        "ralph-loop",
+        "tdd"
       ],
       "category": "quality"
     },
@@ -295,6 +296,18 @@
       "category": "skill"
     },
     {
+      "name": "atv-skill-deepen-brainstorm",
+      "source": "atv-skill-deepen-brainstorm",
+      "description": "ATV `deepen-brainstorm` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
+      "version": "2.6.3",
+      "keywords": [
+        "atv",
+        "skill",
+        "deepen-brainstorm"
+      ],
+      "category": "skill"
+    },
+    {
       "name": "atv-skill-deepen-plan",
       "source": "atv-skill-deepen-plan",
       "description": "ATV `deepen-plan` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
@@ -343,6 +356,18 @@
       "category": "skill"
     },
     {
+      "name": "atv-skill-improve-codebase-architecture",
+      "source": "atv-skill-improve-codebase-architecture",
+      "description": "ATV `improve-codebase-architecture` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
+      "version": "2.6.3",
+      "keywords": [
+        "atv",
+        "skill",
+        "improve-codebase-architecture"
+      ],
+      "category": "skill"
+    },
+    {
       "name": "atv-skill-instincts",
       "source": "atv-skill-instincts",
       "description": "ATV `instincts` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
@@ -351,6 +376,42 @@
         "atv",
         "skill",
         "instincts"
+      ],
+      "category": "skill"
+    },
+    {
+      "name": "atv-skill-kanban-lightsout",
+      "source": "atv-skill-kanban-lightsout",
+      "description": "ATV `kanban-lightsout` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
+      "version": "2.6.3",
+      "keywords": [
+        "atv",
+        "skill",
+        "kanban-lightsout"
+      ],
+      "category": "skill"
+    },
+    {
+      "name": "atv-skill-kanban-plan",
+      "source": "atv-skill-kanban-plan",
+      "description": "ATV `kanban-plan` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
+      "version": "2.6.3",
+      "keywords": [
+        "atv",
+        "skill",
+        "kanban-plan"
+      ],
+      "category": "skill"
+    },
+    {
+      "name": "atv-skill-kanban-work",
+      "source": "atv-skill-kanban-work",
+      "description": "ATV `kanban-work` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
+      "version": "2.6.3",
+      "keywords": [
+        "atv",
+        "skill",
+        "kanban-work"
       ],
       "category": "skill"
     },
@@ -483,6 +544,18 @@
         "atv",
         "skill",
         "takeoff"
+      ],
+      "category": "skill"
+    },
+    {
+      "name": "atv-skill-tdd",
+      "source": "atv-skill-tdd",
+      "description": "ATV `tdd` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
+      "version": "2.6.3",
+      "keywords": [
+        "atv",
+        "skill",
+        "tdd"
       ],
       "category": "skill"
     },

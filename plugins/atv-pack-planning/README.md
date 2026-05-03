@@ -1,6 +1,6 @@
 # atv-pack-planning
 
-Planning & design pack — Brainstorming, CE Brainstorm, CE Ideate, Plan, and Deepen Plan skills for shaping work before coding.
+Planning & design pack — Brainstorming, CE Brainstorm, CE Ideate, Plan, Deepen Plan, and Kanban Plan skills for shaping work before coding.
 
 ## Install
 

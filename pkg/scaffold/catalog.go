@@ -171,9 +171,13 @@ var coreSkillDirectories = []string{
 	"ce-plan",
 	"ce-review",
 	"ce-work",
+	"deepen-brainstorm",
 	"deepen-plan",
 	"document-review",
+	"improve-codebase-architecture",
+	"kanban-plan",
 	"setup",
+	"tdd",
 	// Session lifecycle
 	"takeoff",
 	"land",
@@ -197,6 +201,8 @@ var coreSkillDirectories = []string{
 
 var orchestratorSkillDirectories = []string{
 	"feature-video",
+	"kanban-lightsout",
+	"kanban-work",
 	"lfg",
 	"ralph-loop",
 	"resolve_todo_parallel",

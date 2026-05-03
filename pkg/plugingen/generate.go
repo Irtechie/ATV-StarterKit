@@ -150,6 +150,15 @@ func Generate(cfg Config) error {
 		if err := writeSkillFile(dir, name, skillBody[name]); err != nil {
 			return err
 		}
+		if name == "kanban-lightsout" {
+			body, ok := skillBody["kanban-work"]
+			if !ok {
+				return fmt.Errorf("plugingen: kanban-lightsout compatibility plugin requires kanban-work")
+			}
+			if err := writeSkillFile(dir, "kanban-work", body); err != nil {
+				return err
+			}
+		}
 		manifest := PluginManifest{
 			Name:        pluginName,
 			Description: skillPluginDescription(name),

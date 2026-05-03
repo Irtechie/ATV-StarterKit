@@ -1,6 +1,6 @@
 # atv-pack-quality
 
-Quality pack — Unslop and Ralph Loop for tightening up code and iterating on solutions.
+Quality pack — TDD, Unslop, and Ralph Loop for tightening up code and iterating on solutions.
 
 ## Install
 

@@ -39,9 +39,9 @@ func Packs() []Pack {
 		{
 			Name:        "atv-pack-planning",
 			Category:    "planning",
-			Description: "Planning & design pack — Brainstorming, CE Brainstorm, CE Ideate, Plan, and Deepen Plan skills for shaping work before coding.",
+			Description: "Planning & design pack — Brainstorming, CE Brainstorm, CE Ideate, Plan, Deepen Plan, and Kanban Plan skills for shaping work before coding.",
 			Keywords:    []string{"atv", "compound-engineering", "planning", "brainstorming"},
-			SkillNames:  []string{"brainstorming", "ce-brainstorm", "ce-ideate", "ce-plan", "deepen-plan"},
+			SkillNames:  []string{"brainstorming", "ce-brainstorm", "ce-ideate", "ce-plan", "deepen-brainstorm", "deepen-plan", "improve-codebase-architecture", "kanban-plan"},
 		},
 		{
 			Name:        "atv-pack-review",
@@ -59,6 +59,8 @@ func Packs() []Pack {
 				"ce-compound",
 				"ce-compound-refresh",
 				"ce-work",
+				"kanban-lightsout",
+				"kanban-work",
 				"land",
 				"lfg",
 				"slfg",
@@ -75,9 +77,9 @@ func Packs() []Pack {
 		{
 			Name:        "atv-pack-quality",
 			Category:    "quality",
-			Description: "Quality pack — Unslop and Ralph Loop for tightening up code and iterating on solutions.",
-			Keywords:    []string{"atv", "quality", "ralph-loop"},
-			SkillNames:  []string{"ralph-loop", "unslop"},
+			Description: "Quality pack — TDD, Unslop, and Ralph Loop for tightening up code and iterating on solutions.",
+			Keywords:    []string{"atv", "quality", "ralph-loop", "tdd"},
+			SkillNames:  []string{"ralph-loop", "tdd", "unslop"},
 		},
 		{
 			Name:        "atv-pack-guidelines",
