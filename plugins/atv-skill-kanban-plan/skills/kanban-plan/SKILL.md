@@ -4,15 +4,25 @@ description: "Break a brainstorm or feature into vertical-slice task plans with 
 argument-hint: "[brainstorm path, feature description, or PRD]"
 ---
 
-# Kanban Plan — Vertical Slice Decomposition
+# Kanban Plan - Vertical Slice Decomposition
 
-<!-- Inspired by mattpocock/skills to-issues — credit: github.com/mattpocock/skills -->
+<!-- Inspired by mattpocock/skills to-issues - credit: github.com/mattpocock/skills -->
 
-Break work into independently-executable **vertical slices** (tracer bullets). Each slice cuts through ALL layers end-to-end — never horizontal phases.
+Break work into independently executable **vertical slices** (tracer bullets). Each slice cuts through all relevant layers end-to-end. Avoid horizontal phases.
+
+## Quick Start
+
+1. Read the brainstorm, PRD, or feature description.
+2. Draft thin end-to-end slices with dependencies and verification modes.
+3. Confirm the breakdown with the user when the platform supports blocking questions.
+4. Write one kanban manifest plus one plan file per slice.
+5. Stage or commit only the generated files when the user explicitly asked for a commit.
 
 ## Interaction Method
 
-Use the platform's blocking question tool when available (`ask_user` in Copilot CLI, `AskUserQuestion` in Claude Code). Ask one question at a time. Prefer concise single-select choices.
+Use the platform's blocking question tool when available. Ask one question at a time and prefer concise single-select choices. If no blocking question tool exists, ask concise direct questions.
+
+If the user asked for non-interactive planning, make conservative assumptions and record them in the manifest.
 
 ## Input
 
@@ -20,7 +30,7 @@ Use the platform's blocking question tool when available (`ask_user` in Copilot 
 
 **If input is empty:** Check `docs/brainstorms/` for recent brainstorm documents. If found, ask which one to use. Otherwise ask: "What feature or work would you like to decompose into vertical slices?"
 
-**If input is a brainstorm path:** Read it thoroughly — this is the source of truth for WHAT to build. Carry forward all decisions, scope boundaries, and requirements.
+**If input is a brainstorm path:** Read it thoroughly. This is the source of truth for what to build. Carry forward all decisions, scope boundaries, and requirements.
 
 **If input is a feature description:** Proceed directly to decomposition.
 
@@ -28,9 +38,9 @@ Use the platform's blocking question tool when available (`ask_user` in Copilot 
 
 ### Vertical Slices Only
 
-Each slice must deliver a narrow but COMPLETE path through every relevant layer (schema, service, API, UI, tests). A completed slice is demoable or verifiable on its own.
+Each slice must deliver a narrow but complete path through every relevant layer: schema, service, API, UI, tests, docs, or ops as applicable. A completed slice is demoable or verifiable on its own.
 
-```
+```text
 WRONG (horizontal phases):
   Task 1: Create database schema
   Task 2: Build service layer
@@ -43,9 +53,9 @@ RIGHT (vertical slices):
   Task 3: Add level progression display
 ```
 
-### Enabling Slices Are Acceptable (With Constraints)
+### Enabling Slices Are Acceptable
 
-Some work IS legitimately enabling infrastructure (migrations, auth plumbing, shared config). Allow enabling slices ONLY when:
+Some work is legitimately enabling infrastructure: migrations, auth plumbing, shared config, repo setup. Allow enabling slices only when:
 
 - They unlock a named downstream slice
 - They are the smallest viable prerequisite
@@ -55,7 +65,7 @@ Some work IS legitimately enabling infrastructure (migrations, auth plumbing, sh
 
 | Mode | When | Gate |
 |------|------|------|
-| `tdd` | Behavior changes, business logic | Failing test → implement → passes |
+| `tdd` | Behavior changes, business logic | Failing test -> implement -> passes |
 | `integration` | Wiring, cross-boundary, API contracts | Integration test proves path works |
 | `verification-only` | Config, scaffolding, ops | Builds pass, no regression |
 | `hitl` | UX taste, design judgment | Human confirms acceptable |
@@ -71,31 +81,53 @@ Read the brainstorm/PRD/description. Extract:
 - What constraints/dependencies exist
 - What's explicitly out of scope
 
+### 1.5. Research (Parallel)
+
+Run lightweight research to ground slice design in reality:
+
+- Use the **repo-research-analyst** agent to understand existing patterns related to the feature
+- Use the **learnings-researcher** agent to check `docs/solutions/` for relevant institutional knowledge
+
+Launch both in parallel. Focus on: similar features, established conventions, documented gotchas.
+
+**Research decision:** Based on findings, decide if external research is needed.
+
+- **High-risk topics** (security, payments, external APIs, data privacy) → always research externally
+- **Strong local patterns exist** → skip external research
+- **Unfamiliar territory** → research externally
+
+**If external research is warranted**, also run in parallel:
+
+- Use the **best-practices-researcher** agent for industry patterns
+- Use the **framework-docs-researcher** agent for framework-specific guidance
+
+Carry research findings forward into slice plans — each slice should reference relevant patterns, gotchas, and file paths discovered here.
+
 ### 2. Draft Vertical Slices
 
 Break the work into thin end-to-end slices. For each slice, determine:
 
-- **Title** — short descriptive name
-- **What it delivers** — end-to-end behavior description
-- **Verification mode** — tdd / integration / verification-only / hitl
-- **Blocked by** — which other slices must complete first (or "none")
-- **HITL flag** — does this need human judgment? (most should be `false` if brainstorm was thorough)
+- **Title** - short descriptive name
+- **What it delivers** - end-to-end behavior description
+- **Verification mode** - tdd / integration / verification-only / hitl
+- **Blocked by** - which other slices must complete first, or none
+- **HITL flag** - does this need human judgment? Most should be `false` if the brainstorm was thorough.
 
 ### 3. Present and Quiz the User
 
 Show the proposed breakdown as a numbered list. Ask:
 
-- Does the granularity feel right? (too coarse / too fine)
+- Does the granularity feel right: too coarse, too fine, or right?
 - Are dependency relationships correct?
 - Should any slices be merged or split?
 - Are verification modes correct?
-- Any HITL flags wrong?
+- Are any HITL flags wrong?
 
-Iterate until approved.
+Iterate until approved unless the user asked for non-interactive planning.
 
 ### 4. Generate Plan Files
 
-Create a **manifest** and **individual slice plans**.
+Create a manifest and individual slice plans.
 
 #### Manifest: `docs/plans/YYYY-MM-DD-000-kanban-<name>-manifest.md`
 
@@ -114,6 +146,7 @@ slices:
     verification: tdd
     hitl: false
     status: pending
+    notes: ""
   - id: slice-002
     title: "<title>"
     path: docs/plans/YYYY-MM-DD-002-<type>-<name>-plan.md
@@ -121,6 +154,7 @@ slices:
     verification: tdd
     hitl: false
     status: pending
+    notes: ""
 ---
 
 # Kanban: <Feature Name>
@@ -130,10 +164,10 @@ Brainstorm: `<brainstorm_path>`
 
 ## Slice Overview
 | # | Slice | Blocked By | Verification | HITL | Status |
-|---|-------|-----------|--------------|------|--------|
-| 1 | <title> | — | tdd | no | pending |
+|---|-------|------------|--------------|------|--------|
+| 1 | <title> | - | tdd | no | pending |
 | 2 | <title> | slice-001 | tdd | no | pending |
-| 3 | <title> | — | integration | no | pending |
+| 3 | <title> | - | integration | no | pending |
 ```
 
 #### Individual Slice Plans: `docs/plans/YYYY-MM-DD-NNN-<type>-<name>-plan.md`
@@ -153,22 +187,43 @@ status: pending
 ```
 
 The plan body should include:
-- What to build (end-to-end behavior, not layer-by-layer)
-- Acceptance criteria (testable)
-- Files likely involved
-- Test scenarios (specific enough for TDD)
-- Scope boundary (what this slice does NOT include)
 
-### 5. Commit
+- What to build, expressed as end-to-end behavior
+- Acceptance criteria
+- Files likely involved
+- Test scenarios specific enough for TDD or integration verification
+- Scope boundary: what this slice does not include
+- Dependencies and why they are needed
+- HITL question if `hitl: true`
+
+### 5. Validate Output
+
+- Confirm every `blockers` entry references an existing slice ID.
+- Confirm no dependency cycles exist.
+- Confirm every slice has a verification mode and acceptance criteria.
+- Confirm every generated plan path is listed in the manifest.
+- Confirm the manifest body table matches the YAML frontmatter.
+
+### 6. Optional Commit
+
+Commit only when the user explicitly asked for it. Stage only the generated manifest and slice plan files, never the whole `docs/plans/` directory:
 
 ```bash
-git add docs/plans/
+git add docs/plans/YYYY-MM-DD-000-kanban-<name>-manifest.md docs/plans/YYYY-MM-DD-001-<type>-<name>-plan.md
 git commit -m "kanban-plan: decompose <feature> into N vertical slices"
 ```
+
+## Success Criteria
+
+- The manifest is a valid DAG with no missing blockers or cycles.
+- Each slice is independently grabbable and has a clear verification gate.
+- Enabling slices name their immediate downstream consumers.
+- Generated paths are precise enough for `kanban-work` to resume without rediscovery.
+- No unrelated existing plans are staged or changed.
 
 ## Integration with Other Skills
 
 - **Input from:** `ce-brainstorm`, `deepen-brainstorm`
-- **Deepening:** Run `deepen-plan` on individual slices (one at a time to keep context small)
-- **Execution:** `kanban-work` runs all slices in order, OR `ce-work` picks up one slice at a time
-- **Verification:** Each slice uses `tdd` skill when verification mode is `tdd`
+- **Deepening:** Run `deepen-plan` on individual slices, one at a time
+- **Execution:** `kanban-work` runs all slices in order, or `ce-work` can pick up one slice at a time
+- **Verification:** Each slice uses `tdd` skill principles when verification mode is `tdd`
