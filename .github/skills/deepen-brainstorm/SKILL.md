@@ -1,18 +1,23 @@
 ---
 name: deepen-brainstorm
-description: Enhance a brainstorm document with parallel research agents to validate decisions, surface risks, and add market/technical depth before planning
+description: Enhance a brainstorm document with focused research to validate decisions, surface risks, and add market or technical depth before planning. Use when the user says "deepen brainstorm", "research this brainstorm", or wants a brainstorm hardened before planning.
+argument-hint: "[path to brainstorm file]"
 ---
-
-## Arguments
-[path to brainstorm file]
 
 # Deepen Brainstorm - Research Enhancement Mode
 
-## Introduction
+## Quick Start
 
-**Note: The current year is 2026.** Use this when searching for recent documentation and best practices.
+1. Read the requested brainstorm completely.
+2. Extract decisions, assumptions, open questions, and scope boundaries.
+3. Research only the items that can change the quality of the later plan.
+4. Patch the brainstorm in place with clearly marked research additions.
+5. Report the strongest validation, challenged assumptions, and remaining uncertainty.
 
-This command takes an existing brainstorm document (from `/ce-brainstorm`) and enhances it with parallel research agents. Unlike `/deepen-plan` which adds implementation depth, this adds **decision-validation depth**:
+Use the current session date when dating output. For current external facts, verify against current sources; if browsing or network access is unavailable, mark those facts as unverified instead of guessing.
+
+Unlike `deepen-plan`, which adds implementation detail, this skill adds decision-validation depth:
+
 - Market research validating the chosen approach
 - Competitive landscape for the problem space
 - Technical feasibility signals
@@ -20,202 +25,144 @@ This command takes an existing brainstorm document (from `/ce-brainstorm`) and e
 - Prior art and lessons learned
 - Strengthened rationale for key decisions
 
-The result is a brainstorm with battle-tested decisions ready for confident planning.
-
-## Brainstorm File
+## Input
 
 <brainstorm_path> #$ARGUMENTS </brainstorm_path>
 
 **If the brainstorm path above is empty:**
-1. Check for recent brainstorms: `ls -la docs/brainstorms/`
+1. Check for recent brainstorms in `docs/brainstorms/`.
 2. Ask the user: "Which brainstorm would you like to deepen? Please provide the path (e.g., `docs/brainstorms/2026-01-15-my-feature-brainstorm.md`)."
 
 Do not proceed until you have a valid brainstorm file path.
 
-## Main Tasks
+## Operating Rules
+
+- Do not write code. This is research and decision validation only.
+- Preserve the original brainstorm content. Add evidence layers rather than rewriting the user's decisions.
+- Keep research bounded. Prefer 3-7 targeted research questions over exhaustive landscape scanning.
+- Use parallel sub-agents only when the platform supports them and the invocation permits delegated research. Otherwise perform the same research locally in batches.
+- Use the platform's blocking question tool when available; otherwise ask concise direct questions.
+- Do not upload to Proof, post externally, or run network side effects without explicit user confirmation.
+- Stage or commit only when the user explicitly asked for a commit.
+
+## Workflow
 
 ### 1. Parse and Analyze Brainstorm Structure
 
-<thinking>
 Read the brainstorm to identify decisions, approaches chosen, alternatives rejected, and open questions. These are the targets for research validation.
-</thinking>
 
-**Read the brainstorm file and extract:**
-- [ ] Feature/problem description (the WHAT)
-- [ ] Key decisions made and their rationale
-- [ ] Chosen approach and why
-- [ ] Rejected alternatives and why
-- [ ] Open questions (highest priority for research)
-- [ ] Assumptions stated or implied
-- [ ] Success criteria defined
-- [ ] Scope boundaries (in/out)
-- [ ] Technologies or patterns mentioned
-- [ ] Domain area (UI, API, infrastructure, workflow, etc.)
+Extract:
 
-**Create a research manifest:**
-```
+- Feature/problem description
+- Key decisions and rationale
+- Chosen approach and rejected alternatives
+- Open questions
+- Stated and implied assumptions
+- Success criteria
+- Scope boundaries
+- Technologies or patterns mentioned
+- Domain area such as UI, API, infrastructure, workflow, data, or security
+
+Create a research manifest:
+
+```text
 Decision 1: [Decision] - Validate: [What to research]
 Decision 2: [Decision] - Validate: [What to research]
 Open Q 1: [Question] - Research: [What to find]
 Assumption 1: [Assumption] - Verify: [How to check]
 ```
 
-### 2. Launch Parallel Research Agents
+### 2. Run Decision Research
 
-<thinking>
-For each decision, open question, and assumption, spawn dedicated research agents. The goal is to validate or challenge each one with external evidence.
-</thinking>
+For each key decision, research:
 
-**For each key decision, spawn a validation agent:**
-
-```
-Task explore: "Research whether [chosen approach] is the right choice for [problem context].
-Find:
 - Who else has solved this problem? What did they choose?
 - What are the known failure modes of this approach?
-- Are there newer (2024-2026) alternatives we might be missing?
+- Are there newer alternatives we might be missing?
 - What scale/complexity thresholds make this approach break down?
-Return: Evidence supporting OR challenging this decision."
-```
+- What evidence supports or challenges the decision?
 
-**For each open question, spawn a research agent:**
+For each open question, research:
 
-```
-Task explore: "Research: [open question from brainstorm].
-Find:
-- Industry consensus (if any)
+- Industry consensus, if any
 - Tradeoffs between options
 - Real-world examples of each option in production
 - Data or benchmarks that inform the choice
-Return: Concrete recommendation with evidence."
-```
+- A concrete recommendation with confidence level
 
-**For each assumption, spawn a verification agent:**
+For each assumption, verify:
 
-```
-Task explore: "Verify assumption: [assumption from brainstorm].
-Find:
-- Is this actually true in 2026?
+- Is this actually true now?
 - What conditions make this assumption false?
 - Has anyone documented failures from this assumption?
-Return: Confirmed/Challenged with evidence."
-```
+- Is the assumption confirmed, partially true, or challenged?
 
-**Launch ALL agents in PARALLEL.**
+### 3. Market and Competitive Research
 
-### 3. Market & Competitive Research
+Research the landscape around the problem:
 
-<thinking>
-Understand the broader landscape around this feature/problem. Even for internal tools, someone has likely solved a similar problem.
-</thinking>
-
-**Spawn market research agents:**
-
-```
-Task explore: "Research the competitive/market landscape for: [problem being solved].
-Find:
 - How do other tools/products solve this?
-- What's the current state of the art (2024-2026)?
+- What is the current state of the art?
 - Are there open-source solutions worth studying?
 - What user experience patterns are considered best practice?
-Return: Landscape summary with 3-5 concrete examples."
-```
 
-**Use WebSearch for current context:**
+Return a landscape summary with 3-5 concrete examples when external research is available.
 
-Search for recent articles, blog posts, and documentation related to the brainstorm's problem domain.
+### 4. Check Learnings and Prior Art
 
-### 4. Check Learnings & Prior Art
-
-<thinking>
-Check institutional knowledge for relevant past experience.
-</thinking>
-
-**Search for relevant learnings:**
+Search for relevant learnings and similar code:
 
 ```bash
-# Project learnings from /ce-compound
-find docs/solutions -name "*.md" -type f 2>/dev/null
-
-# Check if similar features exist in the codebase
-grep -r "[key terms from brainstorm]" --include="*.py" --include="*.ts" -l
+rg --files docs/solutions
+rg -n "[key terms from brainstorm]"
 ```
 
-**For each potentially relevant learning, spawn a sub-agent:**
+If `rg` is unavailable, use the platform's native file search. For each potentially relevant learning, determine:
 
-```
-Task explore: "Read this learning file and determine if it applies to our brainstorm:
-
-Learning: [path]
-Brainstorm context: [brief summary of what we're building]
-
-If relevant: What specific insight should we carry forward?
-If not: Say 'Not applicable' with brief reason."
-```
+- Does this learning apply to the brainstorm?
+- What specific insight should carry forward?
+- If not applicable, why not?
 
 ### 5. Discover and Apply Available Skills
 
-<thinking>
-Check for skills that could provide domain-specific insights on the brainstorm's decisions.
-</thinking>
-
-**Discover skills from all sources:**
+Check for skills that could provide domain-specific insights. Search project and user skill locations that exist in the current environment:
 
 ```bash
-# Project skills
-ls .github/skills/ 2>/dev/null
-
-# User global skills
-ls ~/.copilot/skills/ 2>/dev/null
-
-# Plugin skills
-find ~/.copilot/plugins/cache -type d -name "skills" 2>/dev/null
+rg --files .github/skills -g "SKILL.md"
 ```
 
-**For each skill that matches the brainstorm's domain, spawn a sub-agent:**
+Also check available global/plugin skill roots exposed by the current platform, such as `~/.copilot/skills`, `~/.codex/skills`, or `~/.claude/skills`.
 
-```
-Task general-purpose: "You have the [skill-name] skill at [path].
-Read its SKILL.md and apply its perspective to this brainstorm:
+For each matching skill, apply only the relevant perspective:
 
-[brainstorm content]
-
-Focus on: Does this skill's domain knowledge validate, challenge, or add nuance to any decisions?
-Return: Skill-informed insights only (skip if nothing relevant)."
-```
+- Does the skill validate any decisions?
+- Does it challenge any assumptions?
+- Does it add a nuance that should affect planning?
 
 ### 6. Synthesize and Enhance
 
-<thinking>
-Merge all research back into the brainstorm. Preserve original decisions but add evidence layers.
-</thinking>
+Merge research back into the brainstorm. Preserve original decisions but add evidence layers.
 
-**Collect outputs from all agents and organize by brainstorm section:**
-
-**Enhancement format:**
+Use this format under relevant original sections:
 
 ```markdown
-## [Original Section]
-
-[Original content preserved]
-
-### 📊 Research Validation
+### Research Validation
 
 **Evidence supporting this decision:**
 - [Finding 1 with source]
 - [Finding 2 with source]
 
 **Risks identified:**
-- [Risk 1] — Mitigation: [approach]
-- [Risk 2] — Mitigation: [approach]
+- [Risk 1] - Mitigation: [approach]
+- [Risk 2] - Mitigation: [approach]
 
 **Competitive context:**
 - [How others solve this]
 
-**Confidence level:** High/Medium/Low — [brief justification]
+**Confidence level:** High/Medium/Low - [brief justification]
 ```
 
-**For Open Questions that research answered:**
+For open questions that research answered:
 
 ```markdown
 ### [Original Open Question]
@@ -229,16 +176,16 @@ Merge all research back into the brainstorm. Preserve original decisions but add
 **Confidence:** High/Medium/Low
 ```
 
-**For Assumptions that were verified/challenged:**
+For assumptions:
 
 ```markdown
 ### Assumptions Audit
 
 | Assumption | Status | Evidence |
 |-----------|--------|----------|
-| [Assumption 1] | ✅ Confirmed | [brief evidence] |
-| [Assumption 2] | ⚠️ Partially true | [conditions] |
-| [Assumption 3] | ❌ Challenged | [counter-evidence] |
+| [Assumption 1] | Confirmed | [brief evidence] |
+| [Assumption 2] | Partially true | [conditions] |
+| [Assumption 3] | Challenged | [counter-evidence] |
 ```
 
 ### 7. Add Enhancement Summary
@@ -249,7 +196,7 @@ At the top of the brainstorm, add:
 ## Deepening Summary
 
 **Deepened on:** [Date]
-**Research agents used:** [Count]
+**Research questions:** [Count]
 **Decisions validated:** [Count]/[Total]
 **Open questions resolved:** [Count]/[Total]
 **Assumptions verified:** [Count]/[Total]
@@ -258,7 +205,7 @@ At the top of the brainstorm, add:
 ### Confidence Assessment
 - **Overall approach confidence:** High/Medium/Low
 - **Strongest decision:** [which one and why]
-- **Weakest decision:** [which one — consider revisiting]
+- **Weakest decision:** [which one - consider revisiting]
 - **Biggest risk:** [what could go wrong]
 
 ### Key Research Findings
@@ -269,49 +216,35 @@ At the top of the brainstorm, add:
 
 ### 8. Update Brainstorm File
 
-**Write the enhanced brainstorm:**
+Write the enhanced brainstorm:
+
 - Preserve original filename
-- All original content intact
-- Research additions clearly marked with `### 📊 Research Validation` headers
-- Open questions resolved are moved to a "Resolved Questions" section
+- Keep all original content intact
+- Mark research additions with `### Research Validation`
+- Move resolved open questions to a "Resolved Questions" section
 
 ## Quality Checks
 
-Before finalizing:
-- [ ] All original decisions preserved (never overwrite user choices)
+- [ ] All original decisions preserved
 - [ ] Research clearly attributed with sources
-- [ ] Confidence levels are honest (don't inflate)
+- [ ] Confidence levels are honest
 - [ ] Challenged assumptions are flagged prominently
-- [ ] No implementation details crept in (that's for /ce-plan)
+- [ ] No implementation details crept in
 - [ ] Enhancement summary accurately reflects findings
+
+## Success Criteria
+
+- The brainstorm still contains every original decision and scope boundary.
+- Research additions distinguish verified facts from inference.
+- The top summary names the strongest decision, weakest decision, biggest risk, and remaining open questions.
+- The document is ready to feed into `ce-plan` or `kanban-plan`.
 
 ## Post-Enhancement Options
 
-After writing the enhanced brainstorm, use the **AskUserQuestion tool**:
+After writing the enhanced brainstorm, ask what to do next:
 
-**Question:** "Brainstorm deepened at `[path]`. What would you like to do next?"
-
-**Options:**
 1. **View changes** - Show what research added
 2. **Revisit challenged decisions** - Discuss decisions that research challenged
-3. **Proceed to planning** - Run `/ce-plan` (will auto-detect this brainstorm)
+3. **Proceed to planning** - Run `/ce-plan` or `/kanban-plan` with the brainstorm path
 4. **Deepen further** - Run another research pass on specific decisions
-5. **Share to Proof** - Upload to Proof for collaborative review
-
-Based on selection:
-- **View changes** → Show summary of additions
-- **Revisit challenged decisions** → Re-enter brainstorm dialogue focused on weak decisions
-- **Proceed to planning** → Run `/ce-plan` with brainstorm path
-- **Deepen further** → Ask which decisions need more research, re-run those agents
-- **Share to Proof** →
-  ```bash
-  CONTENT=$(cat [brainstorm_path])
-  TITLE="Brainstorm (Deepened): <topic>"
-  RESPONSE=$(curl -s -X POST https://www.proofeditor.ai/share/markdown \
-    -H "Content-Type: application/json" \
-    -d "$(jq -n --arg title "$TITLE" --arg markdown "$CONTENT" --arg by "ai:compound" '{title: $title, markdown: $markdown, by: $by}')")
-  PROOF_URL=$(echo "$RESPONSE" | jq -r '.tokenUrl')
-  ```
-  Display: `View & collaborate in Proof: <PROOF_URL>`
-
-NEVER CODE! Just research and validate decisions.
+5. **Share to Proof** - Upload to Proof for collaborative review, after explicit confirmation
