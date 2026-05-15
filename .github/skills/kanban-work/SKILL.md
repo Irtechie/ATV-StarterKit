@@ -30,7 +30,8 @@ Run all vertical slices from a `kanban-plan` manifest in dependency order. Keep 
 2. **Validate DAG** - confirm no cycles in blockers, all referenced slice IDs exist, and all slice files exist.
 3. **Check status** - skip any slices already marked `done`. Resume from the first runnable `pending` slice.
 4. **Check worktree** - note dirty or untracked files before executing so unrelated user changes are not staged or reverted.
-5. **Confirm with user:** "Ready to execute N remaining slices in order. Proceed?"
+5. **Sync with board** - read `docs/kanban.md` and confirm its status table matches the manifest. If they diverge, the board wins — another agent may have updated it. Reconcile the manifest from the board before proceeding.
+6. **Confirm with user:** "Ready to execute N remaining slices in order. Proceed?"
 
 Treat statuses as:
 
@@ -40,6 +41,25 @@ Treat statuses as:
 | `done` | Skip |
 | `blocked` | Stop and ask whether to retry, skip, or abort |
 | `skipped` | Skip but keep visible in the summary |
+
+## Board Sync Protocol
+
+`docs/kanban.md` is the multi-agent handoff file. Update it at every status transition:
+
+| Event | Board Update |
+|-------|-------------|
+| Starting a slice | Set status to 🔧 in_progress |
+| Slice completes | Set status to ✅ done |
+| Slice blocked | Set status to 🔒 blocked + reason in notes |
+| Slice skipped | Set status to ⊘ skipped |
+| All slices done | Move entire feature section to `docs/kanban-done.md` |
+
+**Multi-agent rules:**
+- Before claiming a slice, re-read `docs/kanban.md`. If another agent set it to 🔧, do not claim it.
+- The board is the source of truth — not chat history, not the manifest. If the board says done, it's done.
+- Update the board BEFORE starting work (claim) and AFTER completing work (release). This prevents two agents from working the same slice.
+- Also update the manifest to stay in sync, but if they conflict, the board wins.
+- Append a short entry to the **📝 Work Log** section after each slice: `- YYYY-MM-DD: <slice title> — done (<agent/session>)`
 
 ## Dependency Ordering
 
@@ -214,14 +234,16 @@ After the slice completes:
    - If yes: update manifest `status: done` for this slice and update the body table.
    - If no: update manifest `status: blocked`, add failure notes, and ask user how to proceed.
 
-2. **Run verification**
+2. **Sync board** — update `docs/kanban.md` status for this slice (✅ or 🔒). Append validation note.
+
+3. **Run verification**
    - Run the relevant test command for the repo.
    - If a full suite is too expensive or unavailable, explain the narrower verification used.
 
-3. **Optional commit**
+4. **Optional commit**
    - If the user asked for commits, stage only the manifest file for status updates and commit it separately.
 
-4. Continue to the next runnable slice.
+5. Continue to the next runnable slice.
 
 ### Step 5: Completion
 
@@ -229,7 +251,8 @@ When all slices are `done` or intentionally `skipped`:
 
 1. Update manifest `status: completed`.
 2. Run final verification.
-3. Report summary:
+3. **Archive to board** — move the feature section from `docs/kanban.md` to `docs/kanban-done.md`. Prepend at the top of the archive file with a completion date header.
+4. Report summary:
 
 ```text
 Kanban <name> complete.
