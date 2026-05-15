@@ -1,6 +1,6 @@
 ---
 name: klfg
-description: "Full kanban pipeline orchestrator. Chains /kanban-brainstorm → /kanban-plan → /kanban-work → /ce-review → /observe → /learn. Pauses only for the initial brainstorm Q&A in step 1 and any HITL-flagged slices in step 3; otherwise runs autonomously through to DONE. Use when the user says 'klfg', 'kanban lfg', 'run the full kanban', 'go from brainstorm to done', or wants the same hands-off feel as /lfg but for the kanban (vertical-slice) workflow."
+description: "Full kanban pipeline orchestrator. Chains /kanban-brainstorm → /kanban-plan → /kanban-work → DONE. kanban-work handles the full gauntlet internally: scope lock, execution, tests, diff-scope, destructive guard, QA (lint + browser), repair loop, Figma sync, ce-review, compound, learn, and evolve. Use when the user says 'klfg', 'kanban lfg', 'run the full kanban', 'go from brainstorm to done', or wants the same hands-off feel as /lfg but for the kanban (vertical-slice) workflow."
 argument-hint: "[feature description]"
 disable-model-invocation: true
 ---
@@ -10,9 +10,9 @@ CRITICAL: You MUST execute every step below IN ORDER. Do NOT skip any required s
 This pipeline is interactive in **two specific places** and autonomous everywhere else:
 
 1. **Step 1 (brainstorm)** stops for product Q&A. That is the design — `kanban-brainstorm` does research first, then asks the user targeted product questions before producing a requirements doc.
-2. **Step 3 (work)** stops only on slices the manifest flagged `hitl: true`. Those are intentional human-judgment gates set during planning. `kanban-work` handles them and resumes automatically once the user answers.
+2. **Step 3 (work)** stops only on slices the manifest flagged `hitl: true` and when safety gates fire (scope violations, destructive commands, QA failures that exhaust repair). `kanban-work` handles them and resumes automatically once the user answers.
 
-Everything else proceeds without prompting. Once the user picks "Proceed to /kanban-plan" at the end of step 1, head off till done.
+Everything else proceeds without prompting. Once the user picks "Proceed to /kanban-plan" at the end of step 1, hands off till done.
 
 ## Pipeline
 
@@ -32,32 +32,36 @@ Everything else proceeds without prompting. Once the user picks "Proceed to /kan
 
 3. `/kanban-work <manifest-path>`
 
-   `kanban-work` will execute every pending slice in dependency order. It will pause **only** on slices marked `hitl: true` and will resume automatically once the user answers. Let it run.
+   `kanban-work` executes every pending slice in dependency order, running the full gauntlet per slice:
 
-   GATE: STOP. After `kanban-work` returns, re-read the manifest. Every slice must be `status: done` or `status: skipped`. If any slice is `pending`, `in_progress`, or `blocked`, re-run `/kanban-work <manifest-path>` to resume. Do NOT proceed to step 4 until the manifest is fully resolved.
+   **Per-slice gates (all mandatory):**
+   - 3.0 Scope Lock — block writes outside `expected_files`
+   - 3 Execute — TDD/integration/verification-only
+   - 3.5 System-Wide Test Check — trace side effects
+   - 3.6 Diff-Scope Verification — git diff vs declared scope
+   - 3.7 Destructive Command Guard — block rm -rf, force push, etc.
+   - 3.8 QA — lint (all slices) + browser checks (frontend) → kanban-repair on failure
+   - 3.9 Figma Design Sync — UI slices only
+
+   **Post-completion (after all slices):**
+   - ce-review — full multi-agent code review
+   - Resolution Gate — P0/P1 must be fixed before shipping
+   - Compound + Learn + Evolve — document, extract patterns, promote instincts
+
+   HITL pauses: slices flagged `hitl: true`, scope violations, destructive commands, QA failures that exhaust repair (5-iteration cap, stuck detection).
+
+   GATE: STOP. After `kanban-work` returns, re-read the manifest. Every slice must be `status: done` or `status: skipped`. If any slice is `pending`, `in_progress`, or `blocked`, re-run `/kanban-work <manifest-path>` to resume.
 
    If a slice is genuinely stuck (e.g., `blocked` for an external reason), surface that to the user and stop the pipeline. Do not paper over a blocked slice.
 
-4. `/ce-review mode:autofix plan:<reqs-path>`
-
-   Final review pass over everything that was built across all slices. Pass the **requirements doc path** (not the manifest) so `ce-review` can verify each `R1`, `R2`, … requirement was actually delivered. Autofix mode applies only `safe_auto` fixes silently and emits residual findings as todos for the user to triage later.
-
-   If `ce-review` returns residual P0 findings, surface them to the user before continuing — those are issues the autofix could not address on its own.
-
-5. `/observe`
-
-   Analyze the changed files from this session and capture patterns into the observation log. This feeds the learning pipeline in step 6.
-
-6. `/learn`
-
-   Extract reusable patterns from this session into project instincts (`.atv/instincts/project.yaml`). Cheap, every-session knowledge capture.
-
-7. Output `<promise>DONE</promise>` once steps 1–6 are complete.
+4. Output `<promise>DONE</promise>` once steps 1–3 are complete.
 
 ## Notes
 
-- **Why no `/unslop`:** intentionally omitted from this pipeline. Run `/unslop` manually if you want a slop-removal pass.
-- **Why no `/ce-compound`:** `/ce-compound` is reserved for documenting *notable* problems that were solved during the session (heavyweight case studies in `docs/solutions/`). Not every kanban run produces one. Run it manually after this pipeline if a slice involved real problem-solving worth a case study.
+- **Why no `/unslop`:** intentionally omitted. Risk of flagging parallel agent WIP as false positives. Run manually if needed.
+- **Why no separate `/ce-review`:** kanban-work runs ce-review internally at Step 5.4 with full context (diff, requirements, slice plans). A second pass would be redundant.
+- **Why no separate `/learn` or `/observe`:** kanban-work feeds resolved P0/P1 findings to observations.jsonl (Step 5.5), runs `/learn` (Step 5.6), and auto-triggers `/evolve` every 5th kanban completion.
+- **Why no separate `/ce-compound`:** kanban-work invokes ce-compound at Step 5.6 for features with novel patterns. Skips automatically for boilerplate.
 - **Why no `/land`:** committing, pushing, and opening a PR is a separate, deliberate act. Run `/land` after `klfg` finishes when you're ready to ship.
 - **Resuming after interruption:** `klfg` is idempotent across restarts because each step's GATE checks for the produced artifact. If the session is interrupted between steps, re-invoke `klfg` with the same arguments and it will pick up at the first failing GATE.
 
