@@ -53,6 +53,27 @@ Look for recurring patterns across the evidence:
 - Common file editing sequences
 - Preferred build/test commands
 
+### Step 2.5: Apply Recency Decay
+
+Before creating or updating instincts, apply time-based decay to all existing entries:
+
+1. For each instinct in `.atv/instincts/project.yaml`:
+   - Calculate days since `last_seen`
+   - Apply decay: `new_confidence = confidence × 0.5^(days_since_last_seen / 90)`
+   - Update the confidence value in place
+
+2. **Archive stale instincts:**
+   - If decayed confidence falls below 0.3, move the instinct to `.atv/instincts/archive/YYYY-MM-DD-archived.yaml`
+   - Add `archived_reason: confidence decayed below 0.3 (last seen: <date>)`
+   - Remove from `project.yaml`
+
+3. Write updated confidence values back to `project.yaml` before proceeding to Step 3.
+
+**Half-life rationale:** 90 days balances stability (project conventions rarely change weekly) with freshness (patterns unused for 6+ months are likely obsolete). At 90 days, an unobserved instinct at 0.85 decays to:
+- 30 days: 0.68
+- 90 days: 0.43
+- 180 days: 0.21 (archived)
+
 ### Step 3: Create or Update Instincts
 
 For each new pattern discovered, create an instinct entry.

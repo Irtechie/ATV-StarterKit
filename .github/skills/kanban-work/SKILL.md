@@ -194,7 +194,62 @@ Kanban <name> complete.
 Verification: <command/result>
 ```
 
-4. Suggest `/ce-review` for a fresh-context review of the full feature.
+4. **Invoke `ce-review`** — Run a full multi-agent code review on the feature diff.
+   This is mandatory. Do not skip, defer, or make it optional.
+   - Pass context: the full `git diff` of the feature branch against baseline
+   - Capture the output: each finding has a severity (P0/P1/P2/P3) and confidence score
+   - Store findings for the resolution gate (Step 5.5)
+
+### Step 5.5: Resolution Gate
+
+Review findings from `ce-review` determine whether shipping is allowed:
+
+| Severity | Action |
+|----------|--------|
+| P0 (critical) | STOP. Fix before proceeding. Re-run affected tests after fix. |
+| P1 (important) | STOP. Fix before proceeding. |
+| P2 (suggestion) | Log in manifest `notes`. Do not block. |
+| P3 (nit) | Log in manifest `notes`. Do not block. |
+
+This gate is mandatory. The agent MUST NOT proceed to Step 6 while unresolved P0/P1 findings exist.
+
+After resolving all P0/P1s, update the manifest notes with a summary:
+`review: P0=0 P1=2(resolved) P2=3(logged) P3=1(logged)`
+
+**Feed learnings to the observation log:**
+
+For each resolved P0/P1 finding, append one line to `.atv/observations.jsonl`:
+
+```json
+{"ts":"<ISO-8601>","hook":"ce-review","tool":"kanban-work","args":{"finding_type":"<category>","severity":"P0|P1","resolution":"<what was fixed>"},"cwd":"<repo-root>","result":"resolved"}
+```
+
+This connects the review → learn pipeline. Only P0/P1 findings are worth learning from — P2/P3 are style preferences, not systemic patterns.
+
+Create `.atv/observations.jsonl` if it doesn't exist. Append, never overwrite.
+
+### Step 5.6: Compound
+
+After the resolution gate passes, document what this feature taught the system:
+
+1. **Invoke `ce-compound`** with context: a one-sentence summary of what was built and any surprising patterns discovered during implementation.
+2. ce-compound writes to `docs/solutions/` with YAML frontmatter — let it run without modification.
+3. If the implementation was pure boilerplate (no novel patterns, no gotchas, no decisions worth preserving), skip with a manifest note: `compound: skipped — standard implementation, no novel patterns`
+4. Per-slice micro-learnings from Step 4 notes feed into the compound context. Reference them when invoking ce-compound.
+5. **Invoke `/learn`** — Extract instincts from this session's work.
+   - Run after compound completes (observations from Step 5.5 are now available)
+   - `/learn` reads: observations.jsonl, recent git history, docs/solutions/, existing instincts
+   - Record result in manifest notes: `learn: N new instincts, M updated` or `learn: no new patterns`
+   - This is automatic — do not ask the user whether to run it
+6. **Check evolution cadence:**
+   - Read `.atv/kanban-completions.txt` (create with `0` if missing)
+   - Increment by 1
+   - Write the new value back
+   - If the new value is divisible by 5:
+     - Invoke `/evolve` to check for promotable instincts
+     - Log result in manifest notes: `evolve: promoted N instincts` or `evolve: no candidates ready`
+   - If not divisible by 5: skip silently
+   - Commit the counter file with the manifest update
 
 ### Step 6: Ship It
 
