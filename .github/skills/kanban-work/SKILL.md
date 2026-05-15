@@ -362,7 +362,7 @@ After all slices pass and review is complete:
 
 2. **Create PR**
 
-   Attach QA screenshots from `.atv/qa-screenshots/` if any frontend slices were executed. Do not re-capture — they already exist from kanban-qa.
+   Include the scope-verified file list (from Step 3.6 across all slices) and QA screenshots in the PR body. Reviewers should see exactly what was touched and what it looks like.
 
    ```bash
    git push -u origin $(git branch --show-current)
@@ -371,6 +371,13 @@ After all slices pass and review is complete:
    ## Summary
    - What was built (list slices completed)
    - Origin brainstorm: `<brainstorm_path>`
+
+   ## Files Changed (scope-verified)
+   List every file from the Step 3.6 verified scope across all slices:
+   | File | Slice | Op |
+   |------|-------|----|
+   | `src/foo.py` | slice-001 | edit |
+   | `tests/test_foo.py` | slice-001 | create (convention-matched) |
 
    ## Slices Executed
    | # | Slice | Verification | Status |
@@ -389,9 +396,10 @@ After all slices pass and review is complete:
    - **Validation window & owner:** [window + owner]
 
    ## Screenshots
-   | Before | After |
-   |--------|-------|
-   | ![before](URL) | ![after](URL) |
+   Attach QA screenshots from `.atv/qa-screenshots/` for each frontend slice:
+   | Slice | Screenshot |
+   |-------|-----------|
+   | slice-001 | ![slice-001](<uploaded-url>) |
 
    ---
    🤖 Generated with [Claude Code](https://claude.com/claude-code)
@@ -404,6 +412,37 @@ After all slices pass and review is complete:
    Omit the Screenshots section if no frontend slices were executed. If there is truly no production/runtime impact, include: `No additional operational monitoring required: <reason>`.
 
 3. **Update manifest** — set `status: shipped` and add the PR URL to the manifest frontmatter.
+
+### Step 7: Cleanup
+
+Prune ephemeral artifacts after shipping. Heavy kanban usage generates file sprawl — clean it up per-feature, not manually.
+
+1. **QA screenshots** — delete `.atv/qa-screenshots/` contents for this feature's slices. Screenshots are already attached to the PR. Safe to remove.
+
+2. **Observations log** — trim `.atv/observations.jsonl` entries older than 90 days. Matches the recency decay half-life in `/learn`. Append-only logs grow indefinitely without this.
+
+   ```bash
+   # Keep entries from the last 90 days
+   python -c "
+   import json, sys
+   from datetime import datetime, timedelta
+   cutoff = (datetime.utcnow() - timedelta(days=90)).isoformat()
+   lines = open('.atv/observations.jsonl').readlines()
+   kept = [l for l in lines if json.loads(l).get('ts','') >= cutoff]
+   open('.atv/observations.jsonl','w').writelines(kept)
+   print(f'observations: kept {len(kept)}/{len(lines)}')
+   "
+   ```
+
+   If Python is unavailable or the file doesn't exist, skip with a note.
+
+3. **Plan files** — leave manifests and slice plans in `docs/plans/`. Lightweight reference material, useful for tracing decisions.
+
+4. **Log cleanup** in the manifest notes:
+
+   ```text
+   cleanup: screenshots pruned, observations trimmed to 90d
+   ```
 
 ## Failure Handling
 
