@@ -117,7 +117,39 @@ Before marking a slice done, pause and ask these questions — vertical slices c
 
 **When to skip:** Leaf-node changes with no callbacks, no state persistence, no parallel interfaces. Purely additive changes (new helper, new partial) take 10 seconds to confirm "nothing fires, skip."
 
-### Step 3.6: Figma Design Sync (UI slices only)
+### Step 3.6: Diff-Scope Verification
+
+After a slice completes, verify that the files actually changed match the slice's declared `expected_files`. This is a hard gate — the agent does not self-report, the actual git diff is checked.
+
+1. **Get the actual diff:**
+
+   ```bash
+   git diff --name-only $(git merge-base HEAD main)..HEAD
+   ```
+
+   This produces the list of files modified by this slice relative to the branch baseline.
+
+2. **Load the declared scope** from the slice plan's `expected_files` frontmatter field.
+
+3. **Compare and enforce:**
+
+   | Finding | Action |
+   |---------|--------|
+   | Files changed that are NOT in `expected_files` | **STOP.** Flag each out-of-scope file. Do not proceed to the next slice. Ask the user whether to amend the plan, revert the change, or accept the scope expansion. |
+   | Files in `expected_files` that were NOT changed | Flag as potentially incomplete. Ask the user whether the slice is truly done or if work was missed. |
+   | Perfect match | Proceed. |
+
+4. **Log results** in the kanban manifest under the slice's `notes` field:
+
+   ```text
+   notes: "scope-check: 5/5 expected files changed, 0 out-of-scope"
+   ```
+
+5. **If the slice plan has no `expected_files` field**, the gate fails. Stop and require the field to be added before proceeding. Do not infer or guess the expected files — the plan must declare them explicitly.
+
+This gate is mandatory. It cannot be skipped, overridden, or deferred.
+
+### Step 3.7: Figma Design Sync (UI slices only)
 
 If the slice involves UI changes and Figma designs exist:
 

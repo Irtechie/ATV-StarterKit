@@ -112,6 +112,7 @@ Break the work into thin end-to-end slices. For each slice, determine:
 - **Verification mode** - tdd / integration / verification-only / hitl
 - **Blocked by** - which other slices must complete first, or none
 - **HITL flag** - does this need human judgment? Most should be `false` if the brainstorm was thorough.
+- **Expected files** - which files this slice will create or modify. Used by `kanban-work` for diff-scope verification.
 
 ### 3. Present and Quiz the User
 
@@ -182,6 +183,7 @@ title: "<title>"
 blockers: []
 verification: tdd
 hitl: false
+expected_files: []
 status: pending
 ---
 ```
@@ -190,7 +192,7 @@ The plan body should include:
 
 - What to build, expressed as end-to-end behavior
 - Acceptance criteria
-- Files likely involved
+- Expected files (must match `expected_files` in frontmatter — these are the files this slice is allowed to touch)
 - Test scenarios specific enough for TDD or integration verification
 - Scope boundary: what this slice does not include
 - Dependencies and why they are needed

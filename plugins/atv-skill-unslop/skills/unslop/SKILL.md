@@ -102,6 +102,14 @@ You are a code simplification expert. Analyze the provided files for AI-generate
    - Event systems for synchronous single-consumer flows
    - Dependency injection where direct instantiation is clearer
 
+6. **Python lazy-loading slop**
+   - Imports inside functions when the module is cheap and used every call — move to top-level
+   - Module-level `__getattr__` for lazy submodule loading in small packages that don't need it
+   - `@cached_property` or `functools.lru_cache` wrapping trivial attribute access
+   - Deferred initialization patterns (`_instance = None` / `if cls._instance is None`) when a module global suffices
+   - `importlib.import_module()` to avoid a top-level import that has no circular dependency or startup cost issue
+   - **All lazy-loading findings must set `fix_safe: false`.** Lazy loading often exists for circular import avoidance or startup cost reasons that are not visible from the file alone. Report only — never auto-remove.
+
 **Return format:**
 ```json
 {
@@ -296,6 +304,7 @@ If the user invoked `/unslop fix`:
    - Factually inaccurate comments (requires understanding intent)
    - YAGNI violations (requires knowing the roadmap)
    - Abstractions (requires understanding the broader architecture)
+   - Python lazy-loading patterns (may exist for circular import avoidance or startup cost — invisible from the file alone)
 4. Report what was fixed:
 
 ```
