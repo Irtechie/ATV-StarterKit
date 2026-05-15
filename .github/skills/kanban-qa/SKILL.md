@@ -52,11 +52,13 @@ Pick the transport based on what the slice needs, not a fixed priority list.
 ## Step 1: Connect and Navigate
 
 1. Connect via the selected transport.
-2. Navigate to the page(s) relevant to the slice. Determine URLs from:
-   - Slice plan's acceptance criteria
-   - Route patterns in `expected_files` (e.g., `pages/dashboard.tsx` → `/dashboard`)
-   - Dev server URL (default `http://localhost:3000`, respect `DEV_SERVER_URL` env var)
-3. Wait for the page to reach a stable state (network idle or DOM content loaded).
+2. **Enable continuous console monitoring.** From this point through all subsequent steps, capture console errors, warnings, and failed network requests after every action — not as a one-time check at the end. Every click, navigation, and form fill gets a before/after console snapshot.
+3. **Scope pages using the diff.** Use the verified file list from kanban-work Step 3.6 to determine which pages need testing:
+   - Map changed files to testable URLs: `pages/dashboard.tsx` → `/dashboard`, `components/Header.tsx` → any page rendering that component.
+   - Cross-reference with the slice plan's acceptance criteria for explicit URLs.
+   - Dev server URL (default `http://localhost:3000`, respect `DEV_SERVER_URL` env var).
+   - Only test pages that include changed components — do not test the entire app.
+4. Wait for the page to reach a stable state (network idle or DOM content loaded).
 
 ## Step 2: Capture Evidence
 
