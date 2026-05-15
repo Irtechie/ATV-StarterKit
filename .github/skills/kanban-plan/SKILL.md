@@ -112,7 +112,14 @@ Break the work into thin end-to-end slices. For each slice, determine:
 - **Verification mode** - tdd / integration / verification-only / hitl
 - **Blocked by** - which other slices must complete first, or none
 - **HITL flag** - does this need human judgment? Most should be `false` if the brainstorm was thorough.
-- **Expected files** - which files this slice will create or modify. Used by `kanban-work` for diff-scope verification.
+- **Expected files** - which files this slice will create or modify, with operation type. Used by `kanban-work` for diff-scope verification and edit-safety.
+
+Each entry in `expected_files` should specify:
+  - `path` — the file path
+  - `op` — `create`, `edit`, or `delete`
+  - `scope` — one-line description of what specifically changes (for `edit` operations)
+
+This prevents agents from regenerating files from the plan spec instead of surgically editing current code.
 
 ### 3. Present and Quiz the User
 
@@ -183,7 +190,10 @@ title: "<title>"
 blockers: []
 verification: tdd
 hitl: false
-expected_files: []
+expected_files:
+  - path: ""
+    op: edit
+    scope: "what specifically changes"
 status: pending
 ---
 ```

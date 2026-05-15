@@ -91,13 +91,19 @@ Plan contents:
 Instructions:
 1. Read the plan completely.
 2. Set up on the current branch.
-3. Apply the verification mode:
+3. For files marked `op: edit` in expected_files:
+   - Read the CURRENT file content FIRST — the file as it exists on disk, not as the plan describes it.
+   - Make only the change described in the `scope` field. Do not regenerate or rewrite the file.
+   - Preserve all existing behavior not mentioned in the scope.
+   - If the file has been modified by prior slices or manual edits, those changes are authoritative. The plan spec is not.
+4. For files marked `op: create`: write the file from the plan spec.
+5. Apply the verification mode:
    - tdd: write one failing test first, confirm it fails for the right reason, implement minimal code to pass, then refactor.
    - integration: write an integration test proving the path works, then implement the wiring.
    - verification-only: implement the change, then verify builds pass and no regressions.
-4. Run relevant tests first, then the full test suite when practical.
-5. Stage only files changed for this slice.
-6. Commit only if the user asked for commits, with message: "feat(<slice-id>): <title>"
+6. Run relevant tests first, then the full test suite when practical.
+7. Stage only files changed for this slice.
+8. Commit only if the user asked for commits, with message: "feat(<slice-id>): <title>"
 
 Do not modify other slices' files unless required for this slice.
 Do not add scope beyond what the plan specifies.
