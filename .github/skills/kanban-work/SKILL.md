@@ -98,14 +98,25 @@ Before executing the slice, load the declared scope and enforce it proactively â
 
 1. **Read `expected_files`** from the slice plan's frontmatter.
 2. **If `expected_files` is empty or missing**, the gate fails. Stop and require the field to be populated before execution begins.
-3. **Before opening any file for writing**, check its path against `expected_files`:
+3. **Expand scope with convention-matched test files.** For each entry in `expected_files`, automatically allow its corresponding test file based on project naming conventions:
+
+   | Source file | Auto-allowed test file(s) |
+   |-------------|--------------------------|
+   | `src/foo.py` | `tests/test_foo.py`, `test/test_foo.py` |
+   | `src/Foo.tsx` | `src/Foo.test.tsx`, `src/__tests__/Foo.tsx` |
+   | `lib/foo.rb` | `spec/foo_spec.rb`, `test/foo_test.rb` |
+   | `pkg/foo.go` | `pkg/foo_test.go` |
+
+   Test files that don't correspond to any `expected_files` entry are still out of scope.
+
+4. **Before opening any file for writing**, check its path against `expected_files` + auto-allowed test files:
 
    | Finding | Action |
    |---------|--------|
-   | File is listed in `expected_files` | Proceed with the edit. |
-   | File is NOT listed | **STOP.** Do not edit. Ask the user: "This file isn't in the slice scope. Add it to `expected_files`, or skip this edit?" |
+   | File is listed in `expected_files` or is a convention-matched test | Proceed with the edit. |
+   | File is NOT listed and not a matching test | **STOP.** Do not edit. Ask the user: "This file isn't in the slice scope. Add it to `expected_files`, or skip this edit?" |
 
-4. **Log the lock** in the manifest notes: `scope-lock: loaded N expected files`
+5. **Log the lock** in the manifest notes: `scope-lock: loaded N expected files + M auto-allowed test files`
 
 This gate pairs with Step 3.6 (Diff-Scope Verification). Scope Lock prevents out-of-scope edits before they happen. Diff-Scope Verification catches anything that slipped through after the fact. Both are mandatory. Neither can be skipped, overridden, or deferred.
 
@@ -176,11 +187,13 @@ After a slice completes, verify that the files actually changed match the slice'
 
 3. **Compare and enforce:**
 
+   Apply the same convention-matched test file expansion as Step 3.0 â€” test files that correspond to an `expected_files` entry are automatically in scope.
+
    | Finding | Action |
    |---------|--------|
-   | Files changed that are NOT in `expected_files` | **STOP.** Flag each out-of-scope file. Do not proceed to the next slice. Ask the user whether to amend the plan, revert the change, or accept the scope expansion. |
+   | Files changed that are NOT in `expected_files` and not convention-matched tests | **STOP.** Flag each out-of-scope file. Do not proceed to the next slice. Ask the user whether to amend the plan, revert the change, or accept the scope expansion. |
    | Files in `expected_files` that were NOT changed | Flag as potentially incomplete. Ask the user whether the slice is truly done or if work was missed. |
-   | Perfect match | Proceed. |
+   | Perfect match (including auto-allowed tests) | Proceed. |
 
 4. **Log results** in the kanban manifest under the slice's `notes` field:
 
