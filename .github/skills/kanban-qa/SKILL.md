@@ -1,18 +1,21 @@
 ---
 name: kanban-qa
-description: "Browser-based verification for frontend slices. Connects via CDP, Playwright, or Agent Browser based on context. Hard gate — the browser reports what rendered, the model does not self-report. Use when a kanban slice touches frontend files (.tsx, .jsx, .html, .css, .vue, .svelte) and needs visual/interactive verification."
+description: "Quality assurance gate for all slices. Runs lint checks on every slice, browser verification on frontend slices. On any failure, invokes kanban-repair for surgical fixes. Hard gate — the browser reports what rendered, the linter reports what's dirty, the model does not self-report."
 argument-hint: "[slice plan path, or blank to verify the current slice]"
 ---
 
-# Kanban QA — Browser Verification Gate
+# Kanban QA — Quality Assurance Gate
 
-Verify frontend slices by looking at what the app actually renders. The agent tests as a user, not a developer. Source code is irrelevant during QA — only what the browser shows matters.
+Quality verification for all slices. Lint for every slice. Browser checks for frontend slices. On any failure, hands off to `kanban-repair` for surgical fixes.
 
 ## When to Run
 
-Called from `kanban-work` after Step 3.6 (Diff-Scope Verification) passes, **only** for slices whose `expected_files` include frontend file extensions: `.tsx`, `.jsx`, `.html`, `.css`, `.scss`, `.vue`, `.svelte`, `.ejs`, `.hbs`.
+Called from `kanban-work` at Step 3.8, after all safety gates pass.
 
-If the slice is backend-only, skip entirely with a one-line note: `qa: skipped — no frontend files in expected_files`
+- **All slices:** lint check (Step 7)
+- **Frontend slices only:** browser verification (Steps 0–6) — triggered when `expected_files` includes frontend file extensions: `.tsx`, `.jsx`, `.html`, `.css`, `.scss`, `.vue`, `.svelte`, `.ejs`, `.hbs`
+
+If the slice is backend-only, skip browser checks with a one-line note: `qa-browser: skipped — no frontend files in expected_files`. Lint still runs.
 
 ## Input
 
@@ -126,7 +129,7 @@ qa: FAIL — <transport used>
   console_errors: [list if any]
 ```
 
-**FAIL on any critical check is a hard gate.** The agent MUST NOT proceed to the next slice. Same enforcement as Step 3.6 (Diff-Scope Verification).
+**FAIL on any critical check (browser or lint) invokes `kanban-repair`.** The agent does not proceed to the next slice until all checks pass or the repair loop exhausts.
 
 Log all results in `docs/kanban.md` under the slice's status or notes. Also update the manifest `notes` field.
 
@@ -139,6 +142,43 @@ Set per-feature or per-slice in kanban.md or the manifest. Default is `quick`.
 | `quick` | Screenshot + console check only |
 | `standard` | + interaction checks on new/modified elements |
 | `deep` | + responsive checks at 3 breakpoints (375px, 768px, 1440px) |
+
+## Step 7: Lint Check (all slices)
+
+Runs for every slice, not just frontend.
+
+1. **Detect the project linter** from `CLAUDE.md`, `package.json` scripts, `.eslintrc`, `Makefile`, or project conventions.
+2. **Scope to slice files** — pass `expected_files` as arguments when the linter supports file-level targeting. Avoid linting the entire repo for one slice.
+3. **Capture output** — errors and warnings, with file paths and line numbers.
+4. **If no linter configured**, skip with note: `lint: skipped — no linter configured`. Not fatal.
+
+```text
+lint: PASS — <linter used>
+  files checked: N
+  errors: 0, warnings: 0
+```
+
+```text
+lint: FAIL — <linter used>
+  errors: N in M files
+  <file:line — error message>
+```
+
+Lint failures are fixable — they feed into the failure handoff (Step 8).
+
+## Step 8: Failure Handoff
+
+After Steps 0–7 complete, collect all failures (browser and lint).
+
+- **All checks passed** → QA passes. Return to `kanban-work`.
+- **Any check failed** → Invoke `kanban-repair` with the full failure report:
+  - Which checks failed (browser, lint, or both)
+  - Failure details (expected vs observed, lint errors with file:line)
+  - Slice context (`expected_files`, slice plan path)
+  - Screenshots for any browser failures
+- `kanban-repair` handles surgical fixes and re-verification.
+- If repair succeeds → QA passes.
+- If repair exhausts (stuck or ceiling hit) → QA fails. Slice stays `in_progress`. The agent MUST NOT proceed to the next slice.
 
 ## Transport Reference
 
@@ -166,7 +206,8 @@ Actions are transport-agnostic above. Here's the mapping:
 
 ## Integration
 
-- **Called from:** `kanban-work` (after Step 3.6, frontend slices only)
+- **Called from:** `kanban-work` (Step 3.8, all slices)
+- **Hands off to:** `kanban-repair` (on any failure)
 - **Results feed into:** `ce-review` (Step 5.4) as additional context
 - **Screenshots persist:** `.atv/qa-screenshots/` (gitignored, ephemeral)
 - **Logs persist:** kanban.md notes + manifest notes

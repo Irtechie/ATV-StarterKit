@@ -215,7 +215,20 @@ Before executing any shell command during a slice, check it against this blockli
 
 This is enforcement, not a warning. The agent MUST NOT execute destructive commands without explicit human confirmation. This gate cannot be skipped, overridden, or deferred.
 
-### Step 3.8: Figma Design Sync (UI slices only)
+### Step 3.8: Kanban QA (all slices)
+
+Invoke `kanban-qa` with the current slice context. QA runs:
+
+- **Lint check** on files in `expected_files` (every slice)
+- **Browser verification** against acceptance criteria (frontend slices only)
+
+If any check fails, `kanban-qa` invokes `kanban-repair` for surgical fixes (progress-based, 5-iteration cap). If repair exhausts or gets stuck, STOP — do not proceed to the next slice.
+
+Backend-only slices skip browser checks but still run lint.
+
+This gate is mandatory. It cannot be skipped or deferred.
+
+### Step 3.9: Figma Design Sync (UI slices only)
 
 If the slice involves UI changes and Figma designs exist:
 
