@@ -337,23 +337,17 @@ After the resolution gate passes, document what this feature taught the system:
 
 After all slices pass and review is complete:
 
-1. **Quality gate**
+1. **Final test suite**
 
    ```bash
-   # Run full test suite
-   # Run linting (per CLAUDE.md / project conventions)
+   # Run full test suite (cross-slice integration check)
    ```
 
-2. **Capture screenshots** (if any slice touched UI)
+   Lint is already verified per-slice by kanban-qa (Step 3.8). Do not re-run.
 
-   Use `agent-browser` to screenshot affected routes:
-   ```bash
-   agent-browser open http://localhost:3000/[route]
-   agent-browser snapshot -i
-   agent-browser screenshot output.png
-   ```
+2. **Create PR**
 
-3. **Create PR**
+   Attach QA screenshots from `.atv/qa-screenshots/` if any frontend slices were executed. Do not re-capture — they already exist from kanban-qa.
 
    ```bash
    git push -u origin $(git branch --show-current)
@@ -392,9 +386,9 @@ After all slices pass and review is complete:
    )"
    ```
 
-   Omit the Screenshots section if no UI slices were executed. If there is truly no production/runtime impact, include: `No additional operational monitoring required: <reason>`.
+   Omit the Screenshots section if no frontend slices were executed. If there is truly no production/runtime impact, include: `No additional operational monitoring required: <reason>`.
 
-4. **Update manifest** — set `status: shipped` and add the PR URL to the manifest frontmatter.
+3. **Update manifest** — set `status: shipped` and add the PR URL to the manifest frontmatter.
 
 ## Failure Handling
 
