@@ -72,6 +72,23 @@ If the slice plan has fewer than 3 acceptance criteria or no test scenarios:
 - Add concrete test scenarios and likely file paths.
 - Keep the pass bounded; do not re-plan the whole feature.
 
+### Step 3.0: Scope Lock
+
+Before executing the slice, load the declared scope and enforce it proactively — prevent out-of-scope edits before they happen.
+
+1. **Read `expected_files`** from the slice plan's frontmatter.
+2. **If `expected_files` is empty or missing**, the gate fails. Stop and require the field to be populated before execution begins.
+3. **Before opening any file for writing**, check its path against `expected_files`:
+
+   | Finding | Action |
+   |---------|--------|
+   | File is listed in `expected_files` | Proceed with the edit. |
+   | File is NOT listed | **STOP.** Do not edit. Ask the user: "This file isn't in the slice scope. Add it to `expected_files`, or skip this edit?" |
+
+4. **Log the lock** in the manifest notes: `scope-lock: loaded N expected files`
+
+This gate pairs with Step 3.6 (Diff-Scope Verification). Scope Lock prevents out-of-scope edits before they happen. Diff-Scope Verification catches anything that slipped through after the fact. Both are mandatory. Neither can be skipped, overridden, or deferred.
+
 ### Step 3: Execute
 
 Use a fresh sub-agent when the platform supports delegated execution and the user has permitted it. Otherwise execute the slice locally while keeping the scope limited to this slice.
@@ -155,7 +172,30 @@ After a slice completes, verify that the files actually changed match the slice'
 
 This gate is mandatory. It cannot be skipped, overridden, or deferred.
 
-### Step 3.7: Figma Design Sync (UI slices only)
+### Step 3.7: Destructive Command Guard
+
+Before executing any shell command during a slice, check it against this blocklist:
+
+| Blocked Pattern | Why |
+|-----------------|-----|
+| `rm -rf`, `rm` with recursive/force flags | Irreversible file deletion |
+| `git push --force` / `git push -f` | Rewrites remote history |
+| `git reset --hard` | Discards uncommitted work |
+| `DROP TABLE` / `DROP DATABASE` / `TRUNCATE` | Irreversible data loss |
+| `git clean -fd` | Deletes untracked files permanently |
+| Bulk delete operations on files or data | Mass irreversible removal |
+| Overwriting production config files | Environment-breaking changes |
+
+**When a blocked command is detected:**
+
+1. **STOP.** Do not execute.
+2. Show the user the exact command and explain why it's blocked.
+3. Wait for explicit HITL approval before proceeding.
+4. If running in autonomous mode (no HITL available), skip the command and log in the manifest notes: `destructive-guard: blocked <command> — no HITL available`
+
+This is enforcement, not a warning. The agent MUST NOT execute destructive commands without explicit human confirmation. This gate cannot be skipped, overridden, or deferred.
+
+### Step 3.8: Figma Design Sync (UI slices only)
 
 If the slice involves UI changes and Figma designs exist:
 
