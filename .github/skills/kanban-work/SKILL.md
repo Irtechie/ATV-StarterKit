@@ -291,9 +291,11 @@ Verification: <command/result>
 
 4. **Invoke `ce-review`** — Run a full multi-agent code review on the feature diff.
    This is mandatory. Do not skip, defer, or make it optional.
-   - Pass context: the full `git diff` of the feature branch against baseline
+   - **Pass scope from prior gates:** collect the verified file list from Step 3.6 (Diff-Scope Verification) across all slices. Pass this as the scoped file list so ce-review skips its own scope discovery (Stage 1). The scope gates already verified these are the correct files — no need to re-derive from git diff.
+   - Pass context: the full `git diff` of the feature branch against baseline, scoped to the verified file list
    - Capture the output: each finding has a severity (P0/P1/P2/P3) and confidence score
    - Store findings for the resolution gate (Step 5.5)
+   - **Note:** this optimization only applies when ce-review is called from kanban-work (sequential, same session). If ce-review runs standalone, it does its own scope discovery.
 
 ### Step 5.5: Resolution Gate
 
