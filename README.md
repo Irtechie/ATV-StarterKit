@@ -2,6 +2,47 @@
        <img src="./assets/hero-retro.svg" alt="ATV — All The Vibes 2.0 Starter Kit" width="100%" />
 </p>
 
+---
+
+> **⚠️ This is a fork.** Upstream: [All-The-Vibes/ATV-StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)
+>
+> This fork adds the **Kanban Pipeline** — an enforcement-first vertical-slice execution engine with mandatory safety gates. Agents don't self-report; git diffs, linters, and browsers verify every claim.
+
+## 🔱 Kanban Pipeline (this fork)
+
+One command from idea to PR. Vertical slices, not horizontal phases. Every slice runs through a gauntlet of hard gates before the next one starts.
+
+```text
+/klfg "your feature"
+   │
+   ├─ /kanban-brainstorm   → research-first requirements
+   ├─ /kanban-plan         → vertical slices with dependency DAG
+   └─ /kanban-work         → execute all slices through mandatory gates:
+         ├─ Scope Lock        (blocks out-of-scope writes proactively)
+         ├─ Diff-Scope        (verifies git diff matches declared scope)
+         ├─ Destructive Guard (blocks rm -rf, force push, DROP TABLE)
+         ├─ QA Gate           (lint + browser) → /kanban-repair on failure
+         ├─ Figma Sync        (UI slices only)
+         ├─ ce-review         (multi-agent code review)
+         ├─ Resolution Gate   (P0/P1 must be fixed before shipping)
+         └─ Ship              (PR with scope-verified files + screenshots)
+```
+
+| Skill | Purpose |
+|-------|---------|
+| `/klfg` | Full pipeline orchestrator — brainstorm → plan → work → DONE |
+| `/kanban-brainstorm` | Research-first requirements (landscape research before questions) |
+| `/kanban-plan` | Decompose into vertical slices with `expected_files` contracts |
+| `/kanban-work` | Execute slices through all safety gates sequentially |
+| `/kanban-qa` | Lint + browser verification — hard gate, no self-reporting |
+| `/kanban-repair` | Surgical fix loop — progress-based, 5-iteration cap, stuck detection |
+
+**Why this exists:** Agents lie by omission. They don't intend to — but when asked "did you stay in scope?" they check their memory, not the filesystem. Every gate in this pipeline checks ground truth.
+
+📖 **[Full documentation →](docs/KANBAN-SKILLS.md)**
+
+---
+
 <h1 align="center">ATV — All The Vibes 2.0 Starter Kit</h1>
 
 <p align="center"><strong>One command. Full agentic coding setup. Maximum tasteful chaos.</strong></p>
