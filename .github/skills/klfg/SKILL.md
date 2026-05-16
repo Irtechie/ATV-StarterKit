@@ -1,18 +1,19 @@
 ---
 name: klfg
-description: "Full kanban pipeline orchestrator. Chains /kanban-brainstorm → /kanban-plan → /kanban-work → DONE. kanban-work handles the full gauntlet internally: scope lock, execution, tests, diff-scope, destructive guard, QA (lint + browser), repair loop, Figma sync, ce-review, compound, learn, and evolve. Use when the user says 'klfg', 'kanban lfg', 'run the full kanban', 'go from brainstorm to done', or wants the same hands-off feel as /lfg but for the kanban (vertical-slice) workflow."
+description: "Full kanban pipeline orchestrator. Chains /kanban-brainstorm → /kanban-plan → /kanban-work → kanban-complete → DONE. kanban-work handles the per-slice gauntlet (scope lock, execution, tests, diff-scope, destructive guard, QA, repair, Figma sync). kanban-complete handles post-work quality (ce-review, compound, learn, evolve). Use when the user says 'klfg', 'kanban lfg', 'run the full kanban', 'go from brainstorm to done', or wants the same hands-off feel as /lfg but for the kanban (vertical-slice) workflow."
 argument-hint: "[feature description]"
 disable-model-invocation: true
 ---
 
 CRITICAL: You MUST execute every step below IN ORDER. Do NOT skip any required step. Do NOT jump ahead to coding or implementation. The brainstorm (step 1), plan (step 2), and work (step 3) phases each have a GATE that must verify their output exists before the next step begins. Violating this order produces bad output.
 
-This pipeline is interactive in **two specific places** and autonomous everywhere else:
+This pipeline is interactive in **three specific places** and autonomous everywhere else:
 
 1. **Step 1 (brainstorm)** stops for product Q&A. That is the design — `kanban-brainstorm` does research first, then asks the user targeted product questions before producing a requirements doc.
 2. **Step 3 (work)** stops only on slices the manifest flagged `hitl: true` and when safety gates fire (scope violations, destructive commands, QA failures that exhaust repair). `kanban-work` handles them and resumes automatically once the user answers.
+3. **Step 4 (complete)** asks "Continue through kanban-complete?" after all slices finish. The user decides when to run review and learning.
 
-Everything else proceeds without prompting. Once the user picks "Proceed to /kanban-plan" at the end of step 1, hands off till done.
+Everything else proceeds without prompting. Once the user picks "Proceed to /kanban-plan" at the end of step 1, hands off till the step 4 pause.
 
 ## Pipeline
 
@@ -43,10 +44,7 @@ Everything else proceeds without prompting. Once the user picks "Proceed to /kan
    - 3.8 QA — lint (all slices) + browser checks (frontend) → kanban-repair on failure
    - 3.9 Figma Design Sync — UI slices only
 
-   **Post-completion (after all slices):**
-   - ce-review — full multi-agent code review
-   - Resolution Gate — P0/P1 must be fixed before shipping
-   - Compound + Learn + Evolve — document, extract patterns, promote instincts
+   After all slices: persists scope-verified file list in manifest for kanban-complete.
 
    HITL pauses: slices flagged `hitl: true`, scope violations, destructive commands, QA failures that exhaust repair (5-iteration cap, stuck detection).
 
@@ -54,14 +52,32 @@ Everything else proceeds without prompting. Once the user picks "Proceed to /kan
 
    If a slice is genuinely stuck (e.g., `blocked` for an external reason), surface that to the user and stop the pipeline. Do not paper over a blocked slice.
 
-4. Output `<promise>DONE</promise>` once steps 1–3 are complete.
+4. **Ask the user:** "All slices complete. Continue through kanban-complete (review → compound → learn)?"
+
+   Wait for the user to confirm before proceeding. This is a mandatory pause — the user decides when to run the quality and learning pipeline.
+
+   If the user says no or wants to stop here, output what was completed and stop. They can run `/kanban-complete <manifest-path>` later.
+
+5. `/kanban-complete <manifest-path>`
+
+   `kanban-complete` runs the post-work quality and learning pipeline:
+
+   - ce-review — full multi-agent code review with scope passthrough from kanban-work's gates
+   - Resolution Gate — P0/P1 must be fixed before proceeding
+   - Compound + Learn + Evolve — document patterns, extract instincts, promote mature ones
+   - Cleanup — prune ephemeral artifacts (screenshots, old observations)
+
+   GATE: STOP. After `kanban-complete` returns, verify the manifest status is `reviewed`. If ce-review found unresolved P0/P1s, `kanban-complete` will have stopped — re-run it after fixes.
+
+6. Output `<promise>DONE</promise>` once steps 1–5 are complete.
 
 ## Notes
 
 - **Why no `/unslop`:** intentionally omitted. Risk of flagging parallel agent WIP as false positives. Run manually if needed.
-- **Why no separate `/ce-review`:** kanban-work runs ce-review internally at Step 5.4 with full context (diff, requirements, slice plans). A second pass would be redundant.
-- **Why no separate `/learn` or `/observe`:** kanban-work feeds resolved P0/P1 findings to observations.jsonl (Step 5.5), runs `/learn` (Step 5.6), and auto-triggers `/evolve` every 5th kanban completion.
-- **Why no separate `/ce-compound`:** kanban-work invokes ce-compound at Step 5.6 for features with novel patterns. Skips automatically for boilerplate.
+- **Why a separate `kanban-complete`:** the quality/learning pipeline (ce-review, compound, learn, evolve) is deliberately separated from slice execution. This gives the user a natural pause point — review the work before investing in review and documentation. Also makes each skill independently invocable.
+- **Why no separate `/ce-review`:** kanban-complete runs ce-review at Step 1 with full scope context from kanban-work's gates. A second pass would be redundant.
+- **Why no separate `/learn` or `/observe`:** kanban-complete feeds resolved P0/P1 findings to observations.jsonl (Step 2), runs `/learn` (Step 3), and auto-triggers `/evolve` every 5th kanban completion.
+- **Why no separate `/ce-compound`:** kanban-complete invokes ce-compound at Step 3 for features with novel patterns. Skips automatically for boilerplate.
 - **Why no `/land`:** committing, pushing, and opening a PR is a separate, deliberate act. Run `/land` after `klfg` finishes when you're ready to ship.
 - **Resuming after interruption:** `klfg` is idempotent across restarts because each step's GATE checks for the produced artifact. If the session is interrupted between steps, re-invoke `klfg` with the same arguments and it will pick up at the first failing GATE.
 

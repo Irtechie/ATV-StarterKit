@@ -26,12 +26,14 @@ The kanban skills are an **enforcement-first agent pipeline** that decomposes wo
          ├─ 3.8  QA Gate                 (lint + browser) → /kanban-repair on failure
          ├─ 3.9  Figma Sync             (UI slices only)
          ├─ 4    Verify & Update
-         ├─ 5    Completion
-         ├─ 5.4  ce-review              (multi-agent code review)
-         ├─ 5.5  Resolution Gate         (P0/P1 must be fixed)
-         ├─ 5.6  Compound + Learn + Evolve
-         ├─ 6    Ship (PR with scope-verified files + screenshots)
-         └─ 7    Cleanup
+         └─ 5    Completion              (persists scope context for kanban-complete)
+   │
+   └─ /kanban-complete       ← post-work quality & learning
+         │
+         ├─ 1    ce-review              (multi-agent code review, scope pre-loaded)
+         ├─ 2    Resolution Gate         (P0/P1 must be fixed)
+         ├─ 3    Compound + Learn + Evolve
+         └─ 4    Cleanup
 ```
 
 ---
@@ -40,11 +42,11 @@ The kanban skills are an **enforcement-first agent pipeline** that decomposes wo
 
 ### `/klfg` — Full Pipeline Orchestrator
 
-**What it does:** Chains brainstorm → plan → work → DONE in one command. Interactive only twice: during brainstorm Q&A and when safety gates fire.
+**What it does:** Chains brainstorm → plan → work → complete → DONE in one command. Interactive at three points: brainstorm Q&A, safety gate pauses during work, and a "continue to review?" prompt after all slices complete.
 
-**When to use:** You want hands-off execution from idea to PR. One command, walk away.
+**When to use:** You want hands-off execution from idea to reviewed, documented code. One command, walk away.
 
-**How it's different from `/lfg`:** The upstream `/lfg` runs a horizontal pipeline (plan → deepen → work → review → compound). `/klfg` enforces vertical slicing — every slice cuts through all layers end-to-end — and kanban-work owns the entire gauntlet internally (no separate review/compound/learn steps to orchestrate).
+**How it's different from `/lfg`:** The upstream `/lfg` runs a horizontal pipeline (plan → deepen → work → review → compound). `/klfg` enforces vertical slicing — every slice cuts through all layers end-to-end — and splits the pipeline: kanban-work owns slice execution + gates, kanban-complete owns quality review + learning.
 
 ```
 /klfg "add user streak tracking"
@@ -111,7 +113,7 @@ status: pending
 
 ### `/kanban-work` — Sequential Slice Executor
 
-**What it does:** Executes all slices from a kanban manifest in dependency order, running every safety gate per slice. This is the engine — it handles execution, verification, review, documentation, and shipping.
+**What it does:** Executes all slices from a kanban manifest in dependency order, running every safety gate per slice. After all slices complete, persists scope context for `kanban-complete` to pick up.
 
 **The Gauntlet (per-slice):**
 
@@ -171,6 +173,25 @@ status: pending
 
 ---
 
+### `/kanban-complete` — Post-Work Quality & Learning
+
+**What it does:** After `kanban-work` finishes all slices, runs the quality review and knowledge capture pipeline. Separated from kanban-work so the user gets a natural pause point before investing in review and documentation.
+
+**Pipeline:**
+1. **ce-review** — multi-agent code review with scope-verified file list pre-loaded from kanban-work's gates (skips redundant scope discovery)
+2. **Resolution Gate** — P0/P1 findings must be fixed before proceeding. P2/P3 logged but don't block.
+3. **Compound + Learn + Evolve** — document patterns (ce-compound), extract instincts (/learn), and promote mature ones (/evolve every 5th completion)
+4. **Cleanup** — prune QA screenshots, trim observations log to 90 days
+
+**When to use:** After `kanban-work` reports all slices complete. `klfg` prompts automatically. Standalone users invoke it manually with the manifest path.
+
+**Standalone invocation:**
+```
+/kanban-complete docs/plans/2025-05-16-001-kanban-feature-manifest.md
+```
+
+---
+
 ## The Safety Philosophy
 
 The kanban pipeline exists because **agents lie by omission.** They don't intend to — but when you ask "did you stay in scope?" they check their own memory, not the filesystem. When you ask "does it pass lint?" they recall what they think they wrote, not what the linter actually says.
@@ -194,9 +215,9 @@ The kanban skills build on the ATV foundation:
 | ATV Component | How Kanban Uses It |
 |---------------|-------------------|
 | `ce-brainstorm` | kanban-brainstorm extends it with research-first ordering |
-| `ce-review` | Called at Step 5.4 with scope-verified file list (skips redundant discovery) |
-| `ce-compound` | Called at Step 5.6 for novel patterns |
-| `/learn` + `/evolve` | Called automatically after every kanban completion |
+| `ce-review` | Called by kanban-complete with scope-verified file list (skips redundant discovery) |
+| `ce-compound` | Called by kanban-complete for novel patterns |
+| `/learn` + `/evolve` | Called by kanban-complete after every completion |
 | `docs/solutions/` | Consumed by `learnings-researcher` during planning |
 | `docs/brainstorms/` | Produced by kanban-brainstorm, consumed by kanban-plan |
 | `docs/plans/` | Produced by kanban-plan, consumed by kanban-work |
@@ -212,7 +233,8 @@ The kanban skills build on the ATV foundation:
 | `/klfg "feature"` | Full pipeline, one command | PR with everything |
 | `/kanban-brainstorm "idea"` | Research → requirements | `docs/brainstorms/*-requirements.md` |
 | `/kanban-plan path/to/reqs.md` | Slice decomposition | Manifest + per-slice plans |
-| `/kanban-work path/to/manifest.md` | Execute all slices | Working code, PR, documentation |
+| `/kanban-work path/to/manifest.md` | Execute all slices | Working code, scope context |
+| `/kanban-complete path/to/manifest.md` | Review + learn | Reviewed code, documentation |
 | `/kanban-qa` | Lint + browser checks | Pass/fail with repair attempt |
 | `/kanban-repair` | Fix QA failures | Atomic fix commits |
 
@@ -225,8 +247,8 @@ The kanban skills build on the ATV foundation:
 | Decomposition | Horizontal phases | Vertical slices |
 | Scope enforcement | None — trusts the agent | Hard gates at Steps 3.0 + 3.6 |
 | QA | Post-hoc (gstack-qa) | Per-slice (kanban-qa + repair) |
-| Review | Separate step | Internal (Step 5.4, scope pre-loaded) |
-| Learning | Separate step | Internal (Step 5.6, auto-cadence) |
+| Review | Separate step | kanban-complete (scope pre-loaded from work) |
+| Learning | Separate step | kanban-complete (auto-cadence) |
 | Resumability | Limited | Full — manifest tracks per-slice status |
 | Multi-agent | Not designed for it | Board sync protocol in kanban.md |
 | Destructive safety | `/gstack-careful` (optional) | Step 3.7 (mandatory, cannot be skipped) |
@@ -241,6 +263,7 @@ The kanban skills build on the ATV foundation:
 ├── kanban-brainstorm/SKILL.md # Research-first requirements
 ├── kanban-plan/SKILL.md       # Vertical slice decomposition
 ├── kanban-work/SKILL.md       # Sequential executor + all gates
+├── kanban-complete/SKILL.md   # Post-work review + learning
 ├── kanban-qa/SKILL.md         # Quality assurance (lint + browser)
 └── kanban-repair/SKILL.md     # Surgical fix loop
 

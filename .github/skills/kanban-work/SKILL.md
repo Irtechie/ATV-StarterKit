@@ -281,168 +281,19 @@ When all slices are `done` or intentionally `skipped`:
 4. Report summary:
 
 ```text
-Kanban <name> complete.
+Kanban <name> — all slices complete.
 - N slices executed
 - S slices skipped
 - M tests added
 - K files changed
 Verification: <command/result>
+
+Next: run kanban-complete for review, documentation, and learning.
 ```
 
-4. **Invoke `ce-review`** — Run a full multi-agent code review on the feature diff.
-   This is mandatory. Do not skip, defer, or make it optional.
-   - **Pass scope from prior gates:** collect the verified file list from Step 3.6 (Diff-Scope Verification) across all slices. Pass this as the scoped file list so ce-review skips its own scope discovery (Stage 1). The scope gates already verified these are the correct files — no need to re-derive from git diff.
-   - Pass context: the full `git diff` of the feature branch against baseline, scoped to the verified file list
-   - Capture the output: each finding has a severity (P0/P1/P2/P3) and confidence score
-   - Store findings for the resolution gate (Step 5.5)
-   - **Note:** this optimization only applies when ce-review is called from kanban-work (sequential, same session). If ce-review runs standalone, it does its own scope discovery.
+5. **Persist scope context** — collect the scope-verified file lists from each slice's `notes` field (the `scope-check:` entries from Step 3.6). Write the combined list to the manifest frontmatter as `scope-verified-files` so `kanban-complete` can pass it to ce-review without re-deriving.
 
-### Step 5.5: Resolution Gate
-
-Review findings from `ce-review` determine whether shipping is allowed:
-
-| Severity | Action |
-|----------|--------|
-| P0 (critical) | STOP. Fix before proceeding. Re-run affected tests after fix. |
-| P1 (important) | STOP. Fix before proceeding. |
-| P2 (suggestion) | Log in manifest `notes`. Do not block. |
-| P3 (nit) | Log in manifest `notes`. Do not block. |
-
-This gate is mandatory. The agent MUST NOT proceed to Step 6 while unresolved P0/P1 findings exist.
-
-After resolving all P0/P1s, update the manifest notes with a summary:
-`review: P0=0 P1=2(resolved) P2=3(logged) P3=1(logged)`
-
-**Feed learnings to the observation log:**
-
-For each resolved P0/P1 finding, append one line to `.atv/observations.jsonl`:
-
-```json
-{"ts":"<ISO-8601>","hook":"ce-review","tool":"kanban-work","args":{"finding_type":"<category>","severity":"P0|P1","resolution":"<what was fixed>"},"cwd":"<repo-root>","result":"resolved"}
-```
-
-This connects the review → learn pipeline. Only P0/P1 findings are worth learning from — P2/P3 are style preferences, not systemic patterns.
-
-Create `.atv/observations.jsonl` if it doesn't exist. Append, never overwrite.
-
-### Step 5.6: Compound
-
-After the resolution gate passes, document what this feature taught the system:
-
-1. **Invoke `ce-compound`** with context: a one-sentence summary of what was built and any surprising patterns discovered during implementation.
-2. ce-compound writes to `docs/solutions/` with YAML frontmatter — let it run without modification.
-3. If the implementation was pure boilerplate (no novel patterns, no gotchas, no decisions worth preserving), skip with a manifest note: `compound: skipped — standard implementation, no novel patterns`
-4. Per-slice micro-learnings from Step 4 notes feed into the compound context. Reference them when invoking ce-compound.
-5. **Invoke `/learn`** — Extract instincts from this session's work.
-   - Run after compound completes (observations from Step 5.5 are now available)
-   - `/learn` reads: observations.jsonl, recent git history, docs/solutions/, existing instincts
-   - Record result in manifest notes: `learn: N new instincts, M updated` or `learn: no new patterns`
-   - This is automatic — do not ask the user whether to run it
-6. **Check evolution cadence:**
-   - Read `.atv/kanban-completions.txt` (create with `0` if missing)
-   - Increment by 1
-   - Write the new value back
-   - If the new value is divisible by 5:
-     - Invoke `/evolve` to check for promotable instincts
-     - Log result in manifest notes: `evolve: promoted N instincts` or `evolve: no candidates ready`
-   - If not divisible by 5: skip silently
-   - Commit the counter file with the manifest update
-
-### Step 6: Ship It
-
-After all slices pass and review is complete:
-
-1. **Final test suite**
-
-   ```bash
-   # Run full test suite (cross-slice integration check)
-   ```
-
-   Lint is already verified per-slice by kanban-qa (Step 3.8). Do not re-run.
-
-2. **Create PR**
-
-   Include the scope-verified file list (from Step 3.6 across all slices) and QA screenshots in the PR body. Reviewers should see exactly what was touched and what it looks like.
-
-   ```bash
-   git push -u origin $(git branch --show-current)
-
-   gh pr create --title "feat: <feature name>" --body "$(cat <<'EOF'
-   ## Summary
-   - What was built (list slices completed)
-   - Origin brainstorm: `<brainstorm_path>`
-
-   ## Files Changed (scope-verified)
-   List every file from the Step 3.6 verified scope across all slices:
-   | File | Slice | Op |
-   |------|-------|----|
-   | `src/foo.py` | slice-001 | edit |
-   | `tests/test_foo.py` | slice-001 | create (convention-matched) |
-
-   ## Slices Executed
-   | # | Slice | Verification | Status |
-   |---|-------|-------------|--------|
-   | 1 | <title> | tdd | ✅ |
-   | 2 | <title> | integration | ✅ |
-
-   ## Testing
-   - Tests added per slice (TDD/integration as specified)
-   - Full suite passing
-
-   ## Post-Deploy Monitoring & Validation
-   - **What to monitor:** [logs, metrics, dashboards]
-   - **Expected healthy behavior:** [signals]
-   - **Failure signals / rollback trigger:** [trigger + action]
-   - **Validation window & owner:** [window + owner]
-
-   ## Screenshots
-   Attach QA screenshots from `.atv/qa-screenshots/` for each frontend slice:
-   | Slice | Screenshot |
-   |-------|-----------|
-   | slice-001 | ![slice-001](<uploaded-url>) |
-
-   ---
-   🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-   Co-Authored-By: Claude <noreply@anthropic.com>
-   EOF
-   )"
-   ```
-
-   Omit the Screenshots section if no frontend slices were executed. If there is truly no production/runtime impact, include: `No additional operational monitoring required: <reason>`.
-
-3. **Update manifest** — set `status: shipped` and add the PR URL to the manifest frontmatter.
-
-### Step 7: Cleanup
-
-Prune ephemeral artifacts after shipping. Heavy kanban usage generates file sprawl — clean it up per-feature, not manually.
-
-1. **QA screenshots** — delete `.atv/qa-screenshots/` contents for this feature's slices. Screenshots are already attached to the PR. Safe to remove.
-
-2. **Observations log** — trim `.atv/observations.jsonl` entries older than 90 days. Matches the recency decay half-life in `/learn`. Append-only logs grow indefinitely without this.
-
-   ```bash
-   # Keep entries from the last 90 days
-   python -c "
-   import json, sys
-   from datetime import datetime, timedelta
-   cutoff = (datetime.utcnow() - timedelta(days=90)).isoformat()
-   lines = open('.atv/observations.jsonl').readlines()
-   kept = [l for l in lines if json.loads(l).get('ts','') >= cutoff]
-   open('.atv/observations.jsonl','w').writelines(kept)
-   print(f'observations: kept {len(kept)}/{len(lines)}')
-   "
-   ```
-
-   If Python is unavailable or the file doesn't exist, skip with a note.
-
-3. **Plan files** — leave manifests and slice plans in `docs/plans/`. Lightweight reference material, useful for tracing decisions.
-
-4. **Log cleanup** in the manifest notes:
-
-   ```text
-   cleanup: screenshots pruned, observations trimmed to 90d
-   ```
+**Post-work steps (ce-review, compound, learn, evolve, cleanup) are handled by `kanban-complete`.** If running via `klfg`, the pipeline prompts to continue automatically. If running standalone, invoke `kanban-complete <manifest-path>` manually when ready.
 
 ## Failure Handling
 
@@ -475,4 +326,4 @@ Kanban work is resumable:
 - **Deepening:** Optionally runs `deepen-plan` per slice before execution
 - **Execution engine:** Fresh sub-agents when available, local execution otherwise
 - **Verification:** Invokes `tdd` skill principles per slice when verification mode requires it
-- **Post-completion:** Hand off to `ce-review` for fresh-context review
+- **Post-completion:** Invoke `kanban-complete` for review, documentation, and learning
