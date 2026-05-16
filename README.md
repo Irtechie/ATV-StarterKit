@@ -8,160 +8,60 @@
 
 <h1 align="center">The Kanban Pipeline</h1>
 
-<p align="center"><strong>Agents don't self-report. Git diffs, linters, and browsers verify every claim.</strong></p>
+<p align="center"><strong>One command. Idea to reviewed, documented, tested code.</strong></p>
 
 <p align="center">
-       <code>/klfg "your feature"</code> — one command, idea to PR, walk away.
+       <code>/klfg "your feature"</code> — brainstorm → plan → work → review → learn → done.
 </p>
 
 ---
 
-## Why This Exists
+## What It Does
 
-Every agentic coding tool in 2026 has the same failure mode: **the agent says it did something, and you believe it.**
+You type one command. The pipeline:
 
-Karpathy [identified this](https://x.com/karpathy/status/2015883857489522876) clearly:
+1. **Researches** the landscape before asking you product questions (not after)
+2. **Decomposes** your feature into vertical slices — each one cuts through all layers end-to-end
+3. **Requires each slice to declare which files it will touch** — before execution starts
+4. **Executes** each slice through 7 mandatory safety gates
+5. **Reviews** the full diff with multi-agent code review (scope already verified — no redundant discovery)
+6. **Documents** patterns worth remembering, extracts instincts, promotes mature ones to skills
+7. **Cleans up** after itself
 
-> *"The models make wrong assumptions on your behalf and just run along with them without checking. They don't manage their confusion, don't seek clarifications, don't surface inconsistencies."*
-
-> *"They still sometimes change/remove comments and code they don't sufficiently understand as side effects, even if orthogonal to the task."*
-
-These aren't occasional bugs. They're **structural properties of generative models.** An agent reporting "I only modified `src/foo.py`" is generating that statement from its context window — the same source that generates everything else, with the same hallucination probability. `git diff --name-only` has zero hallucination probability. Current tools treat these as equivalent oracles. They are not.
-
-Wolf et al. ([arXiv:2304.11082](https://arxiv.org/abs/2304.11082)) formally proved that **behavioral attenuation without elimination is not robust** — any behavior with non-zero probability can be triggered by sufficiently long prompts. Instructions like "don't touch files outside scope" are attenuation. A gate that checks the filesystem is elimination.
-
-The kanban pipeline's thesis: **verification must be structural, not behavioral.** The model cannot override `git diff --name-only`. It cannot hallucinate linter stdout. It cannot imagine a browser screenshot. These are the oracles.
+You're interactive during brainstorm Q&A and when safety gates fire. Everything else is autonomous.
 
 ---
 
-## The Intellectual Foundation
+## The Full Pipeline, Step by Step
 
-This isn't "we added some checks." It's the application of 60 years of computer science to a new execution context where the failure modes are more severe than for humans.
+### Step 1: Brainstorm (`kanban-brainstorm`)
 
-### Design by Contract → `expected_files`
+Research runs **before** questions so decisions are grounded in real prior art — not the user's first framing.
 
-Bertrand Meyer's [Design by Contract](https://en.wikipedia.org/wiki/Design_by_contract) (1986), rooted in Hoare's {P} C {Q} triple (1969): every component declares preconditions, postconditions, and invariants. The contract is an **executable specification** — not documentation that drifts from reality.
+| Phase | What happens |
+|-------|-------------|
+| Topic intake | Restate the feature, confirm understanding. No questions yet. |
+| Repo context | Search codebase for related patterns, existing features, constraints. |
+| External research | Parallel agents: market landscape, prior art from `docs/solutions/`, applicable skills, risk & failure modes. |
+| Research brief | Synthesize findings, show the user before any questions. |
+| Product pressure test | Challenge the request: Right problem? Better framing? Do nothing? |
+| Targeted Q&A | Ask sharp product questions informed by research. One at a time. |
+| Approaches | Propose 2–3 approaches with tradeoffs. User picks. |
+| Capture | Write requirements to `docs/brainstorms/*-requirements.md`. |
+| Document review | Multi-persona review (PM, engineer, security). |
+| Handoff | Proceed to planning. |
 
-Declaring `expected_files` before a slice executes is a direct Hoare Triple:
-- **P** (precondition): repo is in state S₀ (known good, verified by prior slice)
-- **C** (command): agent executes slice N
-- **Q** (postcondition): `git diff --name-only` shows exactly the declared files, nothing more
+### Step 2: Plan (`kanban-plan`)
 
-The agent cannot redefine "success" post-hoc to match whatever it actually produced. The contract was committed before execution began.
+Break the brainstorm into independently-executable vertical slices — not horizontal phases.
 
-### Continuous Integration → Per-Slice QA
+- ❌ WRONG: "Create schema" → "Build service" → "Add API" → "Build UI"
+- ✅ RIGHT: "Award points + show on dashboard" → "Track streaks" → "Add level display"
 
-Fowler's [CI philosophy](https://martinfowler.com/articles/continuousIntegration.html) (2001/2023): *"Any individual developer's work is only a few hours away from a shared project state and can be integrated back into that state in minutes. Any integration errors are found rapidly and can be fixed rapidly."*
-
-The principle: **the cost of discovering a conflict grows superlinearly with the distance between introduction and detection.** CI runs tests per-commit, not per-release. The kanban pipeline runs QA per-slice, not post-batch. Same logic, different unit of work.
-
-MetaGPT's Data Interpreter ([arXiv:2402.18679](https://arxiv.org/abs/2402.18679)) quantified this: per-subproblem verification produced a **25% absolute accuracy gain** over end-of-pipeline review. Mobile-Agent-v2 ([arXiv:2406.01014](https://arxiv.org/abs/2406.01014)) saw **30%+ task completion improvement** from adding an observation agent that checks outcomes after each step. The gains come entirely from intermediate verification — not better models.
-
-### Vertical Slices → Failure Isolation
-
-Bill Wake's [INVEST](https://xp123.com/invest-in-good-stories-and-smart-tasks/) (2003): *"Think of a whole story as a multi-layer cake... we want to give the customer the essence of the whole cake, and the best way is to slice vertically through the layers."*
-
-Jimmy Bogard's [Vertical Slice Architecture](https://jimmybogard.com/vertical-slice-architecture/) (2018): *"Minimize coupling between slices, and maximize coupling within a slice."*
-
-For human developers, this is a preference. For agents, it's **architectural necessity.** Liu et al.'s ["Lost in the Middle"](https://arxiv.org/abs/2307.03172) (2024) showed that LLM performance degrades when relevant information is in the middle of long contexts. An agent's effective working memory is its context window — and that window has a finite, degrading attention horizon. Each slice must be independently completable within a single bounded context. If slice 3 requires remembering what slice 1 changed, and those changes are beyond the attention horizon, the agent will confabulate consistency.
-
-Failure isolation follows: if slice 3 has a bug, slices 1-2 are untouched. The debugging surface is bounded. The revert is one commit. In horizontal pipelines, a bug in the persistence layer breaks every feature — the blast radius is unbounded.
-
-### Fail-Fast → Stop on Violation
-
-Jim Gray's fail-fast principle (1985): *"A fail-fast system immediately reports at its interface any condition that is likely to indicate a failure. Fail-fast systems are usually designed to stop normal operation rather than attempt to continue a possibly flawed process."*
-
-Per-slice gates are fail-fast applied to agent execution. The pipeline **stops** when a slice violates scope, rather than continuing into an invalid state where all subsequent work is unreliable by transitivity.
-
----
-
-## How It Works
-
-```text
-┌─────────────────────────────────────────────────────────────────────┐
-│                        /klfg "your feature"                         │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  BRAINSTORM ─── research landscape first, ask questions second      │
-│       │         (produces docs/brainstorms/*-requirements.md)       │
-│       ▼                                                             │
-│  PLAN ───────── vertical slices with expected_files contracts       │
-│       │         (produces manifest + per-slice plans in docs/plans/)│
-│       ▼                                                             │
-│  WORK ───────── for each slice in dependency order:                 │
-│       │                                                             │
-│       │  ┌── 3.0 Scope Lock ─── block undeclared writes (before) ──┐
-│       │  │── 3   Execute ─────── TDD / integration / verify-only   │
-│       │  │── 3.5 System Tests ── trace side effects 2 levels out   │
-│       │  │── 3.6 Diff-Scope ──── git diff vs contract (after) ─────┤ HARD
-│       │  │── 3.7 Destructive ─── block rm -rf, force push, DROP ───┤ GATES
-│       │  │── 3.8 QA ──────────── lint + browser → repair loop ─────┤
-│       │  └── 3.9 Figma ──────── compare to design (UI only) ──────┘
-│       │                                                             │
-│       │  After all slices pass:                                     │
-│       │  ├─ ce-review (multi-agent, scope pre-loaded)               │
-│       │  ├─ Resolution Gate (P0/P1 fixed before shipping)           │
-│       │  ├─ Compound + Learn + Evolve (automatic)                   │
-│       │  ├─ Ship (PR with verified file list + screenshots)         │
-│       │  └─ Cleanup (prune ephemeral artifacts)                     │
-│       ▼                                                             │
-│  DONE ───────── PR open, knowledge captured, instincts updated     │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## What Makes This a Different Bird
-
-### vs. ATV / Compound Engineering (`/lfg`)
-
-ATV is the **knowledge lifecycle.** It's the best system for making your repo smarter over time — observations → instincts → evolved skills, `docs/solutions/` feeding future planning. We keep all of that. It's brilliant and nobody else has it.
-
-But ATV's execution step (`/ce-work`) is a black box. "Code was changed" means *any tracked git change*. There's no mechanism to verify the changes match the declared plan. The agent decides what to touch, and nobody checks.
-
-| ATV Step | What's Verified | Verification Method |
-|----------|----------------|-------------------|
-| `/ce-plan` output | Plan exists | File presence |
-| `/ce-work` output | Code changed | Any git diff (not scope-verified) |
-| `/ce-review` | Issues resolved | Agent self-report |
-| `/gstack-careful` | Destructive ops safe | Advisory, overridable |
-
-**What we replace:** The execution engine. `/ce-work` becomes `/kanban-work` — 12 mandatory gates, external verification at every step.
-
-**What we keep:** Everything else. The learning pipeline, the agent architecture, the observer hooks, the compound documentation system. These are genuinely novel contributions to the field and we build on top of them.
-
-### vs. gstack (Garry Tan / YC)
-
-gstack is **personas at velocity.** Garry Tan ships at [810x his 2013 pace](https://github.com/garrytan/gstack) — 11,417 logical lines/day across 40+ repos. At that speed, you need staff-engineer-quality review, CSO-grade security, and real browser QA. gstack provides all three.
-
-But gstack's guardrails are advisory. From the README: *"/careful — warns before destructive commands... **Override any warning.**"* A guardrail with an override is a suggestion. And `/qa` is post-hoc — build everything, then test everything. If slice 7 breaks something slice 3 introduced, you're debugging a compound failure.
-
-**What we took from gstack:** The continuous console monitoring pattern, the stuck detection signals (3 failed fixes → stop), the atomic commit philosophy, and the "real browser eyes" approach to QA.
-
-**What we changed:**
-- QA runs **per-slice**, not post-batch. Failures are caught before they compound.
-- Guardrails are **hard blocks**, not overridable warnings. The runtime enforces them.
-- Repair is **progress-based** with stuck detection — not "try 3 times and give up" but "monitor whether you're making measurable progress and stop the moment you're not."
-
-### vs. Matt Pocock's Skills
-
-Pocock's contribution is **composable primitives and philosophical clarity.** His stance: *"Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process. But while doing so, they take away your control and make bugs in the process hard to resolve."* His `/tdd` skill explicitly names the anti-pattern: *"DO NOT write all tests first, then all implementation. This is 'horizontal slicing'... Tests written in bulk test imagined behavior, not actual behavior."*
-
-His `/to-issues` skill decomposes plans into independently-grabbable vertical slices. His `git-guardrails-claude-code` uses PreToolUse hooks to **hard-block** dangerous git commands (exit code 2 — the tool call never fires).
-
-**What we took from Pocock:** The vertical-slice-as-first-class-primitive philosophy. The understanding that each slice must be independently verifiable. The hard-gate pattern (structural enforcement by the runtime, not behavioral instruction to the model).
-
-**What we added:**
-- The `expected_files` contract. Pocock's slices are advisory ("here's what to build"). Ours are contractual — the slice declares exactly which files it will touch, checked before and after execution.
-- The full execution engine. Pocock provides composable primitives; we provide an orchestrated pipeline that chains them with mandatory gates between each step.
-- The repair loop. Pocock's philosophy is "small skills, user controls the process." Ours adds autonomous recovery within bounded constraints — the agent can fix its own QA failures, but only within scope, only with measurable progress, and only for 5 iterations.
-
----
-
-## The Scope Contract — The Core Innovation
-
-Every slice declares its `expected_files` during planning:
+Every slice declares:
+- **`expected_files`** — which files it will create or modify, with `op` and `scope`
+- **`verification`** — `tdd`, `integration`, `verification-only`, or `hitl`
+- **`blockers`** — dependency DAG between slices
 
 ```yaml
 expected_files:
@@ -174,82 +74,106 @@ expected_files:
     op: create
 ```
 
-This isn't documentation. It's a **machine-enforced contract** verified at two independent checkpoints:
+This isn't documentation — it's a machine-enforced contract. The pipeline checks it before AND after execution.
 
-**Proactive (Step 3.0 — Scope Lock):** Before execution begins, the agent's write access is constrained. Attempt to open `src/unrelated.py` for editing? Blocked. Cannot write. Does not proceed. Convention-matched test files are auto-allowed (`src/foo.py` permits `tests/test_foo.py`).
+### Step 3: Work (`kanban-work`)
 
-**Reactive (Step 3.6 — Diff-Scope):** After execution completes, `git diff --name-only` is compared against the contract. Files changed that aren't declared? Stop. Declared files that weren't changed? Flag incomplete.
+Executes all slices in dependency order. Resumable — re-running picks up where it left off.
 
-The proactive gate catches intent. The reactive gate catches accidents. Neither trusts the agent's self-report. Both are mandatory — cannot be skipped, overridden, or deferred.
+**Per-slice, every slice, no exceptions:**
+
+| Gate | Type | What it does |
+|------|------|-------------|
+| **3.0 Scope Lock** | Proactive | Load `expected_files`. Block writes to any undeclared file. No `expected_files` = cannot start. Convention-matched test files auto-allowed (`src/foo.py` permits `tests/test_foo.py`). |
+| **3 Execute** | — | Implement the slice. TDD, integration, or verification-only per the plan. |
+| **3.5 System Tests** | Analytical | What fires when this runs? Callbacks, middleware, observers 2 levels out. |
+| **3.6 Diff-Scope** | Reactive | `git diff --name-only` vs declared `expected_files`. Out-of-scope files = **STOP**. Missing expected files = flag incomplete. |
+| **3.7 Destructive Guard** | Preventive | Block `rm -rf`, `git push --force`, `DROP TABLE`, etc. Requires human approval. Cannot be overridden programmatically. |
+| **3.8 QA** | Observational | Lint on all slices. Browser verification on frontend slices. On failure → `kanban-repair`. |
+| **3.9 Figma Sync** | Visual | Compare rendered UI to Figma designs (UI slices only). |
+
+**Why the scope gates matter:** An agent reporting "I only modified `src/foo.py`" is generating that statement from its context window — same source as everything else, same hallucination probability. `git diff --name-only` has zero hallucination probability. The scope lock prevents out-of-scope writes before they happen. The diff-scope gate catches anything that slipped through after.
+
+**When QA fails — the repair loop:**
+
+`kanban-repair` attempts surgical fixes without losing context:
+- Each fix is an **atomic commit** — one commit = one revert if it regresses
+- **Progress-based:** fewer failures = continue. Same failures = stuck, stop.
+- **Stuck detection:** same failure twice, fix reverted twice, 3+ files in one fix, same file edited→reverted→re-edited
+- **5-iteration hard ceiling**, no exceptions
+- On exhaustion: slice stays `in_progress`, agent STOPS, user decides
+
+This is not "retry 3 times and give up." The agent can fix its own mistakes, but only surgically, only within scope, and only while making measurable forward progress.
+
+**Board sync:** `docs/kanban.md` is the multi-agent handoff file. Agents claim slices before working and release after completing. Prevents two agents from working the same slice.
+
+### Step 4: Complete (`kanban-complete`)
+
+After all slices pass, the quality and learning pipeline runs automatically:
+
+| Step | What happens |
+|------|-------------|
+| **Code review** | `ce-review` with scope-verified file list pre-loaded. Multiple persona agents (security, performance, correctness). |
+| **Resolution gate** | P0/P1 must be fixed. P2/P3 logged, don't block. Cannot proceed with unresolved P0/P1s. |
+| **Compound** | `ce-compound` documents surprising patterns to `docs/solutions/`. Skips boilerplate. |
+| **Learn** | `/learn` extracts instincts from resolved findings + recent work. |
+| **Evolve** | Every 5th completion, `/evolve` checks for instincts ready to become full skills. |
+| **Cleanup** | Prune QA screenshots, trim observations log to 90 days. |
+
+### Step 5: Ship
+
+Run `/land` when you're ready to push and open a PR. Shipping is a separate, deliberate act — not buried in the pipeline.
 
 ---
 
-## The QA + Repair Loop
+## What's New vs. What Existed
 
-```text
-kanban-qa finds failures (lint errors, browser mismatches)
-       │
-       ▼
-kanban-repair ── surgical fixes within scope:
-  ┌──────────────────────────────────────────────────┐
-  │  Each iteration:                                  │
-  │  1. Fix ONLY the lines causing failure            │
-  │  2. Atomic commit (one fix = one revert)          │
-  │  3. Re-run ALL checks (side effects are real)     │
-  │  4. Measure: fewer failures = progress            │
-  │                                                   │
-  │  Stop signals:                                    │
-  │  • Same failure twice = stuck                     │
-  │  • Fix reverted twice = oscillating               │
-  │  • 3+ files in one fix = scope creep              │
-  │  • Same file edit→revert→edit = circular          │
-  │  • Iteration 5 = hard ceiling, no exceptions      │
-  │                                                   │
-  │  On stop: slice stays in_progress, user decides   │
-  └──────────────────────────────────────────────────┘
-```
+This fork doesn't replace the upstream tools — it adds an execution engine with enforcement. Here's what came from where:
 
-This is not "retry." This is **repair with bounded autonomy.** The agent can fix its own mistakes, but only surgically, only within the scope contract, and only while making measurable forward progress. The moment progress stalls, it stops and surfaces the problem to you. Every fix is an atomic commit — if it regresses, you revert one commit, not the feature.
+| Capability | Existed In | What This Fork Changed |
+|------------|-----------|----------------------|
+| **QA (lint + browser)** | gstack `/qa` | Moved from post-batch to **per-slice**. Failures caught before they compound. |
+| **Code review** | ATV `ce-review` | Unchanged — but scope-verified file list is pre-loaded from gates, skipping redundant discovery. |
+| **Learning pipeline** | ATV observations → instincts → evolve | Unchanged — runs automatically after review findings are resolved. |
+| **Compound docs** | ATV `ce-compound` | Unchanged — fed by per-slice micro-learnings instead of just the final diff. |
+| **Destructive guards** | gstack `/careful` | Changed from **overridable warning** to **hard block**. Cannot be bypassed. |
+| **Vertical slices** | Pocock `/to-issues` | Added `expected_files` contract (advisory → enforceable), DAG execution order. |
+| **Browser automation** | Vercel `agent-browser` | Added diff-aware page scoping and continuous console capture. |
+
+**Genuinely new in this fork (not from upstream):**
+- `expected_files` scope contract — slices declare files during planning, enforced before and after execution
+- Scope Lock (Step 3.0) — proactive write blocking
+- Diff-Scope Verification (Step 3.6) — reactive git-diff verification
+- `kanban-repair` — progress-based autonomous fix loop with stuck detection
+- Board sync protocol — multi-agent mutex via `docs/kanban.md`
+- Convention-matched test auto-allow — `src/foo.py` automatically permits `tests/test_foo.py`
 
 ---
 
 ## Skills Reference
 
-| Skill | Role | Invoked By |
-|-------|------|------------|
-| `/klfg` | Orchestrator: brainstorm → plan → work → DONE | User |
-| `/kanban-brainstorm` | Research-first requirements (landscape before questions) | `/klfg` or user |
-| `/kanban-plan` | Vertical-slice decomposition with `expected_files` contracts | `/klfg` or user |
-| `/kanban-work` | Execute all slices through 12 mandatory gates | `/klfg` or user |
-| `/kanban-qa` | Lint + browser verification. Hard gate. No self-reporting. | `kanban-work` Step 3.8 |
-| `/kanban-repair` | Surgical fix loop. Progress-based. 5-iteration cap. | `kanban-qa` on failure |
+| Skill | Role |
+|-------|------|
+| `/klfg` | Full pipeline orchestrator — brainstorm → plan → work → complete → done |
+| `/kanban-brainstorm` | Research-first requirements gathering |
+| `/kanban-plan` | Vertical-slice decomposition with `expected_files` contracts |
+| `/kanban-work` | Execute slices through 7 mandatory gates |
+| `/kanban-complete` | Post-work: ce-review → compound → learn → evolve → cleanup |
+| `/kanban-qa` | Lint + browser verification (called by kanban-work) |
+| `/kanban-repair` | Surgical fix loop (called by kanban-qa on failure) |
 
 ---
 
-## Credits & Lineage
+## Credits
 
-| Project | What We Took | What We Added |
-|---------|-------------|---------------|
-| **[ATV StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)** | The entire foundation: learning system (observations → instincts → evolved skills), ce-review, ce-compound, 45+ skills, 29 agents, observer hooks | Enforcement-first execution engine, mandatory safety gates, `expected_files` scope contracts, per-slice QA, autonomous repair loop |
-| **[gstack](https://github.com/garrytan/gstack)** (Garry Tan / YC) | QA philosophy ("real browser eyes"), continuous console monitoring, stuck detection (3 failed → stop), atomic commit pattern | Per-slice timing (not post-hoc), progress-based repair (not count-based), hard blocks (not overridable warnings), 5-iteration ceiling with multi-signal stuck detection |
-| **[Matt Pocock](https://github.com/mattpocock/skills)** | Vertical-slice-as-primitive, `/to-issues` decomposition, `/tdd` anti-pattern identification ("horizontal slicing tests imagined behavior"), `git-guardrails` hard-gate pattern (exit code 2) | `expected_files` contract (advisory → enforceable), full execution orchestration, DAG-ordered slice execution, convention-matched test auto-allow |
-| **[agent-browser](https://github.com/vercel-labs/agent-browser)** (Vercel Labs) | Native Rust CDP automation, snapshot refs for deterministic element selection, ~100ms latency | Diff-aware page scoping, continuous console capture during interaction, multi-tier verification (quick/standard/deep) |
-| **[Karpathy's observations](https://x.com/karpathy/status/2015883857489522876)** | "Models make wrong assumptions and run with them" — the three failure categories (assumption drift, scope bloat, orthogonal edits). "LLMs are exceptionally good at looping until they meet specific goals." | Turned behavioral observations into structural enforcement. If goals are machine-checkable (`git diff` vs contract), the model can loop against them with zero confabulation risk. Every gate is a machine-checkable goal. |
-| **[Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin)** (Every, Inc.) | Knowledge-compounds-over-time: plan → work → review → document → learn | Integrated into kanban-work completion (Step 5.6) — automatic, not a separate manual step. Learning pipeline feeds directly from resolved P0/P1 findings. |
-
-### Theoretical Lineage
-
-| Concept | Source | How It Applies |
-|---------|--------|---------------|
-| Hoare Triple `{P} C {Q}` | C.A.R. Hoare, 1969 | `expected_files` = postcondition Q, verified against world state |
-| Design by Contract | Bertrand Meyer, 1986 | Contracts are executable specifications, not documentation |
-| INVEST / Vertical Slices | Bill Wake, 2003 | Each slice independently valuable AND independently verifiable |
-| Vertical Slice Architecture | Jimmy Bogard, 2018 | Minimize inter-slice coupling, maximize intra-slice coupling |
-| Continuous Integration | Martin Fowler, 2001/2023 | Per-unit verification; cost of late discovery grows superlinearly |
-| Fail-Fast | Jim Gray, 1985 | Stop immediately on failure; don't continue into invalid state |
-| DiffDebugging | Martin Fowler, 2004 | VCS diff as epistemic instrument; ground truth vs self-report |
-| Lost in the Middle | Liu et al., 2024 | Agent attention degrades mid-context; slices must fit bounded windows |
-| Inference-Time Scaling | Brown et al., 2024 | Verified domains scale with samples; unverified plateau. Gates make scope verification a verified domain. |
+| Project | What We Built On |
+|---------|-----------------|
+| **[ATV StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)** | The entire foundation: learning system, ce-review, ce-compound, 45+ skills, 29 agents, observer hooks |
+| **[gstack](https://github.com/garrytan/gstack)** (Garry Tan / YC) | QA philosophy, continuous console monitoring, atomic commit pattern, stuck detection |
+| **[Matt Pocock](https://github.com/mattpocock/skills)** | Vertical-slice-as-primitive, TDD anti-pattern identification, hard-gate pattern (`git-guardrails`) |
+| **[agent-browser](https://github.com/vercel-labs/agent-browser)** (Vercel Labs) | Native Rust CDP automation, snapshot refs, ~100ms latency |
+| **[Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin)** (Every, Inc.) | Knowledge-compounds-over-time: plan → work → review → document → learn |
+| **[Karpathy](https://x.com/karpathy/status/2015883857489522876)** | "Models make wrong assumptions and run with them" — the observation that motivated structural enforcement |
 
 📖 **[Full technical documentation →](docs/KANBAN-SKILLS.md)**
 

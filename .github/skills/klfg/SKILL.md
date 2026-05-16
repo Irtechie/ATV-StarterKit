@@ -7,13 +7,12 @@ disable-model-invocation: true
 
 CRITICAL: You MUST execute every step below IN ORDER. Do NOT skip any required step. Do NOT jump ahead to coding or implementation. The brainstorm (step 1), plan (step 2), and work (step 3) phases each have a GATE that must verify their output exists before the next step begins. Violating this order produces bad output.
 
-This pipeline is interactive in **three specific places** and autonomous everywhere else:
+This pipeline is interactive in **two specific places** and autonomous everywhere else:
 
 1. **Step 1 (brainstorm)** stops for product Q&A. That is the design — `kanban-brainstorm` does research first, then asks the user targeted product questions before producing a requirements doc.
 2. **Step 3 (work)** stops only on slices the manifest flagged `hitl: true` and when safety gates fire (scope violations, destructive commands, QA failures that exhaust repair). `kanban-work` handles them and resumes automatically once the user answers.
-3. **Step 4 (complete)** asks "Continue through kanban-complete?" after all slices finish. The user decides when to run review and learning.
 
-Everything else proceeds without prompting. Once the user picks "Proceed to /kanban-plan" at the end of step 1, hands off till the step 4 pause.
+Everything else — including kanban-complete (review, compound, learn) — proceeds without prompting. Once the user picks "Proceed to /kanban-plan" at the end of step 1, hands off till done.
 
 ## Pipeline
 
@@ -52,13 +51,9 @@ Everything else proceeds without prompting. Once the user picks "Proceed to /kan
 
    If a slice is genuinely stuck (e.g., `blocked` for an external reason), surface that to the user and stop the pipeline. Do not paper over a blocked slice.
 
-4. **Ask the user:** "All slices complete. Continue through kanban-complete (review → compound → learn)?"
+4. `/kanban-complete <manifest-path>`
 
-   Wait for the user to confirm before proceeding. This is a mandatory pause — the user decides when to run the quality and learning pipeline.
-
-   If the user says no or wants to stop here, output what was completed and stop. They can run `/kanban-complete <manifest-path>` later.
-
-5. `/kanban-complete <manifest-path>`
+   `kanban-complete` runs automatically — no pause, no prompt. The whole point of `klfg` is hands-off.
 
    `kanban-complete` runs the post-work quality and learning pipeline:
 
@@ -69,12 +64,12 @@ Everything else proceeds without prompting. Once the user picks "Proceed to /kan
 
    GATE: STOP. After `kanban-complete` returns, verify the manifest status is `reviewed`. If ce-review found unresolved P0/P1s, `kanban-complete` will have stopped — re-run it after fixes.
 
-6. Output `<promise>DONE</promise>` once steps 1–5 are complete.
+5. Output `<promise>DONE</promise>` once steps 1–4 are complete.
 
 ## Notes
 
 - **Why no `/unslop`:** intentionally omitted. Risk of flagging parallel agent WIP as false positives. Run manually if needed.
-- **Why a separate `kanban-complete`:** the quality/learning pipeline (ce-review, compound, learn, evolve) is deliberately separated from slice execution. This gives the user a natural pause point — review the work before investing in review and documentation. Also makes each skill independently invocable.
+- **Why a separate `kanban-complete`:** the quality/learning pipeline (ce-review, compound, learn, evolve) is a separate skill so it can be invoked standalone after `kanban-work`. Within `klfg`, it runs automatically — no pause, no prompt.
 - **Why no separate `/ce-review`:** kanban-complete runs ce-review at Step 1 with full scope context from kanban-work's gates. A second pass would be redundant.
 - **Why no separate `/learn` or `/observe`:** kanban-complete feeds resolved P0/P1 findings to observations.jsonl (Step 2), runs `/learn` (Step 3), and auto-triggers `/evolve` every 5th kanban completion.
 - **Why no separate `/ce-compound`:** kanban-complete invokes ce-compound at Step 3 for features with novel patterns. Skips automatically for boilerplate.

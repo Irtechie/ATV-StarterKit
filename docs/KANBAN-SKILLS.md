@@ -42,7 +42,7 @@ The kanban skills are an **enforcement-first agent pipeline** that decomposes wo
 
 ### `/klfg` — Full Pipeline Orchestrator
 
-**What it does:** Chains brainstorm → plan → work → complete → DONE in one command. Interactive at three points: brainstorm Q&A, safety gate pauses during work, and a "continue to review?" prompt after all slices complete.
+**What it does:** Chains brainstorm → plan → work → complete → DONE in one command. Interactive at two points: brainstorm Q&A and safety gate pauses during work. Everything else — including review and learning — runs automatically.
 
 **When to use:** You want hands-off execution from idea to reviewed, documented code. One command, walk away.
 
