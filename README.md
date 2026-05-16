@@ -32,6 +32,27 @@ You're interactive during brainstorm Q&A and when safety gates fire. Everything 
 
 ---
 
+## The Pipeline
+
+```
+/klfg "your feature"
+       │
+       ▼
+ ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌──────────────┐     ┌──────┐
+ │  BRAINSTORM  │────▶│    PLAN     │────▶│    WORK     │────▶│   COMPLETE   │────▶│ SHIP │
+ │              │     │             │     │             │     │              │     │      │
+ │ research     │     │ vertical    │     │ per-slice   │     │ ce-review    │     │/land │
+ │ then ask     │     │ slices +    │     │ execution   │     │ compound     │     │      │
+ │ questions    │     │ expected_   │     │ through 7   │     │ learn        │     │      │
+ │              │     │ files       │     │ hard gates  │     │ evolve       │     │      │
+ └─────────────┘     └─────────────┘     └─────────────┘     └──────────────┘     └──────┘
+       │                    │                   │                    │
+  requirements.md      manifest +          tested code         reviewed &
+                     slice plans         + atomic commits      documented
+```
+
+---
+
 ## The Full Pipeline, Step by Step
 
 ### Step 1: Brainstorm (`kanban-brainstorm`)
