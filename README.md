@@ -28,6 +28,41 @@ One command from idea to PR. Vertical slices, not horizontal phases. Every slice
          └─ Ship              (PR with scope-verified files + screenshots)
 ```
 
+### What's Different From Upstream
+
+The upstream ATV `/lfg` pipeline is **trust-based** — it asks the agent to plan, build, review, and compound in sequence, trusting self-reported results at each stage. This fork replaces that with **verification-based** execution:
+
+| | Upstream `/lfg` | This fork `/klfg` |
+|---|---|---|
+| **Decomposition** | Horizontal phases (plan all → build all → review all) | Vertical slices (each slice cuts through every layer end-to-end) |
+| **Scope enforcement** | None — agent decides what to touch | Hard gates check `git diff` against declared `expected_files` |
+| **QA timing** | Post-hoc (`/gstack-qa` after everything is built) | Per-slice — catch issues before they compound across slices |
+| **Repair strategy** | Manual — user fixes or re-runs | Automated surgical loop with progress detection + stuck signals |
+| **Resumability** | Start over on interruption | Manifest tracks per-slice status; re-invoke picks up where it left off |
+| **Multi-agent safety** | Not designed for it | Board sync protocol prevents two agents working the same slice |
+| **Destructive commands** | Optional guardrails (`/gstack-careful`) | Mandatory gate — cannot be skipped or overridden |
+| **Review integration** | Separate step, re-discovers scope | Internal (Step 5.4), scope pre-loaded from diff-scope gate |
+| **Learning** | Separate manual steps | Automatic — compound + learn + evolve built into completion |
+
+### What This Fork Adds
+
+These skills don't exist upstream. They were built specifically to close gaps in agentic safety and execution quality:
+
+| Skill | What It Solves |
+|-------|---------------|
+| **`/kanban-work`** | The execution engine. 12 mandatory gates per slice. No gate can be skipped, overridden, or deferred. Upstream's `/ce-work` has no gates. |
+| **`/kanban-qa`** | Hard QA verification. The linter runs, the browser renders, the model doesn't get to say "looks good." Continuous console monitoring catches runtime errors during interaction. Diff-aware page scoping means only pages the slice touches get verified. |
+| **`/kanban-repair`** | When QA fails, repair doesn't retry blindly. Progress-based: each iteration must make measurable improvement. Stuck detection catches oscillation (revert → re-edit → revert). 5-iteration hard ceiling. |
+| **`/kanban-brainstorm`** | Research-first ordering. Upstream `/ce-brainstorm` asks questions then validates. This inverts it — research the landscape first so questions are grounded in reality. |
+| **`/kanban-plan`** | Every slice declares `expected_files` — the contract that `kanban-work` enforces. Without declared scope, execution cannot begin. Upstream plans have no file-scope contract. |
+| **`/klfg`** | One-command orchestrator. Interactive during brainstorm Q&A, fully autonomous after that. Kanban-work owns the full gauntlet internally. |
+| **Diff-Scope Gate** | `git diff --name-only` vs declared scope. The agent doesn't self-report what it touched — we check. |
+| **Scope Lock** | Proactive counterpart to diff-scope. Blocks writes to undeclared files *before* they happen, not just after. |
+| **Convention-Matched Tests** | Test files corresponding to source files are auto-allowed in scope (e.g., `src/foo.py` → `tests/test_foo.py`). No need to declare every test file explicitly. |
+| **Destructive Guard** | `rm -rf`, `git push --force`, `DROP TABLE` — blocked. Not warned. Blocked. Requires explicit HITL approval. |
+
+### Skills Reference
+
 | Skill | Purpose |
 |-------|---------|
 | `/klfg` | Full pipeline orchestrator — brainstorm → plan → work → DONE |
@@ -37,9 +72,17 @@ One command from idea to PR. Vertical slices, not horizontal phases. Every slice
 | `/kanban-qa` | Lint + browser verification — hard gate, no self-reporting |
 | `/kanban-repair` | Surgical fix loop — progress-based, 5-iteration cap, stuck detection |
 
-**Why this exists:** Agents lie by omission. They don't intend to — but when asked "did you stay in scope?" they check their memory, not the filesystem. Every gate in this pipeline checks ground truth.
+### Credits
 
-📖 **[Full documentation →](docs/KANBAN-SKILLS.md)**
+| Source | What We Built On |
+|--------|-----------------|
+| [All-The-Vibes/ATV-StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit) | The foundational framework — Compound Engineering, learning system, observer hooks, 45+ skills, agent architecture |
+| [Matt Pocock / mattpocock/skills](https://github.com/mattpocock/skills) | Slice-to-issues pattern that inspired `kanban-plan`'s vertical decomposition format |
+| [gstack](https://github.com/garrytan/gstack) (Garry Tan / YC) | Research from gstack's `/qa` informed kanban-qa's continuous console monitoring and stuck detection patterns |
+| [agent-browser](https://github.com/vercel-labs/agent-browser) (Vercel Labs) | Browser automation powering kanban-qa's visual verification |
+| [Andrej Karpathy](https://x.com/karpathy/status/2015883857489522876) | "Models make wrong assumptions on your behalf" — the reason every gate verifies ground truth instead of trusting self-reports |
+
+📖 **[Full kanban documentation →](docs/KANBAN-SKILLS.md)**
 
 ---
 
