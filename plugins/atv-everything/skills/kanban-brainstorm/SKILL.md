@@ -83,6 +83,7 @@ When the user disagrees with or challenges a position:
 - **Research avoidance.** When uncertain, go look instead of guessing. "Let me verify" followed by actually verifying is always better than fabricating an answer in either direction.
 - **Evidence laundering.** Citations must support the specific claim being made. Do not cite research or code that doesn't actually back your conclusion.
 - **Over-verification drag.** Scale verification to stakes. Quick factual checks for low-stakes points, deeper research for decisions that affect the artifact.
+- **Step-skipping.** "I can just fix this now" or jumping from brainstorm to code bypasses the harness. The workflow is kanban-brainstorm → kanban-plan → kanban-work → kanban-complete. Follow it. Produce the artifact for THIS phase. Do not jump ahead or execute the next phase uninvited.
 
 ### Proactive Socratic Probing
 
