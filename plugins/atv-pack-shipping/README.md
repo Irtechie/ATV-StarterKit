@@ -1,6 +1,6 @@
 # atv-pack-shipping
 
-Shipping & deploy pack — Takeoff, CE Work, Land, LFG/SLFG orchestrators, and CE Compound for executing and delivering work.
+Shipping & deploy pack — Takeoff, CE Work, Land, LFG/KLFG/SLFG orchestrators, and CE Compound for executing and delivering work.
 
 ## Install
 

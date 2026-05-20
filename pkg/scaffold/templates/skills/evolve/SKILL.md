@@ -18,15 +18,16 @@ Transform mature instincts into full Copilot skills. When an instinct reaches hi
 ### Step 1: Identify Candidates
 
 Read `.atv/instincts/project.yaml` and filter for:
-- Confidence > 0.8
+- Confidence > 0.85
 - Observations > 5
+- `last_seen` within the last 90 days (rejects stale instincts even if confidence is high)
 - Not already evolved (check `.atv/instincts/archive/`)
 
 If no candidates found:
 ```
 No instincts ready to evolve yet.
 Run /learn to build confidence, or check /instincts for current status.
-Instincts need confidence > 0.8 and 5+ observations to evolve.
+Instincts need confidence > 0.85, 5+ observations, and activity within 90 days to evolve.
 ```
 
 ### Step 2: Cluster Related Instincts

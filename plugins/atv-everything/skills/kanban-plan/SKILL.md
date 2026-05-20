@@ -112,6 +112,14 @@ Break the work into thin end-to-end slices. For each slice, determine:
 - **Verification mode** - tdd / integration / verification-only / hitl
 - **Blocked by** - which other slices must complete first, or none
 - **HITL flag** - does this need human judgment? Most should be `false` if the brainstorm was thorough.
+- **Expected files** - which files this slice will create or modify, with operation type. Used by `kanban-work` for diff-scope verification and edit-safety.
+
+Each entry in `expected_files` should specify:
+  - `path` — the file path
+  - `op` — `create`, `edit`, or `delete`
+  - `scope` — one-line description of what specifically changes (for `edit` operations)
+
+This prevents agents from regenerating files from the plan spec instead of surgically editing current code.
 
 ### 3. Present and Quiz the User
 
@@ -182,6 +190,10 @@ title: "<title>"
 blockers: []
 verification: tdd
 hitl: false
+expected_files:
+  - path: ""
+    op: edit
+    scope: "what specifically changes"
 status: pending
 ---
 ```
@@ -190,13 +202,71 @@ The plan body should include:
 
 - What to build, expressed as end-to-end behavior
 - Acceptance criteria
-- Files likely involved
+- Expected files (must match `expected_files` in frontmatter — these are the files this slice is allowed to touch)
 - Test scenarios specific enough for TDD or integration verification
 - Scope boundary: what this slice does not include
 - Dependencies and why they are needed
 - HITL question if `hitl: true`
 
-### 5. Validate Output
+### 5. Update the Board
+
+After generating plan files, update `docs/kanban.md` — the human-visible board and multi-agent handoff file.
+
+**If `docs/kanban.md` doesn't exist**, create it with this template:
+
+```markdown
+# <Project> — Kanban Board
+
+> The board is the source of truth — not chat history.
+> Last updated: <ISO timestamp>
+
+## Rules
+- Done features → `kanban-done.md` immediately. Keep this file lean.
+- One agent per slice. Claim by setting 🔧. Do not work unclaimed slices.
+- Discovered work → Parked first. Human promotes to active.
+- Human-required items stay visible until a person completes them.
+```
+
+**Add a feature section** for the new kanban:
+
+```markdown
+---
+
+## 🔧 <Feature Name> (kb-YYYY-MM-DD-name)
+
+Source: `docs/brainstorms/<file>.md`
+Manifest: `docs/plans/<manifest>.md`
+
+| # | Slice | Blocked By | Verification | Status |
+|---|-------|------------|--------------|--------|
+| 1 | <title> | - | tdd | ⬜ pending |
+| 2 | <title> | slice-001 | tdd | ⬜ pending |
+
+Done criteria: All N slices done or skipped with reason. Archive to `kanban-done.md`.
+```
+
+**Board status markers** (superset of manifest statuses):
+
+| Marker | Meaning |
+|--------|---------|
+| ⬜ pending | Ready when blockers clear |
+| 🔧 in_progress | Agent claimed and actively working |
+| ✅ done | Complete and verified |
+| 🔒 blocked | Cannot proceed — reason noted |
+| ⊘ skipped | Intentionally skipped with reason |
+| 🧑 manual | Needs human action (HITL) |
+
+**Standing sections** (add once, keep across features):
+
+- **💡 Feature Ideas** — not yet brainstormed, human promotes to active
+- **📋 Queued Improvements** — approved but not yet planned
+- **🧊 Parked / Cold Storage** — discovered work, do not execute until promoted
+- **🛑 Human Required** — items only a person can complete (logins, approvals, decisions)
+- **📝 Work Log** — short dated entries for cross-session visibility
+
+Omit empty sections. These conventions come from `todo_rules.md` and apply here.
+
+### 6. Validate Output
 
 - Confirm every `blockers` entry references an existing slice ID.
 - Confirm no dependency cycles exist.

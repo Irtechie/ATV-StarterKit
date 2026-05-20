@@ -49,13 +49,15 @@
     {
       "name": "atv-pack-guidelines",
       "source": "atv-pack-guidelines",
-      "description": "Coding guidelines pack — Karpathy Guidelines (behavioral) plus Autoresearch (autonomous experimentation loop).",
+      "description": "Coding guidelines pack — First Principles (anti-sycophancy, evidence-based dialogue), Karpathy Guidelines (behavioral), plus Autoresearch (autonomous experimentation loop).",
       "version": "2.6.3",
       "keywords": [
         "atv",
         "guidelines",
         "karpathy",
-        "autoresearch"
+        "autoresearch",
+        "first-principles",
+        "anti-sycophancy"
       ],
       "category": "guidelines"
     },
@@ -140,7 +142,7 @@
     {
       "name": "atv-pack-shipping",
       "source": "atv-pack-shipping",
-      "description": "Shipping & deploy pack — Takeoff, CE Work, Land, LFG/SLFG orchestrators, and CE Compound for executing and delivering work.",
+      "description": "Shipping & deploy pack — Takeoff, CE Work, Land, LFG/KLFG/SLFG orchestrators, and CE Compound for executing and delivering work.",
       "version": "2.6.3",
       "keywords": [
         "atv",
@@ -380,14 +382,26 @@
       "category": "skill"
     },
     {
-      "name": "atv-skill-kanban-lightsout",
-      "source": "atv-skill-kanban-lightsout",
-      "description": "ATV `kanban-lightsout` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
+      "name": "atv-skill-kanban-brainstorm",
+      "source": "atv-skill-kanban-brainstorm",
+      "description": "ATV `kanban-brainstorm` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
       "version": "2.6.3",
       "keywords": [
         "atv",
         "skill",
-        "kanban-lightsout"
+        "kanban-brainstorm"
+      ],
+      "category": "skill"
+    },
+    {
+      "name": "atv-skill-kanban-first-principles",
+      "source": "atv-skill-kanban-first-principles",
+      "description": "ATV `kanban-first-principles` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
+      "version": "2.6.3",
+      "keywords": [
+        "atv",
+        "skill",
+        "kanban-first-principles"
       ],
       "category": "skill"
     },
@@ -424,6 +438,18 @@
         "atv",
         "skill",
         "karpathy-guidelines"
+      ],
+      "category": "skill"
+    },
+    {
+      "name": "atv-skill-klfg",
+      "source": "atv-skill-klfg",
+      "description": "ATV `klfg` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
+      "version": "2.6.3",
+      "keywords": [
+        "atv",
+        "skill",
+        "klfg"
       ],
       "category": "skill"
     },

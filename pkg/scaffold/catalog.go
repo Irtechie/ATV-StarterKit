@@ -176,6 +176,7 @@ var coreSkillDirectories = []string{
 	"document-review",
 	"improve-codebase-architecture",
 	"kanban-plan",
+	"kanban-brainstorm",
 	"setup",
 	"tdd",
 	// Session lifecycle
@@ -189,6 +190,7 @@ var coreSkillDirectories = []string{
 	// ATV Quality
 	"unslop",
 	// Behavioral Guidelines
+	"kanban-first-principles",
 	"karpathy-guidelines",
 	// Experimentation
 	"autoresearch",
@@ -201,8 +203,8 @@ var coreSkillDirectories = []string{
 
 var orchestratorSkillDirectories = []string{
 	"feature-video",
-	"kanban-lightsout",
 	"kanban-work",
+	"klfg",
 	"lfg",
 	"ralph-loop",
 	"resolve_todo_parallel",

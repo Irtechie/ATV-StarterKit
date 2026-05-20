@@ -1,6 +1,6 @@
 # atv-pack-guidelines
 
-Coding guidelines pack — Karpathy Guidelines (behavioral) plus Autoresearch (autonomous experimentation loop).
+Coding guidelines pack — First Principles (anti-sycophancy, evidence-based dialogue), Karpathy Guidelines (behavioral), plus Autoresearch (autonomous experimentation loop).
 
 ## Install
 

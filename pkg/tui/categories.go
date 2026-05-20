@@ -33,6 +33,7 @@ var atvCategoryMapping = map[string][]CategorySkill{
 		{Label: "Deepen Brainstorm — enrich requirements before planning", Key: "core-skills:deepen-brainstorm", Source: "atv"},
 		{Label: "Deepen Plan — parallel research to harden the plan", Key: "core-skills:deepen-plan", Source: "atv"},
 		{Label: "Improve Codebase Architecture — identify structural improvements", Key: "core-skills:improve-codebase-architecture", Source: "atv"},
+		{Label: "Kanban Brainstorm — research-first requirements exploration", Key: "core-skills:kanban-brainstorm", Source: "atv"},
 		{Label: "Kanban Plan — split work into vertical slices", Key: "core-skills:kanban-plan", Source: "atv"},
 	},
 	gstack.CategoryReview: {
@@ -45,6 +46,7 @@ var atvCategoryMapping = map[string][]CategorySkill{
 		{Label: "Takeoff — backlog briefing at session start", Key: "core-skills:takeoff", Source: "atv"},
 		{Label: "CE Work — execute plans with quality checks", Key: "core-skills:ce-work", Source: "atv"},
 		{Label: "Kanban Work — execute kanban slices with HITL pauses", Key: "orchestrators:kanban-work", Source: "atv"},
+		{Label: "KLFG — full kanban pipeline orchestrator", Key: "orchestrators:klfg", Source: "atv"},
 		{Label: "LFG — full autonomous pipeline", Key: "orchestrators:lfg", Source: "atv"},
 		{Label: "SLFG — swarm mode parallel execution", Key: "orchestrators:slfg", Source: "atv"},
 		{Label: "CE Compound — document solutions", Key: "core-skills:ce-compound", Source: "atv"},
@@ -56,6 +58,7 @@ var atvCategoryMapping = map[string][]CategorySkill{
 		{Label: "TDD — red/green/refactor discipline", Key: "core-skills:tdd", Source: "atv"},
 	},
 	gstack.CategoryGuidelines: {
+		{Label: "First Principles — anti-sycophancy, evidence-based dialogue", Key: "core-skills:kanban-first-principles", Source: "atv"},
 		{Label: "Karpathy Guidelines — think before coding, simplicity, surgical changes, goal-driven execution", Key: "core-skills:karpathy-guidelines", Source: "atv"},
 		{Label: "Autoresearch — autonomous experiment loop: define goal + metric, agent iterates", Key: "core-skills:autoresearch", Source: "atv"},
 	},

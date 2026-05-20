@@ -41,7 +41,7 @@ func Packs() []Pack {
 			Category:    "planning",
 			Description: "Planning & design pack — Brainstorming, CE Brainstorm, CE Ideate, Plan, Deepen Plan, and Kanban Plan skills for shaping work before coding.",
 			Keywords:    []string{"atv", "compound-engineering", "planning", "brainstorming"},
-			SkillNames:  []string{"brainstorming", "ce-brainstorm", "ce-ideate", "ce-plan", "deepen-brainstorm", "deepen-plan", "improve-codebase-architecture", "kanban-plan"},
+			SkillNames:  []string{"brainstorming", "ce-brainstorm", "ce-ideate", "ce-plan", "deepen-brainstorm", "deepen-plan", "improve-codebase-architecture", "kanban-brainstorm", "kanban-plan"},
 		},
 		{
 			Name:        "atv-pack-review",
@@ -53,14 +53,14 @@ func Packs() []Pack {
 		{
 			Name:        "atv-pack-shipping",
 			Category:    "shipping",
-			Description: "Shipping & deploy pack — Takeoff, CE Work, Land, LFG/SLFG orchestrators, and CE Compound for executing and delivering work.",
+			Description: "Shipping & deploy pack — Takeoff, CE Work, Land, LFG/KLFG/SLFG orchestrators, and CE Compound for executing and delivering work.",
 			Keywords:    []string{"atv", "shipping", "deploy", "compound-engineering", "orchestrator"},
 			SkillNames: []string{
 				"ce-compound",
 				"ce-compound-refresh",
 				"ce-work",
-				"kanban-lightsout",
 				"kanban-work",
+				"klfg",
 				"land",
 				"lfg",
 				"slfg",
@@ -84,9 +84,9 @@ func Packs() []Pack {
 		{
 			Name:        "atv-pack-guidelines",
 			Category:    "guidelines",
-			Description: "Coding guidelines pack — Karpathy Guidelines (behavioral) plus Autoresearch (autonomous experimentation loop).",
-			Keywords:    []string{"atv", "guidelines", "karpathy", "autoresearch"},
-			SkillNames:  []string{"autoresearch", "karpathy-guidelines"},
+			Description: "Coding guidelines pack — First Principles (anti-sycophancy, evidence-based dialogue), Karpathy Guidelines (behavioral), plus Autoresearch (autonomous experimentation loop).",
+			Keywords:    []string{"atv", "guidelines", "karpathy", "autoresearch", "first-principles", "anti-sycophancy"},
+			SkillNames:  []string{"autoresearch", "kanban-first-principles", "karpathy-guidelines"},
 		},
 		{
 			Name:        "atv-pack-easter-eggs",

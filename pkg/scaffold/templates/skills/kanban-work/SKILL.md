@@ -30,7 +30,8 @@ Run all vertical slices from a `kanban-plan` manifest in dependency order. Keep 
 2. **Validate DAG** - confirm no cycles in blockers, all referenced slice IDs exist, and all slice files exist.
 3. **Check status** - skip any slices already marked `done`. Resume from the first runnable `pending` slice.
 4. **Check worktree** - note dirty or untracked files before executing so unrelated user changes are not staged or reverted.
-5. **Confirm with user:** "Ready to execute N remaining slices in order. Proceed?"
+5. **Sync with board** - read `docs/kanban.md` and confirm its status table matches the manifest. If they diverge, the board wins — another agent may have updated it. Reconcile the manifest from the board before proceeding.
+6. **Confirm with user:** "Ready to execute N remaining slices in order. Proceed?"
 
 Treat statuses as:
 
@@ -40,6 +41,25 @@ Treat statuses as:
 | `done` | Skip |
 | `blocked` | Stop and ask whether to retry, skip, or abort |
 | `skipped` | Skip but keep visible in the summary |
+
+## Board Sync Protocol
+
+`docs/kanban.md` is the multi-agent handoff file. Update it at every status transition:
+
+| Event | Board Update |
+|-------|-------------|
+| Starting a slice | Set status to 🔧 in_progress |
+| Slice completes | Set status to ✅ done |
+| Slice blocked | Set status to 🔒 blocked + reason in notes |
+| Slice skipped | Set status to ⊘ skipped |
+| All slices done | Move entire feature section to `docs/kanban-done.md` |
+
+**Multi-agent rules:**
+- Before claiming a slice, re-read `docs/kanban.md`. If another agent set it to 🔧, do not claim it.
+- The board is the source of truth — not chat history, not the manifest. If the board says done, it's done.
+- Update the board BEFORE starting work (claim) and AFTER completing work (release). This prevents two agents from working the same slice.
+- Also update the manifest to stay in sync, but if they conflict, the board wins.
+- Append a short entry to the **📝 Work Log** section after each slice: `- YYYY-MM-DD: <slice title> — done (<agent/session>)`
 
 ## Dependency Ordering
 
@@ -72,6 +92,23 @@ If the slice plan has fewer than 3 acceptance criteria or no test scenarios:
 - Add concrete test scenarios and likely file paths.
 - Keep the pass bounded; do not re-plan the whole feature.
 
+### Step 3.0: Scope Lock
+
+Before executing the slice, load the declared scope and enforce it proactively — prevent out-of-scope edits before they happen.
+
+1. **Read `expected_files`** from the slice plan's frontmatter.
+2. **If `expected_files` is empty or missing**, the gate fails. Stop and require the field to be populated before execution begins.
+3. **Before opening any file for writing**, check its path against `expected_files`:
+
+   | Finding | Action |
+   |---------|--------|
+   | File is listed in `expected_files` | Proceed with the edit. |
+   | File is NOT listed | **STOP.** Do not edit. Ask the user: "This file isn't in the slice scope. Add it to `expected_files`, or skip this edit?" |
+
+4. **Log the lock** in the manifest notes: `scope-lock: loaded N expected files`
+
+This gate pairs with Step 3.6 (Diff-Scope Verification). Scope Lock prevents out-of-scope edits before they happen. Diff-Scope Verification catches anything that slipped through after the fact. Both are mandatory. Neither can be skipped, overridden, or deferred.
+
 ### Step 3: Execute
 
 Use a fresh sub-agent when the platform supports delegated execution and the user has permitted it. Otherwise execute the slice locally while keeping the scope limited to this slice.
@@ -91,13 +128,19 @@ Plan contents:
 Instructions:
 1. Read the plan completely.
 2. Set up on the current branch.
-3. Apply the verification mode:
+3. For files marked `op: edit` in expected_files:
+   - Read the CURRENT file content FIRST — the file as it exists on disk, not as the plan describes it.
+   - Make only the change described in the `scope` field. Do not regenerate or rewrite the file.
+   - Preserve all existing behavior not mentioned in the scope.
+   - If the file has been modified by prior slices or manual edits, those changes are authoritative. The plan spec is not.
+4. For files marked `op: create`: write the file from the plan spec.
+5. Apply the verification mode:
    - tdd: write one failing test first, confirm it fails for the right reason, implement minimal code to pass, then refactor.
    - integration: write an integration test proving the path works, then implement the wiring.
    - verification-only: implement the change, then verify builds pass and no regressions.
-4. Run relevant tests first, then the full test suite when practical.
-5. Stage only files changed for this slice.
-6. Commit only if the user asked for commits, with message: "feat(<slice-id>): <title>"
+6. Run relevant tests first, then the full test suite when practical.
+7. Stage only files changed for this slice.
+8. Commit only if the user asked for commits, with message: "feat(<slice-id>): <title>"
 
 Do not modify other slices' files unless required for this slice.
 Do not add scope beyond what the plan specifies.
@@ -117,7 +160,62 @@ Before marking a slice done, pause and ask these questions — vertical slices c
 
 **When to skip:** Leaf-node changes with no callbacks, no state persistence, no parallel interfaces. Purely additive changes (new helper, new partial) take 10 seconds to confirm "nothing fires, skip."
 
-### Step 3.6: Figma Design Sync (UI slices only)
+### Step 3.6: Diff-Scope Verification
+
+After a slice completes, verify that the files actually changed match the slice's declared `expected_files`. This is a hard gate — the agent does not self-report, the actual git diff is checked.
+
+1. **Get the actual diff:**
+
+   ```bash
+   git diff --name-only $(git merge-base HEAD main)..HEAD
+   ```
+
+   This produces the list of files modified by this slice relative to the branch baseline.
+
+2. **Load the declared scope** from the slice plan's `expected_files` frontmatter field.
+
+3. **Compare and enforce:**
+
+   | Finding | Action |
+   |---------|--------|
+   | Files changed that are NOT in `expected_files` | **STOP.** Flag each out-of-scope file. Do not proceed to the next slice. Ask the user whether to amend the plan, revert the change, or accept the scope expansion. |
+   | Files in `expected_files` that were NOT changed | Flag as potentially incomplete. Ask the user whether the slice is truly done or if work was missed. |
+   | Perfect match | Proceed. |
+
+4. **Log results** in the kanban manifest under the slice's `notes` field:
+
+   ```text
+   notes: "scope-check: 5/5 expected files changed, 0 out-of-scope"
+   ```
+
+5. **If the slice plan has no `expected_files` field**, the gate fails. Stop and require the field to be added before proceeding. Do not infer or guess the expected files — the plan must declare them explicitly.
+
+This gate is mandatory. It cannot be skipped, overridden, or deferred.
+
+### Step 3.7: Destructive Command Guard
+
+Before executing any shell command during a slice, check it against this blocklist:
+
+| Blocked Pattern | Why |
+|-----------------|-----|
+| `rm -rf`, `rm` with recursive/force flags | Irreversible file deletion |
+| `git push --force` / `git push -f` | Rewrites remote history |
+| `git reset --hard` | Discards uncommitted work |
+| `DROP TABLE` / `DROP DATABASE` / `TRUNCATE` | Irreversible data loss |
+| `git clean -fd` | Deletes untracked files permanently |
+| Bulk delete operations on files or data | Mass irreversible removal |
+| Overwriting production config files | Environment-breaking changes |
+
+**When a blocked command is detected:**
+
+1. **STOP.** Do not execute.
+2. Show the user the exact command and explain why it's blocked.
+3. Wait for explicit HITL approval before proceeding.
+4. If running in autonomous mode (no HITL available), skip the command and log in the manifest notes: `destructive-guard: blocked <command> — no HITL available`
+
+This is enforcement, not a warning. The agent MUST NOT execute destructive commands without explicit human confirmation. This gate cannot be skipped, overridden, or deferred.
+
+### Step 3.8: Figma Design Sync (UI slices only)
 
 If the slice involves UI changes and Figma designs exist:
 
@@ -136,14 +234,16 @@ After the slice completes:
    - If yes: update manifest `status: done` for this slice and update the body table.
    - If no: update manifest `status: blocked`, add failure notes, and ask user how to proceed.
 
-2. **Run verification**
+2. **Sync board** — update `docs/kanban.md` status for this slice (✅ or 🔒). Append validation note.
+
+3. **Run verification**
    - Run the relevant test command for the repo.
    - If a full suite is too expensive or unavailable, explain the narrower verification used.
 
-3. **Optional commit**
+4. **Optional commit**
    - If the user asked for commits, stage only the manifest file for status updates and commit it separately.
 
-4. Continue to the next runnable slice.
+5. Continue to the next runnable slice.
 
 ### Step 5: Completion
 
@@ -151,7 +251,8 @@ When all slices are `done` or intentionally `skipped`:
 
 1. Update manifest `status: completed`.
 2. Run final verification.
-3. Report summary:
+3. **Archive to board** — move the feature section from `docs/kanban.md` to `docs/kanban-done.md`. Prepend at the top of the archive file with a completion date header.
+4. Report summary:
 
 ```text
 Kanban <name> complete.
@@ -162,7 +263,62 @@ Kanban <name> complete.
 Verification: <command/result>
 ```
 
-4. Suggest `/ce-review` for a fresh-context review of the full feature.
+4. **Invoke `ce-review`** — Run a full multi-agent code review on the feature diff.
+   This is mandatory. Do not skip, defer, or make it optional.
+   - Pass context: the full `git diff` of the feature branch against baseline
+   - Capture the output: each finding has a severity (P0/P1/P2/P3) and confidence score
+   - Store findings for the resolution gate (Step 5.5)
+
+### Step 5.5: Resolution Gate
+
+Review findings from `ce-review` determine whether shipping is allowed:
+
+| Severity | Action |
+|----------|--------|
+| P0 (critical) | STOP. Fix before proceeding. Re-run affected tests after fix. |
+| P1 (important) | STOP. Fix before proceeding. |
+| P2 (suggestion) | Log in manifest `notes`. Do not block. |
+| P3 (nit) | Log in manifest `notes`. Do not block. |
+
+This gate is mandatory. The agent MUST NOT proceed to Step 6 while unresolved P0/P1 findings exist.
+
+After resolving all P0/P1s, update the manifest notes with a summary:
+`review: P0=0 P1=2(resolved) P2=3(logged) P3=1(logged)`
+
+**Feed learnings to the observation log:**
+
+For each resolved P0/P1 finding, append one line to `.atv/observations.jsonl`:
+
+```json
+{"ts":"<ISO-8601>","hook":"ce-review","tool":"kanban-work","args":{"finding_type":"<category>","severity":"P0|P1","resolution":"<what was fixed>"},"cwd":"<repo-root>","result":"resolved"}
+```
+
+This connects the review → learn pipeline. Only P0/P1 findings are worth learning from — P2/P3 are style preferences, not systemic patterns.
+
+Create `.atv/observations.jsonl` if it doesn't exist. Append, never overwrite.
+
+### Step 5.6: Compound
+
+After the resolution gate passes, document what this feature taught the system:
+
+1. **Invoke `ce-compound`** with context: a one-sentence summary of what was built and any surprising patterns discovered during implementation.
+2. ce-compound writes to `docs/solutions/` with YAML frontmatter — let it run without modification.
+3. If the implementation was pure boilerplate (no novel patterns, no gotchas, no decisions worth preserving), skip with a manifest note: `compound: skipped — standard implementation, no novel patterns`
+4. Per-slice micro-learnings from Step 4 notes feed into the compound context. Reference them when invoking ce-compound.
+5. **Invoke `/learn`** — Extract instincts from this session's work.
+   - Run after compound completes (observations from Step 5.5 are now available)
+   - `/learn` reads: observations.jsonl, recent git history, docs/solutions/, existing instincts
+   - Record result in manifest notes: `learn: N new instincts, M updated` or `learn: no new patterns`
+   - This is automatic — do not ask the user whether to run it
+6. **Check evolution cadence:**
+   - Read `.atv/kanban-completions.txt` (create with `0` if missing)
+   - Increment by 1
+   - Write the new value back
+   - If the new value is divisible by 5:
+     - Invoke `/evolve` to check for promotable instincts
+     - Log result in manifest notes: `evolve: promoted N instincts` or `evolve: no candidates ready`
+   - If not divisible by 5: skip silently
+   - Commit the counter file with the manifest update
 
 ### Step 6: Ship It
 

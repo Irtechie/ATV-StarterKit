@@ -1,6 +1,6 @@
 {
   "name": "atv-pack-guidelines",
-  "description": "Coding guidelines pack — Karpathy Guidelines (behavioral) plus Autoresearch (autonomous experimentation loop).",
+  "description": "Coding guidelines pack — First Principles (anti-sycophancy, evidence-based dialogue), Karpathy Guidelines (behavioral), plus Autoresearch (autonomous experimentation loop).",
   "version": "2.6.3",
   "author": {
     "name": "All The Vibes",
@@ -12,7 +12,9 @@
     "atv",
     "guidelines",
     "karpathy",
-    "autoresearch"
+    "autoresearch",
+    "first-principles",
+    "anti-sycophancy"
   ],
   "category": "guidelines",
   "skills": [
