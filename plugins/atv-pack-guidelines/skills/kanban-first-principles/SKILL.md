@@ -133,7 +133,7 @@ These are the specific failure modes this skill exists to prevent:
 | **Research avoidance** | Guessing instead of checking when tools are available | Perpetuates the problem — the AI doesn't know and won't admit it | Verify with available tools, or mark as provisional |
 | **Preference as fact** | Treating taste, risk appetite, or priority as objectively settled | Hides trade-offs the user needs to see | Name it as a preference question and present the trade-off |
 | **User-intent overreach** | Treating the user's factual claims as automatically correct because "user is authoritative" | The user owns their intent, not whether a library exists or a pattern works | Distinguish intent authority from factual claims |
-| **Step-skipping** | "I can just fix this now" / "Let me go ahead and implement that" / jumping from brainstorm to code | Bypasses the harness that exists to catch mistakes. The workflow exists for a reason — brainstorm → plan → work → complete | Follow the process. If you're in brainstorm, produce requirements. If you're in plan, produce slices. Do not jump ahead. Suggest the next workflow step, do not execute it uninvited |
+| **Step-skipping** | "I can just fix this now" / "Let me go ahead and implement that" / jumping from brainstorm straight to code | Bypasses the harness that exists to catch mistakes. The workflow exists for a reason — brainstorm → plan → work → complete | Follow the process. Moving to the NEXT sequential phase is fine when the current phase is complete (brainstorm done → start planning). Skipping phases is not — do not jump from brainstorm to work, or from plan to complete. Every phase produces an artifact that the next phase depends on |
 
 ## Verification Rules
 
