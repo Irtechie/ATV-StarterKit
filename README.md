@@ -110,21 +110,37 @@ Executes all slices in dependency order. Resumable — re-running picks up where
 | **3.5 System Tests** | Analytical | What fires when this runs? Callbacks, middleware, observers 2 levels out. |
 | **3.6 Diff-Scope** | Reactive | `git diff --name-only` vs declared `expected_files`. Out-of-scope files = **STOP**. Missing expected files = flag incomplete. |
 | **3.7 Destructive Guard** | Preventive | Block `rm -rf`, `git push --force`, `DROP TABLE`, etc. Requires human approval. Cannot be overridden programmatically. |
-| **3.8 QA** | Observational | Lint on all slices. Browser verification on frontend slices. On failure → `kanban-repair`. |
+| **3.8 QA** | Hard gate | Lint on all slices. Browser verification on frontend slices via CDP, Playwright, or agent-browser. **Slice cannot advance until all checks pass.** On failure → `kanban-repair` autonomous fix loop. |
 | **3.9 Figma Sync** | Visual | Compare rendered UI to Figma designs (UI slices only). |
 
 **Why the scope gates matter:** An agent reporting "I only modified `src/foo.py`" is generating that statement from its context window — same source as everything else, same hallucination probability. `git diff --name-only` has zero hallucination probability. The scope lock prevents out-of-scope writes before they happen. The diff-scope gate catches anything that slipped through after.
 
-**When QA fails — the repair loop:**
+**Gate 3.8 is a hard acceptance gate, not advisory.** The slice stays `in_progress` until every lint check and every browser check passes. The agent cannot mark it done, cannot move to the next slice, and cannot proceed to Step 4 while any check is failing.
 
-`kanban-repair` attempts surgical fixes without losing context:
-- Each fix is an **atomic commit** — one commit = one revert if it regresses
+**Automated browser testing — what runs:**
+
+`kanban-qa` picks the best available transport for the environment:
+
+| Transport | When used |
+|-----------|-----------|
+| **CDP** (Chrome DevTools Protocol) | Internal/corporate sites — connects to your existing authenticated browser session. Required for SSO/Conditional Access. |
+| **Playwright** | Local dev servers and public URLs — headless, clean viewport, best for responsive testing at 375px/768px/1440px. |
+| **agent-browser** | Structured element targeting via snapshot refs (`@e1`, `@e2`) — ~100ms latency, no CSS selectors needed. |
+
+For each changed frontend file, it maps the file to the affected page, navigates there, screenshots, checks the console, and verifies acceptance criteria from the slice plan. Every click and form fill gets a before/after console snapshot.
+
+**When QA fails — the autonomous repair loop:**
+
+`kanban-repair` runs immediately, without losing context (same agent, no handoff):
+- Each fix is an **atomic commit** — one commit = one revert if it causes regression
 - **Progress-based:** fewer failures = continue. Same failures = stuck, stop.
-- **Stuck detection:** same failure twice, fix reverted twice, 3+ files in one fix, same file edited→reverted→re-edited
-- **5-iteration hard ceiling**, no exceptions
+- **Stuck detection:** same failure twice, fix reverted twice, 3+ files touched in one fix, same file edited→reverted→re-edited
+- **5-iteration hard ceiling**, no exceptions — prevents infinite loops on flaky rendering or cascading lint
 - On exhaustion: slice stays `in_progress`, agent STOPS, user decides
 
-This is not "retry 3 times and give up." The agent can fix its own mistakes, but only surgically, only within scope, and only while making measurable forward progress.
+After each fix, kanban-repair re-runs the full QA check — not just the failing check. A fix for one failure can introduce another; the loop catches it immediately.
+
+This is not "retry 3 times and give up." The agent keeps working autonomously until tests pass — or until it hits a wall it can't climb, at which point it stops and hands the problem to you with screenshots and a full failure log.
 
 **Board sync:** `docs/kanban.md` is the multi-agent handoff file. Agents claim slices before working and release after completing. Prevents two agents from working the same slice.
 
