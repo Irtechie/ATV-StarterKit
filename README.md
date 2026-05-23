@@ -39,6 +39,8 @@ What changed:
 
 - `kanban-*` user-facing workflows became `kb-*`.
 - `kb-route` is now the default entry point for ambiguous work.
+- `kb-route` now delegates project-memory setup to `kb-map`; route chooses the
+  lane for the idea/request, while map decides lookup, refresh, or bootstrap.
 - `kb-map-bootstrap` and `kb-map` create/update project memory so new sessions
   can recover context without a long chat history.
 - `todo.md` and `todo-done.md` replace `docs/kanban.md` and
