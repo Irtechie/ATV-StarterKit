@@ -62,6 +62,9 @@ What changed:
   are done or intentionally skipped.
 - Active handoffs no longer jump straight to `kb-work` unless they link a valid
   KB manifest. Phase-shaped handoffs route through `kb-plan` first.
+- Before planning from a handoff, `kb-plan` checks for existing brainstorm,
+  requirements, manifest, or plan files and uses the best existing source of
+  truth instead of duplicating work.
 - `klfg` remains the full hands-off orchestrator for brainstorm -> plan -> work
   -> complete.
 
