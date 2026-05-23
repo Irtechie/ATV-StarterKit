@@ -39,6 +39,8 @@ What changed:
 
 - `kanban-*` user-facing workflows became `kb-*`.
 - `kb-start` is now the default entry point for ambiguous work.
+- `kb-start` replaces the older `kb-route` name; the workflow still maps context
+  first, then chooses the right lane.
 - `kb-start` now delegates project-memory setup to `kb-map`; route chooses the
   lane for the idea/request, while map decides lookup, refresh, or bootstrap.
 - `kb-map-bootstrap` and `kb-map` create/update project memory so new sessions
