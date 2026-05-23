@@ -33,11 +33,11 @@ Spawned when the orchestrator identifies relevant patterns in the diff. The orch
 | `security` | `security-reviewer` | Auth middleware, public endpoints, user input handling, permission checks, secrets management |
 | `performance` | `performance-reviewer` | Database queries, ORM calls, loop-heavy data transforms, caching layers, async/concurrent code |
 | `api-contract` | `api-contract-reviewer` | Route definitions, serializer/interface changes, event schemas, exported type signatures, API versioning |
-| `data-migrations` | `api-contract-reviewer` or `reliability-reviewer` | Migration files, schema changes, backfill scripts, data transformations |
+| `data-migrations` | `data-migrations-reviewer` | Migration files, schema changes, backfill scripts, data transformations |
 | `reliability` | `reliability-reviewer` | Error handling, retry logic, circuit breakers, timeouts, background jobs, async handlers, health checks |
 | `adversarial` | `adversarial-reviewer` | Diff has >=50 changed non-test, non-generated, non-lockfile lines, OR touches auth, payments, data mutations, external API integrations, or other high-risk domains |
-| `cli-readiness` | `code-review` | CLI command definitions, argument parsing, CLI framework usage, command handler implementations |
-| `previous-comments` | `repo-research-analyst` or `code-review` | **PR-only.** Reviewing a PR that has existing review comments or review threads from prior review rounds. Skip entirely when no PR metadata was gathered in Stage 1. |
+| `cli-readiness` | `cli-readiness-reviewer` | CLI command definitions, argument parsing, CLI framework usage, command handler implementations |
+| `previous-comments` | `previous-comments-reviewer` | **PR-only.** Reviewing a PR that has existing review comments or review threads from prior review rounds. Skip entirely when no PR metadata was gathered in Stage 1. |
 
 ## Stack-Specific Conditional (5 personas)
 
@@ -45,11 +45,11 @@ These reviewers keep their original opinionated lens. They are additive with the
 
 | Persona | Agent | Select when diff touches... |
 |---------|-------|---------------------------|
-| `dhh-rails` | `code-review` | Rails architecture, service objects, authentication/session choices, Hotwire-vs-SPA boundaries, or abstractions that may fight Rails conventions |
-| `kieran-rails` | `code-review` | Rails controllers, models, views, jobs, components, routes, or other application-layer Ruby code where clarity and conventions matter |
+| `dhh-rails` | `dhh-rails-reviewer` | Rails architecture, service objects, authentication/session choices, Hotwire-vs-SPA boundaries, or abstractions that may fight Rails conventions |
+| `kieran-rails` | `kieran-rails-reviewer` | Rails controllers, models, views, jobs, components, routes, or other application-layer Ruby code where clarity and conventions matter |
 | `kieran-python` | `kieran-python-reviewer` | Python modules, endpoints, services, scripts, or typed domain code |
 | `kieran-typescript` | `kieran-typescript-reviewer` | TypeScript components, services, hooks, utilities, or shared types |
-| `julik-frontend-races` | `code-review` | Stimulus/Turbo controllers, DOM event wiring, timers, async UI flows, animations, or frontend state transitions with race potential |
+| `julik-frontend-races` | `julik-frontend-races-reviewer` | Stimulus/Turbo controllers, DOM event wiring, timers, async UI flows, animations, or frontend state transitions with race potential |
 
 ## CE Conditional Agents (migration-specific)
 
@@ -57,8 +57,8 @@ These CE-native agents provide specialized analysis beyond what the persona agen
 
 | Agent | Focus |
 |-------|-------|
-| `api-contract-reviewer` | Cross-references schema changes against included migrations to catch unrelated drift |
-| `reliability-reviewer` | Produces Go/No-Go deployment checklist with verification queries and rollback procedures |
+| `schema-drift-detector` | Cross-references schema changes against included migrations to catch unrelated drift |
+| `deployment-verification-agent` | Produces Go/No-Go deployment checklist with verification queries and rollback procedures |
 
 ## Selection rules
 

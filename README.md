@@ -4,7 +4,7 @@
 
 ---
 
-> **Fork of [All-The-Vibes/ATV-StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)** — built on ATV's learning system, 45+ skills, 29 agents. Adds enforcement-first execution.
+> **Fork of [All-The-Vibes/ATV-StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)** — built on ATV's learning system, 45+ skills, 51 agents. Adds enforcement-first execution.
 
 <h1 align="center">The KB Pipeline</h1>
 
@@ -274,7 +274,7 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 
 | Project | What We Built On |
 |---------|-----------------|
-| **[ATV StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)** | The entire foundation: learning system, ce-review, ce-compound, 45+ skills, 29 agents, observer hooks |
+| **[ATV StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)** | The entire foundation: learning system, ce-review, ce-compound, 45+ skills, 51 agents, observer hooks |
 | **[gstack](https://github.com/garrytan/gstack)** (Garry Tan / YC) | QA philosophy, continuous console monitoring, atomic commit pattern, stuck detection |
 | **[Matt Pocock](https://github.com/mattpocock/skills)** | Vertical-slice-as-primitive, TDD anti-pattern identification, hard-gate pattern (`git-guardrails`), [`/handoff`](https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md) session handoff, workflow skill patterns. The KB pipeline is a Kanban-Based synthesis of Matt's skills + ATV StarterKit foundations |
 | **[agent-browser](https://github.com/vercel-labs/agent-browser)** (Vercel Labs) | Native Rust CDP automation, snapshot refs, ~100ms latency |
@@ -318,7 +318,7 @@ ATV 2.0 is a one-command installer that wires together three open-source systems
 - **[agent-browser](https://github.com/vercel-labs/agent-browser)** — browser automation layer (by Vercel)
 - **[Karpathy Guidelines](https://github.com/forrestchang/andrej-karpathy-skills)** — behavioral guardrails: think before coding, simplicity first, surgical changes, goal-driven execution
 
-Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45+ skills, 29 agents, and a learning system that makes your repo smarter with every session.
+Together they cover the full software lifecycle — from "what should I build?" through "is it healthy in production?" — with 45+ skills, 51 agents, and a learning system that makes your repo smarter with every session.
 
 ---
 
@@ -808,7 +808,7 @@ Over weeks, your repo develops a memory that makes every Copilot session more ef
 
 ## Agents
 
-29 specialized agents in `.github/agents/`, invoked by skills during review, planning, learning, and debugging:
+51 specialized agents in `.github/agents/`, invoked by skills during review, planning, learning, and debugging:
 
 | Category | Agents |
 |---|---|
