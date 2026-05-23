@@ -180,6 +180,7 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		"agent-native-audit":        true,
 		"andrew-kane-gem-writer":    true,
 		"changelog":                 true,
+		"ce-work-beta":              true,
 		"compound-docs":             true,
 		"create-agent-skill":        true,
 		"create-agent-skills":       true,

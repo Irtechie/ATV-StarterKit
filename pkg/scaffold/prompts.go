@@ -46,7 +46,6 @@ var promptShimSkillDirectories = []string{
 	"atv-security",
 	// Orchestrators
 	"klfg",
-	"lfg",
 }
 
 // nonUserFacingSkills lists shipped skills that are intentionally NOT exposed
@@ -56,8 +55,14 @@ var promptShimSkillDirectories = []string{
 var nonUserFacingSkills = []string{
 	// Sub-skill invoked by kb-brainstorm; not a top-level command.
 	"brainstorming",
+	// Legacy Compound Engineering workflow retained as source/reference; KB is the primary user-facing planning workflow.
+	"ce-brainstorm",
 	// Sub-skill invoked by ce-compound; not a top-level command.
 	"ce-compound-refresh",
+	// Legacy Compound Engineering workflow retained as source/reference; KB is the primary user-facing planning workflow.
+	"ce-plan",
+	// Legacy Compound Engineering workflow retained as source/reference; KB is the primary user-facing execution workflow.
+	"ce-work",
 	// Sub-skill invoked by kb-plan; not a top-level command.
 	"deepen-plan",
 	// Sub-skill invoked by ce-review and the document-review pipeline.
@@ -67,13 +72,12 @@ var nonUserFacingSkills = []string{
 	// Behavioral guideline reference text, not an invocable command.
 	"kb-first-principles",
 	"karpathy-guidelines",
-	// Orchestrator sub-skills — internal building blocks of /lfg.
+	// Orchestrator sub-skills — internal building blocks of /klfg or helper-only flows.
 	"feature-video",
 	"kb-qa",
 	"kb-repair",
 	"ralph-loop",
 	"resolve_todo_parallel",
-	"slfg",
 	"test-browser",
 	// Easter-egg skill — discoverable via the easter-eggs layer, not the chat picker.
 	"meme-iq",

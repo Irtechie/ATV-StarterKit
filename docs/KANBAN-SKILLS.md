@@ -1,16 +1,16 @@
-# Kanban Skills — Vertical-Slice Agent Pipeline
+# KB Pipeline — Kanban-Based Vertical-Slice Agent Pipeline
 
 > **Fork of [All-The-Vibes/ATV-StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)**
 > Credit to the [All The Vibes](https://github.com/All-The-Vibes) community for the foundational ATV framework this builds upon.
 
-The kanban skills are an **enforcement-first agent pipeline** that decomposes work into vertical slices and executes them through mandatory safety gates. Unlike the upstream `/lfg` pipeline (which trusts the agent to self-report), the kanban pipeline verifies every claim against ground truth: git diffs, lint output, browser renders, and test results.
+The kanban skills are an **enforcement-first agent pipeline** that decomposes work into vertical slices and executes them through mandatory safety gates. Instead of trusting the agent to self-report, the KB pipeline verifies every claim against ground truth: git diffs, lint output, browser renders, and test results.
 
 ---
 
 ## Architecture
 
 ```text
-/klfg — the orchestrator (hands-off, one command)
+/klfg — the orchestrator for the KB pipeline
    │
    ├─ /kb-brainstorm    ← research-first requirements
    │
@@ -42,11 +42,11 @@ The kanban skills are an **enforcement-first agent pipeline** that decomposes wo
 
 ### `/klfg` — Full Pipeline Orchestrator
 
-**What it does:** Chains brainstorm → plan → work → complete → DONE in one command. Interactive at two points: brainstorm Q&A and safety gate pauses during work. Everything else — including review and learning — runs automatically.
+**What it does:** Chains `/kb-brainstorm` → `/kb-plan` → `/kb-work` → `/kb-complete` → DONE. Interactive at two points: brainstorm Q&A and safety gate pauses during work. Everything else — including review and learning — runs automatically.
 
-**When to use:** You want hands-off execution from idea to reviewed, documented code. One command, walk away.
+**When to use:** You want the full KB workflow from idea to reviewed, documented code.
 
-**How it's different from `/lfg`:** The upstream `/lfg` runs a horizontal pipeline (plan → deepen → work → review → compound). `/klfg` enforces vertical slicing — every slice cuts through all layers end-to-end — and splits the pipeline: kb-work owns slice execution + gates, kb-complete owns quality review + learning.
+**How it differs from the old horizontal workflow:** `/klfg` enforces vertical slicing — every slice cuts through all layers end-to-end — and splits the pipeline cleanly: kb-work owns slice execution + gates, kb-complete owns quality review + learning.
 
 ```
 /klfg "add user streak tracking"
@@ -60,7 +60,7 @@ The kanban skills are an **enforcement-first agent pipeline** that decomposes wo
 
 **Produces:** `docs/brainstorms/*-requirements.md`
 
-**Key difference from `/kb-brainstorm`:** Inverts the order. kb-brainstorm asks questions first, then validates. kb-brainstorm researches first, then asks — so questions are "given X exists, should we do Y?" instead of "what do you want?"
+**Key behavior:** kb-brainstorm researches first, then asks — so questions are "given X exists, should we do Y?" instead of "what do you want?"
 
 **When to use:**
 - Prior art or competitive landscape materially changes framing
@@ -230,7 +230,7 @@ The kanban skills build on the ATV foundation:
 
 | Command | Does What | Produces |
 |---------|-----------|----------|
-| `/klfg "feature"` | Full pipeline, one command | PR with everything |
+| `/klfg "feature"` | Full KB pipeline | PR with everything |
 | `/kb-brainstorm "idea"` | Research → requirements | `docs/brainstorms/*-requirements.md` |
 | `/kb-plan path/to/reqs.md` | Slice decomposition | Manifest + per-slice plans |
 | `/kb-work path/to/manifest.md` | Execute all slices | Working code, scope context |
@@ -240,9 +240,9 @@ The kanban skills build on the ATV foundation:
 
 ---
 
-## Comparison: `/lfg` vs `/klfg`
+## Comparison: Legacy Workflow vs `/klfg`
 
-| Dimension | `/lfg` (upstream) | `/klfg` (kanban) |
+| Dimension | Legacy horizontal workflow | `/klfg` (KB pipeline) |
 |-----------|-------------------|------------------|
 | Decomposition | Horizontal phases | Vertical slices |
 | Scope enforcement | None — trusts the agent | Hard gates at Steps 3.0 + 3.6 |

@@ -8,19 +8,19 @@
 
 <h1 align="center">The KB Pipeline</h1>
 
-<p align="center"><strong>One command. Idea to reviewed, documented, tested code.</strong></p>
+<p align="center"><strong>Research, slice, build, review, and learn with voice-friendly <code>kb-</code> commands.</strong></p>
 
 <p align="center">
-       <code>/klfg "your feature"</code> — brainstorm → plan → work → review → learn → done.
+       <code>/klfg "your feature"</code> — /kb-brainstorm → /kb-plan → /kb-work → /kb-complete.
 </p>
 
 ---
 
 ## What It Does
 
-KB means **Kanban-Based**: the workflow still uses vertical slices, a shared board, and manifest files, but the spoken command prefix is `kb-` so voice input does not have to recognize "kanban".
+KB means **Kanban-Based**: the workflow still uses vertical slices, a shared board, and manifest files, but every user-facing workflow command uses the voice-friendly `kb-` prefix so you do not have to say "kanban".
 
-You type one command. The pipeline:
+You can run the stages directly, or let `/klfg` orchestrate them. The pipeline:
 
 1. **Researches** the landscape before asking you product questions (not after)
 2. **Decomposes** your feature into vertical slices — each one cuts through all layers end-to-end
@@ -193,7 +193,7 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 
 | Skill | Role |
 |-------|------|
-| `/klfg` | Full pipeline orchestrator — brainstorm → plan → work → complete → done |
+| `/klfg` | Full KB orchestrator — `/kb-brainstorm` → `/kb-plan` → `/kb-work` → `/kb-complete` |
 | `/kb-brainstorm` | Research-first requirements gathering |
 | `/kb-plan` | Vertical-slice decomposition with `expected_files` contracts |
 | `/kb-work` | Execute slices through 7 mandatory gates |
@@ -293,7 +293,7 @@ Then open **Copilot Chat** (⌃⌘I / Ctrl+Shift+I) and go:
 /ce-review       →  Multi-agent code review (security, architecture, performance)
 /ce-compound     →  Document what you learned for future sessions
 
-/lfg             →  Run the full pipeline in one shot
+/klfg             →  Run the full KB pipeline
 
 /atv-doctor      →  Diagnose ATV install health
 /atv-update      →  Update ATV marketplace plugins and safe source-installed AgentPlugins
@@ -438,7 +438,7 @@ The guided installer (`--guided`) walks you through four screens:
 
 | Preset | What you get |
 |---|---|
-| **Starter** | Core CE workflow (13 skills). No network calls, instant install. |
+| **Starter** | Core KB workflow (13 skills). No network calls, instant install. |
 | **Pro** | + gstack sprint skills (35+ skills total) |
 | **Full** | + browser QA, benchmarks, agent-browser, Chrome (45+ skills). Requires Bun. |
 
@@ -449,7 +449,7 @@ The customize screen exposes opt-in skill layers grouped by intent:
 | Layer | Contents |
 |---|---|
 | **`core-skills`** | Planning, lifecycle, learning, quality, security, behavioral guidelines |
-| **`orchestrators`** | LFG, SLFG, ralph-loop, feature-video, test-browser |
+| **`orchestrators`** | KLFG, ralph-loop, feature-video, test-browser |
 | **`dev-tools`** | git-worktree, git-commit / git-commit-push-pr, ghcp-review-resolve, onboarding, reproduce-bug, skill-creator, todo-create / -resolve / -triage, changelog, git-clean-gone-branches |
 | **`style-skills`** | dhh-rails-style, andrew-kane-gem-writer, dspy-ruby, every-style-editor, frontend-design |
 | **`media-skills`** | gemini-imagegen, proof, rclone |
@@ -493,8 +493,7 @@ Every skill maps to a phase of the development lifecycle:
                      <strong>🔨 Build</strong><br />
                      <sub>Execute with momentum</sub><br /><br />
                      <code>/kb-work</code><br />
-                     <code>/lfg</code><br />
-                     <code>/slfg</code>
+                     <code>/klfg</code>
               </td>
               <td width="25%" valign="top">
                      <strong>👀 Review</strong><br />
@@ -534,26 +533,16 @@ Every skill maps to a phase of the development lifecycle:
        </tr>
 </table>
 
-### `/lfg` — full pipeline, one command
+### `/klfg` — full KB pipeline
 
-Each step must produce output before the next starts (plan file exists, plan was deepened, code was changed). Retries on failure.
-
-```
-plan → deepen → work → review → unslop → resolve → test → video → compound
-  ✓       ✓       ✓
-```
-
-### `/slfg` — parallel swarm variant
-
-Same steps. Planning is sequential, review + test + unslop run in parallel.
+Each step must produce output before the next starts: requirements exist, the vertical-slice manifest exists, every slice is complete, and review/learning has finished. Retries resume from the first missing gate.
 
 ```
-plan → deepen → work (swarm) ──→ review    ⎤              resolve → unslop fix → video → compound
-                                  test     ⎥ (parallel) →
-                                  unslop   ⎦
+brainstorm → plan → work → complete
+     ✓        ✓      ✓        ✓
 ```
 
-`unslop fix` removes AI slop after review. `compound` saves learnings for future `kb-plan` runs.
+`compound` saves learnings for future `kb-plan` runs. Run `/unslop` separately when you want an explicit cleanup pass.
 
 <details>
 <summary><strong>Full skill reference (45 skills)</strong></summary>
@@ -581,8 +570,7 @@ plan → deepen → work (swarm) ──→ review    ⎤              resolve �
 | Skill | What it does |
 |---|---|
 | `/kb-work` | Implements against the plan with incremental commits and system-wide sanity checks |
-| `/lfg` | Full pipeline: plan → deepen → work → review → test → video → compound |
-| `/slfg` | Parallelized version via swarm agents |
+| `/klfg` | Full KB pipeline: brainstorm → plan → work → complete |
 
 ### Review
 
@@ -721,7 +709,7 @@ AI coding assistants have a tell: over-abstraction, `// This function handles th
 | **Comment Rot** | Obvious restatements, AI filler phrases, stale TODOs | `// This function handles auth` → delete |
 | **Design Slop** | Generic gradients, template layouts, missing hover states | Purple-to-blue default → use brand palette |
 
-`/unslop` is wired into both autonomous pipelines — `/lfg` runs `/unslop fix` after review, and `/slfg` runs the report pass in parallel with `ce-review` and browser testing for zero added wall-clock time.
+`/unslop` is available as a deliberate cleanup pass after review when you want it.
 
 `/ce-review` asks "is this correct?" — `/unslop` asks "does this look human-written?" Run both.
 

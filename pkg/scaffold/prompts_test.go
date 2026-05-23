@@ -150,8 +150,8 @@ func TestBuildFilteredCatalog_CoreSkillsOnlyIncludesCoreShims(t *testing.T) {
 	if !got[".github/prompts/kb-plan.prompt.md"] {
 		t.Errorf("core-skills layer missing kb-plan.prompt.md")
 	}
-	if got[".github/prompts/lfg.prompt.md"] {
-		t.Errorf("core-skills layer should NOT include orchestrator shim lfg.prompt.md")
+	if got[".github/prompts/klfg.prompt.md"] {
+		t.Errorf("core-skills layer should NOT include orchestrator shim klfg.prompt.md")
 	}
 }
 
@@ -159,8 +159,8 @@ func TestBuildFilteredCatalog_OrchestratorsOnlyIncludesOrchestratorShims(t *test
 	comps := BuildFilteredCatalog(detectStackForTest(), []string{"orchestrators"})
 	got := promptShimPaths(comps)
 
-	if !got[".github/prompts/lfg.prompt.md"] {
-		t.Errorf("orchestrators layer missing lfg.prompt.md")
+	if !got[".github/prompts/klfg.prompt.md"] {
+		t.Errorf("orchestrators layer missing klfg.prompt.md")
 	}
 	if got[".github/prompts/kb-plan.prompt.md"] {
 		t.Errorf("orchestrators layer should NOT include core-skill shim kb-plan.prompt.md")

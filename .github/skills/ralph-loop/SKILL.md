@@ -142,7 +142,7 @@ When all tasks in `PROGRESS.md` are `DONE` (or `BLOCKED`):
 
 The ralph-loop skill works with existing CE skills:
 
-- **As orchestrator**: Called by `/lfg` and `/slfg` as an optional first step to autonomously execute all workflow commands
+- **As orchestrator**: Can be called by `/klfg` or manually as an optional helper to execute workflow commands
 - **With `/kb-plan`**: Can use plan files from `docs/plans/` as the PRD input
 - **With `/kb-work`**: Each executor iteration is similar to a focused `/kb-work` session
 - **With `/ce-review`**: The verification step performs lightweight review; for thorough review use `/ce-review` after the loop completes

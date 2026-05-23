@@ -448,7 +448,7 @@ Do NOT:
 
 Sequential per comment (not parallel) — multiple findings can touch the same file, and serial edits avoid merge conflicts and let each fix be verified independently before moving on.
 
-`/lfg` is intentionally **not** used here. `/lfg` is the full autonomous pipeline (plan → work → review → todo-resolve → test → video) and that's overkill for a single reviewer comment. Instead, run this tight inline loop in the current session:
+`/klfg` is intentionally **not** used here. `/klfg` is the full autonomous pipeline (plan → work → review → todo-resolve → test → video) and that's overkill for a single reviewer comment. Instead, run this tight inline loop in the current session:
 
 For each accepted finding, in order by file then line:
 

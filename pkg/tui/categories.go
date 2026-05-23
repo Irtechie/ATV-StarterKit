@@ -28,7 +28,9 @@ type CategoryGroup struct {
 var atvCategoryMapping = map[string][]CategorySkill{
 	gstack.CategoryPlanning: {
 		{Label: "Brainstorming — explore what to build", Key: "core-skills:brainstorming", Source: "atv"},
+		{Label: "CE Brainstorm — legacy Compound Engineering requirements workflow", Key: "core-skills:ce-brainstorm", Source: "atv"},
 		{Label: "CE Ideate — structured idea exploration", Key: "core-skills:ce-ideate", Source: "atv"},
+		{Label: "CE Plan — legacy Compound Engineering planning workflow", Key: "core-skills:ce-plan", Source: "atv"},
 		{Label: "Deepen Brainstorm — enrich requirements before planning", Key: "core-skills:deepen-brainstorm", Source: "atv"},
 		{Label: "Deepen Plan — parallel research to harden the plan", Key: "core-skills:deepen-plan", Source: "atv"},
 		{Label: "Improve Codebase Architecture — identify structural improvements", Key: "core-skills:improve-codebase-architecture", Source: "atv"},
@@ -43,11 +45,10 @@ var atvCategoryMapping = map[string][]CategorySkill{
 	},
 	gstack.CategoryShipping: {
 		{Label: "Takeoff — backlog briefing at session start", Key: "core-skills:takeoff", Source: "atv"},
+		{Label: "CE Work — legacy Compound Engineering execution workflow", Key: "orchestrators:ce-work", Source: "atv"},
 		{Label: "KB Work — execute slices with HITL pauses", Key: "orchestrators:kb-work", Source: "atv"},
 		{Label: "KB Complete — review, compound, learn, and cleanup", Key: "orchestrators:kb-complete", Source: "atv"},
 		{Label: "KLFG — full KB pipeline orchestrator", Key: "orchestrators:klfg", Source: "atv"},
-		{Label: "LFG — full autonomous pipeline", Key: "orchestrators:lfg", Source: "atv"},
-		{Label: "SLFG — swarm mode parallel execution", Key: "orchestrators:slfg", Source: "atv"},
 		{Label: "CE Compound — document solutions", Key: "core-skills:ce-compound", Source: "atv"},
 		{Label: "CE Compound Refresh — refresh documented solutions", Key: "core-skills:ce-compound-refresh", Source: "atv"},
 		{Label: "Land — commit, push, and open a PR at session end", Key: "core-skills:land", Source: "atv"},

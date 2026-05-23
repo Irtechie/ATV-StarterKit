@@ -1,6 +1,6 @@
 ---
 name: klfg
-description: "Full KB pipeline orchestrator. Chains /kb-brainstorm → /kb-plan → /kb-work → kb-complete → DONE. kb-work handles the per-slice gauntlet (scope lock, execution, tests, diff-scope, destructive guard, QA, repair, Figma sync). kb-complete handles post-work quality (ce-review, compound, learn, evolve). Use when the user says 'klfg', 'kb lfg', 'run the full KB pipeline', 'go from brainstorm to done', or wants the same hands-off feel as /lfg but for the KB (vertical-slice) workflow."
+description: "Full KB pipeline orchestrator. Chains /kb-brainstorm → /kb-plan → /kb-work → kb-complete → DONE. kb-work handles the per-slice gauntlet (scope lock, execution, tests, diff-scope, destructive guard, QA, repair, Figma sync). kb-complete handles post-work quality (ce-review, compound, learn, evolve). Use when the user says 'klfg', 'kb', 'run the full KB pipeline', 'go from brainstorm to done', or wants the hands-off KB vertical-slice workflow."
 argument-hint: "[feature description]"
 disable-model-invocation: true
 ---

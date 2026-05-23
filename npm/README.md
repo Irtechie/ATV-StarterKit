@@ -4,9 +4,9 @@
 
 # ATV — All The Vibes 2.0 Starter Kit
 
-<p align="center"><strong>Install a complete GitHub Copilot agentic coding stack into any repo with one command.</strong></p>
+<p align="center"><strong>Install a complete GitHub Copilot agentic coding stack into any repo.</strong></p>
 
-<p align="center">Compound Engineering for planning and review. gstack for QA, shipping, safety, and browser-based testing. Vercel <code>agent-browser</code> for direct browser automation.</p>
+<p align="center">Kanban-Based <code>kb-</code> workflows for planning and execution. Compound Engineering for review and learning. gstack for QA, shipping, safety, and browser-based testing. Vercel <code>agent-browser</code> for direct browser automation.</p>
 
 <p align="center">
 	<a href="https://www.npmjs.com/package/atv-starterkit"><img alt="npm version" src="https://img.shields.io/npm/v/atv-starterkit?style=flat-square&logo=npm&logoColor=white&color=cb3837"></a>
@@ -57,7 +57,8 @@ Interactive TUI wizard — select your stack, toggle individual components on/of
 ## Why people install it
 
 - **One command setup** for Copilot instructions, skills, agents, MCP config, and stack-specific guidance
-- **Better planning before coding** with Compound Engineering workflows
+- **Voice-friendly KB workflow commands**: `kb-brainstorm`, `kb-plan`, `kb-work`, `kb-complete`, plus `/klfg`
+- **Better planning before coding** with Kanban-Based vertical slices
 - **Real browser QA** through gstack runtime support
 - **Direct browser automation** through optional `agent-browser` installation in guided mode
 - **File-based knowledge compounding** via `docs/brainstorms/`, `docs/plans/`, and `docs/solutions/`

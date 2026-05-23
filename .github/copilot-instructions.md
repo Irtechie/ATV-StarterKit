@@ -9,7 +9,7 @@ This project uses the ATV (Agentic Tool & Workflow) Starter Kit.
 - `/kb-work` — Execute the plan with quality checks
 - `/ce-review` — Multi-agent code review
 - `/ce-compound` — Document solutions for future reference
-- `/lfg` — Full autonomous pipeline (plan → work → review)
+- `/klfg` — Full autonomous pipeline (plan → work → review)
 
 ## Session Bookends
 

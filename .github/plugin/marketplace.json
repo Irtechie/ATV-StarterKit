@@ -91,7 +91,7 @@
     {
       "name": "atv-pack-planning",
       "source": "atv-pack-planning",
-      "description": "Planning & design pack — Brainstorming, KB Brainstorm, CE Ideate, KB Plan, Deepen Brainstorm, Deepen Plan, and architecture skills for shaping work before coding.",
+      "description": "Planning & design pack — Brainstorming, KB Brainstorm, CE legacy planning, CE Ideate, KB Plan, Deepen Brainstorm, Deepen Plan, and architecture skills for shaping work before coding.",
       "version": "2.6.3",
       "keywords": [
         "atv",
@@ -142,7 +142,7 @@
     {
       "name": "atv-pack-shipping",
       "source": "atv-pack-shipping",
-      "description": "Shipping & deploy pack — Takeoff, KB Work, Land, LFG/KLFG/SLFG orchestrators, and CE Compound for executing and delivering work.",
+      "description": "Shipping & deploy pack — Takeoff, KB Work, CE legacy work, KLFG, Land, and CE Compound for executing and delivering work.",
       "version": "2.6.3",
       "keywords": [
         "atv",
@@ -214,6 +214,18 @@
       "category": "skill"
     },
     {
+      "name": "atv-skill-ce-brainstorm",
+      "source": "atv-skill-ce-brainstorm",
+      "description": "ATV `ce-brainstorm` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
+      "version": "2.6.3",
+      "keywords": [
+        "atv",
+        "skill",
+        "ce-brainstorm"
+      ],
+      "category": "skill"
+    },
+    {
       "name": "atv-skill-ce-compound",
       "source": "atv-skill-ce-compound",
       "description": "ATV `ce-compound` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
@@ -250,6 +262,18 @@
       "category": "skill"
     },
     {
+      "name": "atv-skill-ce-plan",
+      "source": "atv-skill-ce-plan",
+      "description": "ATV `ce-plan` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
+      "version": "2.6.3",
+      "keywords": [
+        "atv",
+        "skill",
+        "ce-plan"
+      ],
+      "category": "skill"
+    },
+    {
       "name": "atv-skill-ce-review",
       "source": "atv-skill-ce-review",
       "description": "ATV `ce-review` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
@@ -258,6 +282,18 @@
         "atv",
         "skill",
         "ce-review"
+      ],
+      "category": "skill"
+    },
+    {
+      "name": "atv-skill-ce-work",
+      "source": "atv-skill-ce-work",
+      "description": "ATV `ce-work` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
+      "version": "2.6.3",
+      "keywords": [
+        "atv",
+        "skill",
+        "ce-work"
       ],
       "category": "skill"
     },
@@ -478,18 +514,6 @@
       "category": "skill"
     },
     {
-      "name": "atv-skill-lfg",
-      "source": "atv-skill-lfg",
-      "description": "ATV `lfg` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
-      "version": "2.6.3",
-      "keywords": [
-        "atv",
-        "skill",
-        "lfg"
-      ],
-      "category": "skill"
-    },
-    {
       "name": "atv-skill-meme-iq",
       "source": "atv-skill-meme-iq",
       "description": "ATV `meme-iq` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
@@ -546,18 +570,6 @@
         "atv",
         "skill",
         "setup"
-      ],
-      "category": "skill"
-    },
-    {
-      "name": "atv-skill-slfg",
-      "source": "atv-skill-slfg",
-      "description": "ATV `slfg` skill — single-skill plugin (granular install). Some ATV skills dispatch agents bundled separately in `atv-agents`, so single-skill and category-pack installs may need `atv-agents` alongside them. For the full standalone kit, install `atv-everything`. See https://github.com/All-The-Vibes/ATV-StarterKit/blob/main/docs/marketplace.md.",
-      "version": "2.6.3",
-      "keywords": [
-        "atv",
-        "skill",
-        "slfg"
       ],
       "category": "skill"
     },

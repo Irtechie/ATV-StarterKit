@@ -167,10 +167,12 @@ func documentationDirectories() []Component {
 
 var coreSkillDirectories = []string{
 	"brainstorming",
+	"ce-brainstorm",
 	"kb-brainstorm",
 	"ce-compound",
 	"ce-compound-refresh",
 	"ce-ideate",
+	"ce-plan",
 	"kb-plan",
 	"ce-review",
 	"deepen-brainstorm",
@@ -206,12 +208,11 @@ var orchestratorSkillDirectories = []string{
 	"kb-complete",
 	"kb-qa",
 	"kb-repair",
+	"ce-work",
 	"kb-work",
 	"klfg",
-	"lfg",
 	"ralph-loop",
 	"resolve_todo_parallel",
-	"slfg",
 	"test-browser",
 }
 

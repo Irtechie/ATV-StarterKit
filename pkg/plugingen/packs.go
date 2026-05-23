@@ -39,9 +39,9 @@ func Packs() []Pack {
 		{
 			Name:        "atv-pack-planning",
 			Category:    "planning",
-			Description: "Planning & design pack — Brainstorming, KB Brainstorm, CE Ideate, KB Plan, Deepen Brainstorm, Deepen Plan, and architecture skills for shaping work before coding.",
+			Description: "Planning & design pack — Brainstorming, KB Brainstorm, CE legacy planning, CE Ideate, KB Plan, Deepen Brainstorm, Deepen Plan, and architecture skills for shaping work before coding.",
 			Keywords:    []string{"atv", "compound-engineering", "planning", "brainstorming"},
-			SkillNames:  []string{"brainstorming", "kb-brainstorm", "ce-ideate", "kb-plan", "deepen-brainstorm", "deepen-plan", "improve-codebase-architecture"},
+			SkillNames:  []string{"brainstorming", "ce-brainstorm", "kb-brainstorm", "ce-ideate", "ce-plan", "kb-plan", "deepen-brainstorm", "deepen-plan", "improve-codebase-architecture"},
 		},
 		{
 			Name:        "atv-pack-review",
@@ -53,7 +53,7 @@ func Packs() []Pack {
 		{
 			Name:        "atv-pack-shipping",
 			Category:    "shipping",
-			Description: "Shipping & deploy pack — Takeoff, KB Work, Land, LFG/KLFG/SLFG orchestrators, and CE Compound for executing and delivering work.",
+			Description: "Shipping & deploy pack — Takeoff, KB Work, CE legacy work, KLFG, Land, and CE Compound for executing and delivering work.",
 			Keywords:    []string{"atv", "shipping", "deploy", "compound-engineering", "orchestrator"},
 			SkillNames: []string{
 				"ce-compound",
@@ -61,11 +61,10 @@ func Packs() []Pack {
 				"kb-complete",
 				"kb-qa",
 				"kb-repair",
+				"ce-work",
 				"kb-work",
 				"klfg",
 				"land",
-				"lfg",
-				"slfg",
 				"takeoff",
 			},
 		},
