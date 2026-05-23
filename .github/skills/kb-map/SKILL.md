@@ -8,7 +8,7 @@ argument-hint: "[lookup|refresh] [optional task or subsystem]"
 
 Use local project memory so fresh sessions do not need the user to reteach the app.
 
-This skill owns the project-memory preflight. `kb-route` and other skills should call `kb-map` instead of checking bootstrap rules themselves.
+This skill owns the project-memory preflight. `kb-start` and other skills should call `kb-map` instead of checking bootstrap rules themselves.
 
 Keep normal lookup cheap. Deep indexing belongs in `kb-map-bootstrap`.
 
@@ -72,7 +72,7 @@ Stop reading once you can answer:
 - Which subsystem is relevant?
 - Which files or commands are likely involved?
 - What was already tried or researched?
-- Which KB route should handle the request?
+- Which KB lane should handle the request?
 
 Report route, docs loaded, and any stale-work refresh needed. Do not bulk-load all context docs.
 

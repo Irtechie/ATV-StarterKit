@@ -2,7 +2,7 @@
 
 Use the KB workflow in this repo.
 
-For ambiguous KB/workflow requests, start with `kb-route`. Skills live under `.github/skills/`.
+For ambiguous KB/workflow requests, start with `kb-start`. Skills live under `.github/skills/`.
 
 Fresh-session preflight:
 
@@ -27,4 +27,4 @@ Project memory:
 - `docs/context/PROJECT.md` is the project route map.
 - `docs/handoffs/active/`, `docs/handoffs/parked/`, and `docs/handoffs/done/` hold resumable handoffs.
 
-If local memory is missing or stale, use `kb-map`; it decides whether lookup, refresh, or bootstrap is required. For normal startup, use `kb-route`.
+If local memory is missing or stale, use `kb-map`; it decides whether lookup, refresh, or bootstrap is required. For normal startup, use `kb-start`.

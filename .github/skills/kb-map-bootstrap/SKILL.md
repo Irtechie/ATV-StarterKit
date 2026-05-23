@@ -12,7 +12,7 @@ Use `kb-map` for normal startup. Use this only for missing or badly stale memory
 
 ## Automatic Invocation
 
-When `kb-route`, `AGENTS.md`, or `.github/copilot-instructions.md` detects missing `todo.md` or `docs/context/PROJECT.md`, run this skill immediately. Do not ask the user first unless a non-empty user file would be overwritten or moved.
+When `kb-map`, `AGENTS.md`, or `.github/copilot-instructions.md` detects missing `todo.md` or `docs/context/PROJECT.md`, run this skill immediately. Do not ask the user first unless a non-empty user file would be overwritten or moved.
 
 ## Create Layout
 

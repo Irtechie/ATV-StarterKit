@@ -1,6 +1,6 @@
 # Agent Instructions
 
-For KB workflow requests, start with `kb-route`.
+For KB workflow requests, start with `kb-start`.
 
 On every fresh session or ambiguous work request, let `kb-map` perform the KB memory preflight:
 
@@ -26,4 +26,4 @@ Use these project memory files:
 
 Do not treat these files as skills. Skills live under `.github/skills/`.
 
-When local memory is missing or badly stale, use `kb-map`; it decides whether lookup, refresh, or bootstrap is required. For normal startup, use `kb-route`.
+When local memory is missing or badly stale, use `kb-map`; it decides whether lookup, refresh, or bootstrap is required. For normal startup, use `kb-start`.

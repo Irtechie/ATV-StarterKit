@@ -1,14 +1,14 @@
 ---
-name: kb-route
-description: Default KB request router. Use when the user says "kb", gives an idea or ambiguous work request, starts a fresh session, asks what to do next, or wants the workflow to choose the right lane without making the user pick ceremony. Delegates project-memory setup and lookup to kb-map before choosing a lane.
+name: kb-start
+description: Default KB start/router. Use when the user says "kb", gives an idea or ambiguous work request, starts a fresh session, asks what to do next, or wants the workflow to choose the right lane without making the user pick ceremony. Delegates project-memory setup and lookup to kb-map before choosing a lane.
 argument-hint: "[user request or blank for session startup]"
 ---
 
-# KB Route
+# KB Start
 
 Pick the right KB lane for the user's idea/request. The user should be able to ask normally; do not make them choose ceremony.
 
-`kb-route` is not the memory bootstrapper. `kb-map` owns project-memory setup, lookup, and refresh.
+`kb-start` is not the memory bootstrapper. `kb-map` owns project-memory setup, lookup, and refresh.
 
 ## Map First
 
