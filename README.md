@@ -207,7 +207,7 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 |---------|-----------------|
 | **[ATV StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)** | The entire foundation: learning system, ce-review, ce-compound, 45+ skills, 29 agents, observer hooks |
 | **[gstack](https://github.com/garrytan/gstack)** (Garry Tan / YC) | QA philosophy, continuous console monitoring, atomic commit pattern, stuck detection |
-| **[Matt Pocock](https://github.com/mattpocock/skills)** | Vertical-slice-as-primitive, TDD anti-pattern identification, hard-gate pattern (`git-guardrails`) |
+| **[Matt Pocock](https://github.com/mattpocock/skills)** | Vertical-slice-as-primitive, TDD anti-pattern identification, hard-gate pattern (`git-guardrails`), [`/handoff`](https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md) session handoff, workflow skill patterns. Kanban pipeline is a synthesis of Matt's skills + ATV StarterKit foundations |
 | **[agent-browser](https://github.com/vercel-labs/agent-browser)** (Vercel Labs) | Native Rust CDP automation, snapshot refs, ~100ms latency |
 | **[Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin)** (Every, Inc.) | Knowledge-compounds-over-time: plan → work → review → document → learn |
 | **[Karpathy](https://x.com/karpathy/status/2015883857489522876)** | "Models make wrong assumptions and run with them" — the observation that motivated structural enforcement |
