@@ -26,10 +26,14 @@ The voice-friendly KB workflow now has a smaller standalone home:
 
 **[Irtechie/working-skill-repo](https://github.com/Irtechie/working-skill-repo)**
 
-Use that repo when you want the current working KB skill bundle copied into
-GitHub Copilot or Codex projects. This ATV fork still keeps the broader ATV
-StarterKit, CE skills, agents, plugin experiments, historical docs, and upstream
-lineage. The new repo is the trimmed day-to-day bundle.
+Use that repo when you want the current working KB skill bundle installed into
+GitHub Copilot or Codex. The preferred install is now personal/global
+(`~/.copilot/skills`, `~/.copilot/agents`, `~/.agents/skills`, and
+`~/.codex/skills`) instead of copying the bundle into every project. Repo-local
+installs are still useful for pinned or project-specific overrides. This ATV
+fork keeps the broader ATV StarterKit, CE skills, agents, plugin experiments,
+historical docs, and upstream lineage. The new repo is the trimmed day-to-day
+bundle.
 
 What changed:
 
