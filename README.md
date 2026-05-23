@@ -56,8 +56,11 @@ What changed:
   `docs/kanban-done.md` for the current KB workflow.
 - `kb-fix`, `kb-functional-test`, `kb-gate`, `kb-check`, `kb-research`,
   `kb-epic`, `kb-compact`, and `kb-ship` were added to cover small fixes,
-  deterministic testing, P0/P1 gates, research, large initiatives, token
+  deterministic testing, P0-P4 gates, research, large initiatives, token
   trimming, and release readiness.
+- `kb-brainstorm` now proceeds to `kb-plan` when the requirements artifact is
+  gate-clean. It pauses only for unresolved blockers, required human decisions,
+  required research, or an explicit user stop.
 - `kb-work` owns slice execution and calls `kb-complete` only after all slices
   are done or intentionally skipped.
 - Once `kb-work` starts execution, runnable slices continue without per-slice
@@ -214,7 +217,7 @@ After all slices pass, the quality and learning pipeline runs automatically:
 | Step | What happens |
 |------|-------------|
 | **Code review** | `ce-review` with scope-verified file list pre-loaded. Multiple persona agents (security, performance, correctness). |
-| **Resolution gate** | P0/P1 must be fixed. P2/P3 logged, don't block. Cannot proceed with unresolved P0/P1s. |
+| **Resolution gate** | Safe/actionable P0-P4 findings are fixed by the agent. Human input is required only for product intent, access, risky operations, competing reasonable paths, or genuine ambiguity. |
 | **Compound** | `ce-compound` documents surprising patterns to `docs/solutions/`. Skips boilerplate. |
 | **Learn** | `/learn` extracts instincts from resolved findings + recent work. |
 | **Evolve** | Every 5th completion, `/evolve` checks for instincts ready to become full skills. |
@@ -255,7 +258,7 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 | Skill | Role |
 |-------|------|
 | `/klfg` | Full KB orchestrator — `/kb-brainstorm` → `/kb-plan` → `/kb-work` → `/kb-complete` |
-| `/kb-brainstorm` | Research-first requirements gathering |
+| `/kb-brainstorm` | Research-first requirements gathering; auto-starts planning when gate-clean |
 | `/kb-plan` | Vertical-slice decomposition with `expected_files` contracts |
 | `/kb-work` | Execute slices through 7 mandatory gates |
 | `/kb-complete` | Post-work: ce-review → compound → learn → evolve → cleanup |
@@ -612,7 +615,7 @@ brainstorm → plan → work → complete
 
 | Skill | What it does |
 |---|---|
-| `/kb-brainstorm` | Interactive dialogue to clarify requirements; produces design docs in `docs/brainstorms/` |
+| `/kb-brainstorm` | Interactive dialogue to clarify requirements; produces design docs in `docs/brainstorms/` and invokes `/kb-plan` when gate-clean |
 | `/gstack-office-hours` | YC-style forcing questions that challenge your framing before you write code |
 | `/gstack-plan-ceo-review` | CEO-level review: find the 10-star product hiding in the request |
 
