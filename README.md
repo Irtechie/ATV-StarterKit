@@ -49,6 +49,8 @@ What changed:
   trimming, and release readiness.
 - `kb-work` owns slice execution and calls `kb-complete` only after all slices
   are done or intentionally skipped.
+- Active handoffs no longer jump straight to `kb-work` unless they link a valid
+  KB manifest. Phase-shaped handoffs route through `kb-plan` first.
 - `klfg` remains the full hands-off orchestrator for brainstorm -> plan -> work
   -> complete.
 
@@ -138,6 +140,11 @@ This isn't documentation — it's a machine-enforced contract. The pipeline chec
 ### Step 3: Work (`kb-work`)
 
 Executes all slices in dependency order. Resumable — re-running picks up where it left off.
+
+`kb-work` requires a KB manifest and per-slice plans. A handoff with phases,
+workstreams, bullets, or broad next steps is not executable yet; route it through
+`kb-plan` first so the work becomes vertical slices with `expected_files`,
+verification, blockers, and status.
 
 **Per-slice, every slice, no exceptions:**
 
