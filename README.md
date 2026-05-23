@@ -54,6 +54,9 @@ What changed:
   can recover context without a long chat history.
 - `todo.md` and `todo-done.md` replace `docs/kanban.md` and
   `docs/kanban-done.md` for the current KB workflow.
+- `todo.md` now carries its own rules at the top. Completed feature, slice,
+  handoff, and fix summaries move to `todo-done.md`; routine completion logs
+  should not stay in `todo.md`.
 - `kb-fix`, `kb-functional-test`, `kb-gate`, `kb-check`, `kb-research`,
   `kb-epic`, `kb-compact`, and `kb-ship` were added to cover small fixes,
   deterministic testing, P0-P4 gates, research, large initiatives, token
@@ -208,7 +211,7 @@ After each fix, kb-repair re-runs the full QA check — not just the failing che
 
 This is not "retry 3 times and give up." The agent keeps working autonomously until tests pass — or until it hits a wall it can't climb, at which point it stops and hands the problem to you with screenshots and a full failure log.
 
-**Board sync:** `docs/kanban.md` is the multi-agent handoff file. Agents claim slices before working and release after completing. Prevents two agents from working the same slice.
+**Board sync:** `todo.md` is the live multi-agent board. Agents claim slices before working and release after completing. Completed summaries move to `todo-done.md` so `todo.md` stays small and current.
 
 ### Step 4: Complete (`kb-complete`)
 
@@ -248,7 +251,7 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 - Scope Lock (Step 3.0) — proactive write blocking
 - Diff-Scope Verification (Step 3.6) — reactive git-diff verification
 - `kb-repair` — progress-based autonomous fix loop with stuck detection
-- Board sync protocol — multi-agent mutex via `docs/kanban.md`
+- Board sync protocol — multi-agent mutex via `todo.md`, with completed work archived to `todo-done.md`
 - Convention-matched test auto-allow — `src/foo.py` automatically permits `tests/test_foo.py`
 
 ---
