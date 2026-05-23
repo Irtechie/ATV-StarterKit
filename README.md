@@ -47,6 +47,9 @@ What changed:
   not `~`, `.copilot/handoffs`, the whole drive, or sibling repos.
 - `kb-map` checks standard memory files by exact path under the repo root, not
   by broad grep/glob.
+- Drive roots such as `E:\` are not valid project roots unless explicitly
+  chosen; `kb-map` should ask for the project path instead of searching the
+  drive.
 - `kb-map-bootstrap` and `kb-map` create/update project memory so new sessions
   can recover context without a long chat history.
 - `todo.md` and `todo-done.md` replace `docs/kanban.md` and
