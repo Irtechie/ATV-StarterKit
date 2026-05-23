@@ -152,8 +152,8 @@ Every review spawns all 4 always-on personas plus the 2 CE always-on agents, the
 
 The following paths are compound-engineering pipeline artifacts and must never be flagged for deletion, removal, or gitignore by any reviewer:
 
-- `docs/brainstorms/*` -- requirements documents created by ce-brainstorm
-- `docs/plans/*.md` -- plan files created by ce-plan (living documents with progress checkboxes)
+- `docs/brainstorms/*` -- requirements documents created by kb-brainstorm
+- `docs/plans/*.md` -- plan files created by kb-plan (living documents with progress checkboxes)
 - `docs/solutions/*.md` -- solution documents created during the pipeline
 
 If a reviewer flags any file in these directories for cleanup or removal, discard that finding during synthesis.
@@ -179,7 +179,7 @@ Then produce the same output as the other paths:
 echo "BASE:$BASE" && echo "FILES:" && git diff --name-only $BASE && echo "DIFF:" && git diff -U10 $BASE && echo "UNTRACKED:" && git ls-files --others --exclude-standard
 ```
 
-This path works with any ref — a SHA, `origin/main`, a branch name. Automated callers (ce-work, lfg, slfg) should prefer this to avoid the detection overhead. **Do not combine `base:` with a PR number or branch target.** If both are present, stop with an error: "Cannot use `base:` with a PR number or branch target — `base:` implies the current checkout is already the correct branch. Pass `base:` alone, or pass the target alone and let scope detection resolve the base." This avoids scope/intent mismatches where the diff base comes from one source but the code and metadata come from another.
+This path works with any ref — a SHA, `origin/main`, a branch name. Automated callers (kb-work, lfg, slfg) should prefer this to avoid the detection overhead. **Do not combine `base:` with a PR number or branch target.** If both are present, stop with an error: "Cannot use `base:` with a PR number or branch target — `base:` implies the current checkout is already the correct branch. Pass `base:` alone, or pass the target alone and let scope detection resolve the base." This avoids scope/intent mismatches where the diff base comes from one source but the code and metadata come from another.
 
 **If a PR number or GitHub URL is provided as an argument:**
 

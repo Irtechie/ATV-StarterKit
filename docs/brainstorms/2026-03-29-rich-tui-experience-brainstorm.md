@@ -34,4 +34,4 @@ None — all resolved during brainstorm.
 
 ## Next Steps
 
-→ `/ce-plan` for implementation details
+→ `/kb-plan` for implementation details

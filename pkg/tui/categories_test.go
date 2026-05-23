@@ -110,7 +110,7 @@ func TestBuildCategoryGroupsIncludesMaintenanceCategory(t *testing.T) {
 
 func TestKarpathyGuidedFlowParseSelections(t *testing.T) {
 	// Simulate what happens when user selects karpathy-guidelines in Screen 4
-	selected := []string{"core-skills:karpathy-guidelines", "core-skills:ce-plan"}
+	selected := []string{"core-skills:karpathy-guidelines", "core-skills:kb-plan"}
 	atvLayers, gstackDirs := ParseSelections(selected)
 
 	if len(gstackDirs) != 0 {

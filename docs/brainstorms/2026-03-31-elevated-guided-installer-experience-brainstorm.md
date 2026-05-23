@@ -67,7 +67,7 @@ None — this is clear enough to move to planning.
 
 ## Next Steps
 
-→ `/ce-plan` for implementation details
+→ `/kb-plan` for implementation details
 
 Related follow-on brainstorm:
 

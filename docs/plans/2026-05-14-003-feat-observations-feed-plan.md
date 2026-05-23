@@ -6,7 +6,7 @@ blockers: [slice-002]
 verification: verification-only
 hitl: false
 expected_files:
-  - .github/skills/kanban-work/SKILL.md
+  - .github/skills/kb-work/SKILL.md
 status: pending
 ---
 
@@ -38,7 +38,7 @@ Add to the end of Step 5.5 (after the resolution summary), a new sub-section:
 For each resolved P0/P1 finding, append one line to `.atv/observations.jsonl`:
 
 ```json
-{"ts":"<ISO-8601>","hook":"ce-review","tool":"kanban-work","args":{"finding_type":"<category>","severity":"P0|P1","resolution":"<what was fixed>"},"cwd":"<repo-root>","result":"resolved"}
+{"ts":"<ISO-8601>","hook":"ce-review","tool":"kb-work","args":{"finding_type":"<category>","severity":"P0|P1","resolution":"<what was fixed>"},"cwd":"<repo-root>","result":"resolved"}
 ```
 
 This connects the review → learn pipeline. Only P0/P1 findings are worth learning from — P2/P3 are style preferences, not systemic patterns.
@@ -51,7 +51,7 @@ Create `.atv/observations.jsonl` if it doesn't exist. Append, never overwrite.
 Using the existing schema from `.github/hooks/scripts/observe.js`:
 - `ts` — ISO timestamp (when the finding was resolved)
 - `hook` — `"ce-review"` (source identification)
-- `tool` — `"kanban-work"` (what invoked it)
+- `tool` — `"kb-work"` (what invoked it)
 - `args` — structured data: finding_type, severity, resolution description
 - `cwd` — repo root path
 - `result` — `"resolved"` (confirms it was actioned)

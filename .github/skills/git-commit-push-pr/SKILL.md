@@ -344,7 +344,7 @@ When referencing actual GitHub issues or PRs, use the full format: `org/repo#123
 
 #### Compound Engineering badge
 
-Append a badge footer to the PR description, separated by a `---` rule. Do not add one if the description already contains a Compound Engineering badge (e.g., added by another skill like ce-work).
+Append a badge footer to the PR description, separated by a `---` rule. Do not add one if the description already contains a Compound Engineering badge (e.g., added by another skill like kb-work).
 
 
 

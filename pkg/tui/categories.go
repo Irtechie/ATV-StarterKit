@@ -29,12 +29,11 @@ var atvCategoryMapping = map[string][]CategorySkill{
 	gstack.CategoryPlanning: {
 		{Label: "Brainstorming — explore what to build", Key: "core-skills:brainstorming", Source: "atv"},
 		{Label: "CE Ideate — structured idea exploration", Key: "core-skills:ce-ideate", Source: "atv"},
-		{Label: "Plan — turn ideas into an implementation plan", Key: "core-skills:ce-plan", Source: "atv"},
 		{Label: "Deepen Brainstorm — enrich requirements before planning", Key: "core-skills:deepen-brainstorm", Source: "atv"},
 		{Label: "Deepen Plan — parallel research to harden the plan", Key: "core-skills:deepen-plan", Source: "atv"},
 		{Label: "Improve Codebase Architecture — identify structural improvements", Key: "core-skills:improve-codebase-architecture", Source: "atv"},
-		{Label: "Kanban Brainstorm — research-first requirements exploration", Key: "core-skills:kanban-brainstorm", Source: "atv"},
-		{Label: "Kanban Plan — split work into vertical slices", Key: "core-skills:kanban-plan", Source: "atv"},
+		{Label: "KB Brainstorm — research-first requirements exploration", Key: "core-skills:kb-brainstorm", Source: "atv"},
+		{Label: "KB Plan — split work into vertical slices", Key: "core-skills:kb-plan", Source: "atv"},
 	},
 	gstack.CategoryReview: {
 		{Label: "CE Review — multi-agent code review", Key: "core-skills:ce-review", Source: "atv"},
@@ -44,9 +43,9 @@ var atvCategoryMapping = map[string][]CategorySkill{
 	},
 	gstack.CategoryShipping: {
 		{Label: "Takeoff — backlog briefing at session start", Key: "core-skills:takeoff", Source: "atv"},
-		{Label: "CE Work — execute plans with quality checks", Key: "core-skills:ce-work", Source: "atv"},
-		{Label: "Kanban Work — execute kanban slices with HITL pauses", Key: "orchestrators:kanban-work", Source: "atv"},
-		{Label: "KLFG — full kanban pipeline orchestrator", Key: "orchestrators:klfg", Source: "atv"},
+		{Label: "KB Work — execute slices with HITL pauses", Key: "orchestrators:kb-work", Source: "atv"},
+		{Label: "KB Complete — review, compound, learn, and cleanup", Key: "orchestrators:kb-complete", Source: "atv"},
+		{Label: "KLFG — full KB pipeline orchestrator", Key: "orchestrators:klfg", Source: "atv"},
 		{Label: "LFG — full autonomous pipeline", Key: "orchestrators:lfg", Source: "atv"},
 		{Label: "SLFG — swarm mode parallel execution", Key: "orchestrators:slfg", Source: "atv"},
 		{Label: "CE Compound — document solutions", Key: "core-skills:ce-compound", Source: "atv"},
@@ -58,7 +57,7 @@ var atvCategoryMapping = map[string][]CategorySkill{
 		{Label: "TDD — red/green/refactor discipline", Key: "core-skills:tdd", Source: "atv"},
 	},
 	gstack.CategoryGuidelines: {
-		{Label: "First Principles — anti-sycophancy, evidence-based dialogue", Key: "core-skills:kanban-first-principles", Source: "atv"},
+		{Label: "First Principles — anti-sycophancy, evidence-based dialogue", Key: "core-skills:kb-first-principles", Source: "atv"},
 		{Label: "Karpathy Guidelines — think before coding, simplicity, surgical changes, goal-driven execution", Key: "core-skills:karpathy-guidelines", Source: "atv"},
 		{Label: "Autoresearch — autonomous experiment loop: define goal + metric, agent iterates", Key: "core-skills:autoresearch", Source: "atv"},
 	},

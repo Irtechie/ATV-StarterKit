@@ -12,7 +12,7 @@ description: Enhance a brainstorm document with parallel research agents to vali
 
 **Note: The current year is 2026.** Use this when searching for recent documentation and best practices.
 
-This command takes an existing brainstorm document (from `/ce-brainstorm`) and enhances it with parallel research agents. Unlike `/deepen-plan` which adds implementation depth, this adds **decision-validation depth**:
+This command takes an existing brainstorm document (from `/kb-brainstorm`) and enhances it with parallel research agents. Unlike `/deepen-plan` which adds implementation depth, this adds **decision-validation depth**:
 - Market research validating the chosen approach
 - Competitive landscape for the problem space
 - Technical feasibility signals
@@ -282,7 +282,7 @@ Before finalizing:
 - [ ] Research clearly attributed with sources
 - [ ] Confidence levels are honest (don't inflate)
 - [ ] Challenged assumptions are flagged prominently
-- [ ] No implementation details crept in (that's for /ce-plan)
+- [ ] No implementation details crept in (that's for /kb-plan)
 - [ ] Enhancement summary accurately reflects findings
 
 ## Post-Enhancement Options
@@ -294,14 +294,14 @@ After writing the enhanced brainstorm, use the **AskUserQuestion tool**:
 **Options:**
 1. **View changes** - Show what research added
 2. **Revisit challenged decisions** - Discuss decisions that research challenged
-3. **Proceed to planning** - Run `/ce-plan` (will auto-detect this brainstorm)
+3. **Proceed to planning** - Run `/kb-plan` (will auto-detect this brainstorm)
 4. **Deepen further** - Run another research pass on specific decisions
 5. **Share to Proof** - Upload to Proof for collaborative review
 
 Based on selection:
 - **View changes** → Show summary of additions
 - **Revisit challenged decisions** → Re-enter brainstorm dialogue focused on weak decisions
-- **Proceed to planning** → Run `/ce-plan` with brainstorm path
+- **Proceed to planning** → Run `/kb-plan` with brainstorm path
 - **Deepen further** → Ask which decisions need more research, re-run those agents
 - **Share to Proof** →
   ```bash

@@ -12,9 +12,9 @@ This is a Ruby on Rails project using the ATV (Agentic Tool & Workflow) Starter 
 
 ## Available Workflows
 
-- `/ce-brainstorm` — Explore what to build through collaborative dialogue
-- `/ce-plan` — Create a structured implementation plan
-- `/ce-work` — Execute the plan with quality checks
+- `/kb-brainstorm` — Explore what to build through collaborative dialogue
+- `/kb-plan` — Create a structured implementation plan
+- `/kb-work` — Execute the plan with quality checks
 - `/ce-review` — Multi-agent code review
 - `/ce-compound` — Document solutions for future reference
 - `/atv-security` — Unified security audit: agentic config (secrets, permissions, hooks, MCP, agents) + OWASP Top 10 + STRIDE threat model for application source code

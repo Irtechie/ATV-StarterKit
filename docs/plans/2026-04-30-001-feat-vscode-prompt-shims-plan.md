@@ -10,7 +10,7 @@ issue: 36
 
 ## Overview
 
-The ATV installer ships skills as `.github/skills/<name>/SKILL.md`. Claude Code and Copilot CLI discover those natively, but **VS Code Copilot Chat** discovers slash commands from `.github/prompts/*.prompt.md`. Today the installer ships zero prompt files, so `/ce-brainstorm`, `/ce-plan`, `/lfg`, `/learn`, etc. don't appear in the VS Code chat picker even though `copilot-instructions.md` advertises them.
+The ATV installer ships skills as `.github/skills/<name>/SKILL.md`. Claude Code and Copilot CLI discover those natively, but **VS Code Copilot Chat** discovers slash commands from `.github/prompts/*.prompt.md`. Today the installer ships zero prompt files, so `/kb-brainstorm`, `/kb-plan`, `/lfg`, `/learn`, etc. don't appear in the VS Code chat picker even though `copilot-instructions.md` advertises them.
 
 Fix: generate a thin `.prompt.md` shim per user-facing skill at install time. Each shim delegates to the canonical `SKILL.md` so there is one source of truth. Wire it through the existing skill-catalog/parity-test machinery so a new user-facing skill cannot land without a corresponding shim.
 
@@ -75,7 +75,7 @@ The installer already *recognizes* prompt files exist — `pkg/installstate/reco
 
 ### Resolved During Planning
 
-- **Which skills are user-facing?** Resolved: take the union of slash commands listed in `pkg/scaffold/templates/instructions/general.md` (the most complete reference) plus the orchestrator entry `/lfg`. Concretely: `ce-brainstorm`, `ce-plan`, `ce-work`, `ce-review`, `ce-compound`, `ce-ideate`, `takeoff`, `land`, `learn`, `instincts`, `evolve`, `observe`, `unslop`, `autoresearch`, `atv-security`, `atv-doctor`, `atv-update`, `lfg`. Excludes: `document-review`, `deepen-plan`, `setup`, `karpathy-guidelines`, `brainstorming`, `meme-iq`, `ralph-loop`, `resolve_todo_parallel`, `slfg`, `feature-video`, `test-browser`, `ce-compound-refresh`. Implementation may add comments justifying each exclusion to satisfy parity-test diagnostics.
+- **Which skills are user-facing?** Resolved: take the union of slash commands listed in `pkg/scaffold/templates/instructions/general.md` (the most complete reference) plus the orchestrator entry `/lfg`. Concretely: `kb-brainstorm`, `kb-plan`, `kb-work`, `ce-review`, `ce-compound`, `ce-ideate`, `takeoff`, `land`, `learn`, `instincts`, `evolve`, `observe`, `unslop`, `autoresearch`, `atv-security`, `atv-doctor`, `atv-update`, `lfg`. Excludes: `document-review`, `deepen-plan`, `setup`, `karpathy-guidelines`, `brainstorming`, `meme-iq`, `ralph-loop`, `resolve_todo_parallel`, `slfg`, `feature-video`, `test-browser`, `ce-compound-refresh`. Implementation may add comments justifying each exclusion to satisfy parity-test diagnostics.
 - **Where do shim files live in the embed FS?** Resolved: generate at scaffold time from a Go template constant in `pkg/scaffold/prompts.go`. No embedded `.prompt.md` files. The dogfooded copies under `.github/prompts/` are written from the same template via a small generator (or `go:generate` directive — see deferred items).
 - **Layer gating?** Resolved: prompt shims for core skills are gated on `core-skills`; the `lfg` shim (and any future orchestrator shims) is gated on `orchestrators`.
 
@@ -109,8 +109,8 @@ The installer already *recognizes* prompt files exist — `pkg/installstate/reco
 - `coreSkillDirectories` / `orchestratorSkillDirectories` slices in `pkg/scaffold/catalog.go:165-209`.
 
 **Test scenarios:**
-- Happy path: `BuildPromptShim("ce-plan")` returns bytes containing `mode: agent`, a `description:` line referencing `ce-plan`, and a Markdown body referencing `.github/skills/ce-plan/SKILL.md`.
-- Edge case: skill name with hyphens (`ce-brainstorm`) round-trips into both the YAML front-matter and the link target without escaping.
+- Happy path: `BuildPromptShim("kb-plan")` returns bytes containing `mode: agent`, a `description:` line referencing `kb-plan`, and a Markdown body referencing `.github/skills/kb-plan/SKILL.md`.
+- Edge case: skill name with hyphens (`kb-brainstorm`) round-trips into both the YAML front-matter and the link target without escaping.
 - Happy path: every entry in `promptShimSkillDirectories` is a substring of the union of `coreSkillDirectories` and `orchestratorSkillDirectories` — i.e., we never claim to shim a skill that isn't shipped.
 
 **Verification:**
@@ -139,8 +139,8 @@ The installer already *recognizes* prompt files exist — `pkg/installstate/reco
 - Layer gating in `BuildFilteredCatalogForPacks` at `pkg/scaffold/catalog.go:98-132`.
 
 **Test scenarios:**
-- Happy path: `BuildCatalog(StackGeneral)` produces a component for `.github/prompts/ce-plan.prompt.md` whose content matches `BuildPromptShim("ce-plan")`.
-- Happy path: `BuildFilteredCatalog(StackGeneral, []string{"core-skills"})` includes `.github/prompts/ce-plan.prompt.md` but **not** `.github/prompts/lfg.prompt.md`.
+- Happy path: `BuildCatalog(StackGeneral)` produces a component for `.github/prompts/kb-plan.prompt.md` whose content matches `BuildPromptShim("kb-plan")`.
+- Happy path: `BuildFilteredCatalog(StackGeneral, []string{"core-skills"})` includes `.github/prompts/kb-plan.prompt.md` but **not** `.github/prompts/lfg.prompt.md`.
 - Happy path: `BuildFilteredCatalog(StackGeneral, []string{"orchestrators"})` includes `.github/prompts/lfg.prompt.md` but no core-skill prompts.
 - Edge case: `BuildFilteredCatalog(StackGeneral, []string{})` (no layers) emits zero prompt components.
 - Integration: snapshot the set of prompt-component paths and assert it equals the allow-list filtered by selected layers — guards against silent additions.

@@ -6,7 +6,7 @@
 
 > **Fork of [All-The-Vibes/ATV-StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)** — built on ATV's learning system, 45+ skills, 29 agents. Adds enforcement-first execution.
 
-<h1 align="center">The Kanban Pipeline</h1>
+<h1 align="center">The KB Pipeline</h1>
 
 <p align="center"><strong>One command. Idea to reviewed, documented, tested code.</strong></p>
 
@@ -17,6 +17,8 @@
 ---
 
 ## What It Does
+
+KB means **Kanban-Based**: the workflow still uses vertical slices, a shared board, and manifest files, but the spoken command prefix is `kb-` so voice input does not have to recognize "kanban".
 
 You type one command. The pipeline:
 
@@ -55,7 +57,7 @@ You're interactive during brainstorm Q&A and when safety gates fire. Everything 
 
 ## The Full Pipeline, Step by Step
 
-### Step 1: Brainstorm (`kanban-brainstorm`)
+### Step 1: Brainstorm (`kb-brainstorm`)
 
 Research runs **before** questions so decisions are grounded in real prior art — not the user's first framing.
 
@@ -72,7 +74,7 @@ Research runs **before** questions so decisions are grounded in real prior art �
 | Document review | Multi-persona review (PM, engineer, security). |
 | Handoff | Proceed to planning. |
 
-### Step 2: Plan (`kanban-plan`)
+### Step 2: Plan (`kb-plan`)
 
 Break the brainstorm into independently-executable vertical slices — not horizontal phases.
 
@@ -97,7 +99,7 @@ expected_files:
 
 This isn't documentation — it's a machine-enforced contract. The pipeline checks it before AND after execution.
 
-### Step 3: Work (`kanban-work`)
+### Step 3: Work (`kb-work`)
 
 Executes all slices in dependency order. Resumable — re-running picks up where it left off.
 
@@ -110,7 +112,7 @@ Executes all slices in dependency order. Resumable — re-running picks up where
 | **3.5 System Tests** | Analytical | What fires when this runs? Callbacks, middleware, observers 2 levels out. |
 | **3.6 Diff-Scope** | Reactive | `git diff --name-only` vs declared `expected_files`. Out-of-scope files = **STOP**. Missing expected files = flag incomplete. |
 | **3.7 Destructive Guard** | Preventive | Block `rm -rf`, `git push --force`, `DROP TABLE`, etc. Requires human approval. Cannot be overridden programmatically. |
-| **3.8 QA** | Hard gate | Lint on all slices. Browser verification on frontend slices via CDP, Playwright, or agent-browser. **Slice cannot advance until all checks pass.** On failure → `kanban-repair` autonomous fix loop. |
+| **3.8 QA** | Hard gate | Lint on all slices. Browser verification on frontend slices via CDP, Playwright, or agent-browser. **Slice cannot advance until all checks pass.** On failure → `kb-repair` autonomous fix loop. |
 | **3.9 Figma Sync** | Visual | Compare rendered UI to Figma designs (UI slices only). |
 
 **Why the scope gates matter:** An agent reporting "I only modified `src/foo.py`" is generating that statement from its context window — same source as everything else, same hallucination probability. `git diff --name-only` has zero hallucination probability. The scope lock prevents out-of-scope writes before they happen. The diff-scope gate catches anything that slipped through after.
@@ -119,7 +121,7 @@ Executes all slices in dependency order. Resumable — re-running picks up where
 
 **Automated browser testing — what runs:**
 
-`kanban-qa` picks the best available transport for the environment:
+`kb-qa` picks the best available transport for the environment:
 
 | Transport | When used |
 |-----------|-----------|
@@ -131,20 +133,20 @@ For each changed frontend file, it maps the file to the affected page, navigates
 
 **When QA fails — the autonomous repair loop:**
 
-`kanban-repair` runs immediately, without losing context (same agent, no handoff):
+`kb-repair` runs immediately, without losing context (same agent, no handoff):
 - Each fix is an **atomic commit** — one commit = one revert if it causes regression
 - **Progress-based:** fewer failures = continue. Same failures = stuck, stop.
 - **Stuck detection:** same failure twice, fix reverted twice, 3+ files touched in one fix, same file edited→reverted→re-edited
 - **5-iteration hard ceiling**, no exceptions — prevents infinite loops on flaky rendering or cascading lint
 - On exhaustion: slice stays `in_progress`, agent STOPS, user decides
 
-After each fix, kanban-repair re-runs the full QA check — not just the failing check. A fix for one failure can introduce another; the loop catches it immediately.
+After each fix, kb-repair re-runs the full QA check — not just the failing check. A fix for one failure can introduce another; the loop catches it immediately.
 
 This is not "retry 3 times and give up." The agent keeps working autonomously until tests pass — or until it hits a wall it can't climb, at which point it stops and hands the problem to you with screenshots and a full failure log.
 
 **Board sync:** `docs/kanban.md` is the multi-agent handoff file. Agents claim slices before working and release after completing. Prevents two agents from working the same slice.
 
-### Step 4: Complete (`kanban-complete`)
+### Step 4: Complete (`kb-complete`)
 
 After all slices pass, the quality and learning pipeline runs automatically:
 
@@ -181,7 +183,7 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 - `expected_files` scope contract — slices declare files during planning, enforced before and after execution
 - Scope Lock (Step 3.0) — proactive write blocking
 - Diff-Scope Verification (Step 3.6) — reactive git-diff verification
-- `kanban-repair` — progress-based autonomous fix loop with stuck detection
+- `kb-repair` — progress-based autonomous fix loop with stuck detection
 - Board sync protocol — multi-agent mutex via `docs/kanban.md`
 - Convention-matched test auto-allow — `src/foo.py` automatically permits `tests/test_foo.py`
 
@@ -192,12 +194,12 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 | Skill | Role |
 |-------|------|
 | `/klfg` | Full pipeline orchestrator — brainstorm → plan → work → complete → done |
-| `/kanban-brainstorm` | Research-first requirements gathering |
-| `/kanban-plan` | Vertical-slice decomposition with `expected_files` contracts |
-| `/kanban-work` | Execute slices through 7 mandatory gates |
-| `/kanban-complete` | Post-work: ce-review → compound → learn → evolve → cleanup |
-| `/kanban-qa` | Lint + browser verification (called by kanban-work) |
-| `/kanban-repair` | Surgical fix loop (called by kanban-qa on failure) |
+| `/kb-brainstorm` | Research-first requirements gathering |
+| `/kb-plan` | Vertical-slice decomposition with `expected_files` contracts |
+| `/kb-work` | Execute slices through 7 mandatory gates |
+| `/kb-complete` | Post-work: ce-review → compound → learn → evolve → cleanup |
+| `/kb-qa` | Lint + browser verification (called by kb-work) |
+| `/kb-repair` | Surgical fix loop (called by kb-qa on failure) |
 
 ---
 
@@ -207,7 +209,7 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 |---------|-----------------|
 | **[ATV StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)** | The entire foundation: learning system, ce-review, ce-compound, 45+ skills, 29 agents, observer hooks |
 | **[gstack](https://github.com/garrytan/gstack)** (Garry Tan / YC) | QA philosophy, continuous console monitoring, atomic commit pattern, stuck detection |
-| **[Matt Pocock](https://github.com/mattpocock/skills)** | Vertical-slice-as-primitive, TDD anti-pattern identification, hard-gate pattern (`git-guardrails`), [`/handoff`](https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md) session handoff, workflow skill patterns. Kanban pipeline is a synthesis of Matt's skills + ATV StarterKit foundations |
+| **[Matt Pocock](https://github.com/mattpocock/skills)** | Vertical-slice-as-primitive, TDD anti-pattern identification, hard-gate pattern (`git-guardrails`), [`/handoff`](https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md) session handoff, workflow skill patterns. The KB pipeline is a Kanban-Based synthesis of Matt's skills + ATV StarterKit foundations |
 | **[agent-browser](https://github.com/vercel-labs/agent-browser)** (Vercel Labs) | Native Rust CDP automation, snapshot refs, ~100ms latency |
 | **[Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin)** (Every, Inc.) | Knowledge-compounds-over-time: plan → work → review → document → learn |
 | **[Karpathy](https://x.com/karpathy/status/2015883857489522876)** | "Models make wrong assumptions and run with them" — the observation that motivated structural enforcement |
@@ -285,9 +287,9 @@ The VS Code source-install path gives one complete ATV option. The Copilot CLI m
 Then open **Copilot Chat** (⌃⌘I / Ctrl+Shift+I) and go:
 
 ```text
-/ce-brainstorm   →  Explore the problem, produce a design doc
-/ce-plan         →  Generate an implementation plan with acceptance criteria
-/ce-work         →  Build against the plan with incremental commits
+/kb-brainstorm   →  Explore the problem, produce a design doc
+/kb-plan         →  Generate an implementation plan with acceptance criteria
+/kb-work         →  Build against the plan with incremental commits
 /ce-review       →  Multi-agent code review (security, architecture, performance)
 /ce-compound     →  Document what you learned for future sessions
 
@@ -409,10 +411,10 @@ Installed as a skill (`.github/skills/autoresearch/SKILL.md`). Sourced from [git
 A gated pipeline where each step produces an artifact the next step consumes:
 
 ```text
-/ce-brainstorm → /ce-plan → /ce-work → /ce-review → /ce-compound
+/kb-brainstorm → /kb-plan → /kb-work → /ce-review → /ce-compound
 ```
 
-Every time you run `/ce-compound`, solved problems get saved to `docs/solutions/`. Next time `/ce-plan` runs, the `learnings-researcher` agent searches those files first. Your repo gets smarter with every PR.
+Every time you run `/ce-compound`, solved problems get saved to `docs/solutions/`. Next time `/kb-plan` runs, the `learnings-researcher` agent searches those files first. Your repo gets smarter with every PR.
 
 ### gstack — the AI sprint process
 
@@ -475,13 +477,13 @@ Every skill maps to a phase of the development lifecycle:
               <td width="25%" valign="top">
                      <strong>💭 Think</strong><br />
                      <sub>Frame the problem</sub><br /><br />
-                     <code>/ce-brainstorm</code><br />
+                     <code>/kb-brainstorm</code><br />
                      <code>/gstack-office-hours</code>
               </td>
               <td width="25%" valign="top">
                      <strong>📋 Plan</strong><br />
                      <sub>Pressure-test the approach</sub><br /><br />
-                     <code>/ce-plan</code><br />
+                     <code>/kb-plan</code><br />
                      <code>/gstack-plan-ceo-review</code><br />
                      <code>/gstack-plan-eng-review</code><br />
                      <code>/gstack-plan-design-review</code><br />
@@ -490,7 +492,7 @@ Every skill maps to a phase of the development lifecycle:
               <td width="25%" valign="top">
                      <strong>🔨 Build</strong><br />
                      <sub>Execute with momentum</sub><br /><br />
-                     <code>/ce-work</code><br />
+                     <code>/kb-work</code><br />
                      <code>/lfg</code><br />
                      <code>/slfg</code>
               </td>
@@ -551,7 +553,7 @@ plan → deepen → work (swarm) ──→ review    ⎤              resolve �
                                   unslop   ⎦
 ```
 
-`unslop fix` removes AI slop after review. `compound` saves learnings for future `ce-plan` runs.
+`unslop fix` removes AI slop after review. `compound` saves learnings for future `kb-plan` runs.
 
 <details>
 <summary><strong>Full skill reference (45 skills)</strong></summary>
@@ -560,7 +562,7 @@ plan → deepen → work (swarm) ──→ review    ⎤              resolve �
 
 | Skill | What it does |
 |---|---|
-| `/ce-brainstorm` | Interactive dialogue to clarify requirements; produces design docs in `docs/brainstorms/` |
+| `/kb-brainstorm` | Interactive dialogue to clarify requirements; produces design docs in `docs/brainstorms/` |
 | `/gstack-office-hours` | YC-style forcing questions that challenge your framing before you write code |
 | `/gstack-plan-ceo-review` | CEO-level review: find the 10-star product hiding in the request |
 
@@ -568,7 +570,7 @@ plan → deepen → work (swarm) ──→ review    ⎤              resolve �
 
 | Skill | What it does |
 |---|---|
-| `/ce-plan` | Parallel research agents scan codebase + external docs; auto-discovers brainstorms; outputs plans with acceptance criteria |
+| `/kb-plan` | Parallel research agents scan codebase + external docs; auto-discovers brainstorms; outputs plans with acceptance criteria |
 | `/deepen-plan` | Enriches each plan section with best practices and performance guidance |
 | `/gstack-plan-eng-review` | Forces hidden assumptions into the open: architecture, data flow, edge cases |
 | `/gstack-plan-design-review` | Scores design quality 0-10 per dimension; rewrites plan to hit 10 |
@@ -578,7 +580,7 @@ plan → deepen → work (swarm) ──→ review    ⎤              resolve �
 
 | Skill | What it does |
 |---|---|
-| `/ce-work` | Implements against the plan with incremental commits and system-wide sanity checks |
+| `/kb-work` | Implements against the plan with incremental commits and system-wide sanity checks |
 | `/lfg` | Full pipeline: plan → deepen → work → review → test → video → compound |
 | `/slfg` | Parallelized version via swarm agents |
 
@@ -741,7 +743,7 @@ ATV builds seven layers of memory across three reinforcing cycles:
 
 **How they reinforce each other:**
 
-- **Knowledge compounding** (per-PR): `/ce-compound` saves solved problems → future `/ce-plan` finds them via `learnings-researcher` → fewer repeated mistakes
+- **Knowledge compounding** (per-PR): `/ce-compound` saves solved problems → future `/kb-plan` finds them via `learnings-researcher` → fewer repeated mistakes
 - **Pattern learning** (per-session): observer hooks → `/learn` → instincts → `/evolve` → permanent skills → Copilot knows your conventions
 - **Team propagation** (per-commit): instincts are committed to git → the whole team inherits learned patterns without a style guide
 

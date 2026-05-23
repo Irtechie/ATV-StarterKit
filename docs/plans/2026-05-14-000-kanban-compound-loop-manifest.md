@@ -82,7 +82,7 @@ Brainstorm: `docs/brainstorms/2026-05-14-kanban-compound-loop-requirements.md`
 ## Dependency DAG
 
 ```
-Track A (kanban-work flow):      Track B (instinct quality):
+Track A (kb-work flow):      Track B (instinct quality):
   slice-001                        slice-005
       ↓                                ↓
   slice-002                        slice-006
@@ -97,7 +97,7 @@ Track A (kanban-work flow):      Track B (instinct quality):
 ## Existing Infrastructure (already shipped)
 
 - **Step 3.6: Diff-Scope Verification** — hard gate enforcing `expected_files` per slice
-- **`expected_files` field in kanban-plan** — slices declare which files they'll touch
+- **`expected_files` field in kb-plan** — slices declare which files they'll touch
 - **ce-review** — 14+ agent review with P0-P3 confidence-gated output
 - **ce-compound** — 6 subagents, writes YAML-frontmatted docs to `docs/solutions/`
 - **/learn** — reads observations.jsonl + git history → instincts

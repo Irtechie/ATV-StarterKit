@@ -30,7 +30,7 @@ Check if `$ARGUMENTS` contains `mode:autofix`. If present, strip it from argumen
 
 **These principles apply to interactive mode only. In autofix mode, skip all user questions and apply the autofix mode rules above.**
 
-Follow the same interaction style as `ce-brainstorm`:
+Follow the same interaction style as `kb-brainstorm`:
 
 - Ask questions **one at a time** — use the platform's blocking question tool when available (`ask_user` in Copilot CLI). Otherwise, present numbered options in plain text and wait for the user's reply before continuing
 - Prefer **multiple choice** when natural options exist

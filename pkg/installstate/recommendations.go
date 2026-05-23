@@ -147,21 +147,21 @@ func BuildRecommendations(root string, manifest InstallManifest) []Recommendatio
 	case state.BrainstormCount == 0:
 		recommendations = append(recommendations, Recommendation{
 			ID:       "start-brainstorm",
-			Title:    `Start with /ce-brainstorm to shape the first feature`,
+			Title:    `Start with /kb-brainstorm to shape the first feature`,
 			Reason:   "No brainstorms were found in docs/brainstorms yet.",
 			Priority: 90,
 		})
 	case state.PlanCount == 0:
 		recommendations = append(recommendations, Recommendation{
 			ID:       "turn-brainstorm-into-plan",
-			Title:    `Turn the brainstorm into a plan with /ce-plan`,
+			Title:    `Turn the brainstorm into a plan with /kb-plan`,
 			Reason:   "Brainstorms exist, but no plan files were found in docs/plans.",
 			Priority: 85,
 		})
 	case state.HasUncheckedPlan:
 		recommendations = append(recommendations, Recommendation{
 			ID:       "execute-active-plan",
-			Title:    `Continue the active plan with /ce-work`,
+			Title:    `Continue the active plan with /kb-work`,
 			Reason:   "At least one plan still has unchecked items.",
 			Priority: 80,
 		})

@@ -148,9 +148,6 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		// karpathy-guidelines ships only as a template; there is no
 		// .github/skills/karpathy-guidelines/ in this repo.
 		"karpathy-guidelines": true,
-		// kanban-first-principles ships only as a template (anti-sycophancy
-		// behavioral guideline). No dogfooded copy in this repo.
-		"kanban-first-principles": true,
 		// autoresearch ships only as a template (sourced from
 		// github/awesome-copilot, MIT). No dogfooded copy in this repo.
 		"autoresearch": true,
@@ -182,7 +179,6 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		"agent-native-architecture": true,
 		"agent-native-audit":        true,
 		"andrew-kane-gem-writer":    true,
-		"ce-work-beta":              true,
 		"changelog":                 true,
 		"compound-docs":             true,
 		"create-agent-skill":        true,
@@ -201,6 +197,7 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		"git-commit-push-pr":        true,
 		"git-worktree":              true,
 		"heal-skill":                true,
+		"handoff":                   true,
 		"onboarding":                true,
 		"proof":                     true,
 		"rclone":                    true,
@@ -216,11 +213,6 @@ func TestDogfoodTemplateParity(t *testing.T) {
 		"todo-resolve":              true,
 		"todo-triage":               true,
 		"triage":                    true,
-		"workflows-brainstorm":      true,
-		"workflows-compound":        true,
-		"workflows-plan":            true,
-		"workflows-review":          true,
-		"workflows-work":            true,
 	}
 
 	// Stale-entry check: every name listed in templateOnly must actually

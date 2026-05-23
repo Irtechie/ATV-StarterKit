@@ -12,7 +12,7 @@ description: Enhance a plan with parallel research agents for each section to ad
 
 **Note: The current year is 2026.** Use this when searching for recent documentation and best practices.
 
-This command takes an existing plan (from `/ce-plan`) and enhances each section with parallel research agents. Each major element gets its own dedicated research sub-agent to find:
+This command takes an existing plan (from `/kb-plan`) and enhances each section with parallel research agents. Each major element gets its own dedicated research sub-agent to find:
 - Best practices and industry patterns
 - Performance optimizations
 - UI/UX improvements (if applicable)
@@ -483,14 +483,14 @@ After writing the enhanced plan, use the **AskUserQuestion tool** to present the
 **Options:**
 1. **View diff** - Show what was added/changed
 2. **Run `/technical_review`** - Get feedback from reviewers on enhanced plan
-3. **Start `/ce-work`** - Begin implementing this enhanced plan
+3. **Start `/kb-work`** - Begin implementing this enhanced plan
 4. **Deepen further** - Run another round of research on specific sections
 5. **Revert** - Restore original plan (if backup exists)
 
 Based on selection:
 - **View diff** → Run `git diff [plan_path]` or show before/after
 - **`/technical_review`** → Call the /technical_review command with the plan file path
-- **`/ce-work`** → Call the /ce-work command with the plan file path
+- **`/kb-work`** → Call the /kb-work command with the plan file path
 - **Deepen further** → Ask which sections need more research, then re-run those agents
 - **Revert** → Restore from git or backup
 

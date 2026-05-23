@@ -19,7 +19,7 @@ The primary adaptation work is:
 
 ## Problem Frame
 
-The user has two battle-tested session bookends — `/takeoff` to start a session and `/land` to finish one — defined as Claude Code user-scope skills at `~/.claude/skills/{land,takeoff}/SKILL.md`. They want these same flows available inside ATV-starterkit when driving work via GitHub Copilot, which in this repo means the Copilot Skills mechanism backed by `.github/skills/<name>/SKILL.md` files (see sibling skills like `git-commit/`, `git-commit-push-pr/`, `ce-work/`, etc.).
+The user has two battle-tested session bookends — `/takeoff` to start a session and `/land` to finish one — defined as Claude Code user-scope skills at `~/.claude/skills/{land,takeoff}/SKILL.md`. They want these same flows available inside ATV-starterkit when driving work via GitHub Copilot, which in this repo means the Copilot Skills mechanism backed by `.github/skills/<name>/SKILL.md` files (see sibling skills like `git-commit/`, `git-commit-push-pr/`, `kb-work/`, etc.).
 
 Directly copying the SKILL.md files is insufficient: the Claude versions assume tools and conventions that Copilot does not have (e.g., `ExitWorktree`, `mcp__backlog__task_create`, Claude's keyword-trigger "this is not an exact match" language). They also make assumptions about stack detection that should be tightened for this specific repo (Go primary, with Node tooling under `npm/`).
 
@@ -54,8 +54,8 @@ Directly copying the SKILL.md files is insufficient: the Claude versions assume 
 
 - `.github/skills/git-commit/SKILL.md` — canonical shape for a git-oriented Copilot skill in this repo. Uses YAML frontmatter with `name` and `description`, then numbered `### Step N:` sections. No `argument-hint` in the Copilot variant.
 - `.github/skills/git-commit-push-pr/SKILL.md` — the closest functional cousin to `/land`. Shows the repo's pattern for `gh pr view` / `gh pr create`, exit-code capture, and PR description construction. `/land` should not duplicate this skill's PR-body authoring logic — it should either delegate ("follow the conventions in `git-commit-push-pr`") or stay terse on PR body, focusing on the commit-push-PR *sequence* rather than the body craft.
-- `.github/skills/ce-work/` and similar — confirm the `.github/skills/<name>/SKILL.md` structure is the registration mechanism for Copilot skills in this repo.
-- `.github/copilot-instructions.md` — lists available workflows (`/ce-brainstorm`, `/ce-plan`, etc.). New skills should be added to this index so Copilot users discover them.
+- `.github/skills/kb-work/` and similar — confirm the `.github/skills/<name>/SKILL.md` structure is the registration mechanism for Copilot skills in this repo.
+- `.github/copilot-instructions.md` — lists available workflows (`/kb-brainstorm`, `/kb-plan`, etc.). New skills should be added to this index so Copilot users discover them.
 - `~/.claude/skills/land/SKILL.md` and `~/.claude/skills/takeoff/SKILL.md` — source documents. Carry over the 10-step / 6-step structures, the banners, and the "never merge / never skip push" rules verbatim. Strip Claude-specific tool calls.
 
 ### Institutional Learnings
@@ -163,7 +163,7 @@ Directly copying the SKILL.md files is insufficient: the Claude versions assume 
 - Happy path: `backlog/` directory exists with a mix of To Do / In Progress / Done tasks → skill renders 🛫, 🟢, ⚪ groups correctly, emits banner.
 - Happy path (this repo today): No `backlog/` directory, `docs/plans/` has several `status: active` plans → skill renders the plan-based fallback list, states that it's falling back, emits banner.
 - Edge case: Task with unresolved dependency → skill annotates the line with `(blocked by <ID>)` rather than hiding it.
-- Edge case: Empty backlog and empty plans → skill congratulates the user, suggests `/ce-ideate` or `/ce-plan`, still emits banner.
+- Edge case: Empty backlog and empty plans → skill congratulates the user, suggests `/ce-ideate` or `/kb-plan`, still emits banner.
 - Edge case: `--top 3` argument → skill truncates the top-priority group to 3 items.
 - Edge case: Task title contains a `|` pipe character → skill escapes it as `\|`.
 - Error path: `backlog` CLI is present but returns a non-zero exit code → skill reports the error honestly, falls back to `docs/plans/`, emits banner.
@@ -185,7 +185,7 @@ Directly copying the SKILL.md files is insufficient: the Claude versions assume 
 - Modify: `.github/copilot-instructions.md`
 
 **Approach:**
-- Add a new subsection under the top-level workflow list (alongside `/ce-brainstorm` etc.) titled "Session bookends" with two bullets:
+- Add a new subsection under the top-level workflow list (alongside `/kb-brainstorm` etc.) titled "Session bookends" with two bullets:
   - `/takeoff` — Prioritized backlog briefing to start a session
   - `/land` — Commit → push → PR → handoff to finish a session
 - Keep the phrasing terse to match the rest of the file.

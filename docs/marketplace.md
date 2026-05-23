@@ -59,9 +59,9 @@ copilot plugin install atv-agents@atv-starter-kit   # agents for category-pack o
 
 | Pack | Skills | Use when |
 |---|---|---|
-| `atv-pack-planning` | brainstorming, ce-brainstorm, ce-ideate, ce-plan, deepen-plan | Shape work before coding |
+| `atv-pack-planning` | brainstorming, kb-brainstorm, ce-ideate, kb-plan, deepen-plan | Shape work before coding |
 | `atv-pack-review` | ce-review, document-review | Multi-agent review passes |
-| `atv-pack-shipping` | takeoff, ce-work, ce-compound, ce-compound-refresh, land, lfg, slfg | Execute and ship |
+| `atv-pack-shipping` | takeoff, kb-work, ce-compound, ce-compound-refresh, land, lfg, slfg | Execute and ship |
 | `atv-pack-security` | atv-security | Config audit + OWASP/STRIDE |
 | `atv-pack-quality` | unslop, ralph-loop | Tighten up code, iterate |
 | `atv-pack-guidelines` | karpathy-guidelines, autoresearch | Behavioral guardrails + autonomous experiment loop |
@@ -81,10 +81,10 @@ For each skill listed above (and a few utility skills like `setup`, `feature-vid
 ```bash
 copilot plugin install atv-skill-autoresearch@atv-starter-kit
 copilot plugin install atv-skill-atv-security@atv-starter-kit
-copilot plugin install atv-skill-ce-plan@atv-starter-kit
+copilot plugin install atv-skill-kb-plan@atv-starter-kit
 ```
 
-> **Heads up:** category-pack and per-skill plugins include skills only. Several skills (`ce-plan`, `ce-ideate`, `deepen-plan`, `ce-review`, `document-review`) dispatch reviewer/research agents that are bundled separately in `atv-agents`. For the most predictable experience, install `atv-everything`. If you choose a category pack or single skill that dispatches agents, also install `atv-agents`.
+> **Heads up:** category-pack and per-skill plugins include skills only. Several skills (`kb-plan`, `ce-ideate`, `deepen-plan`, `ce-review`, `document-review`) dispatch reviewer/research agents that are bundled separately in `atv-agents`. For the most predictable experience, install `atv-everything`. If you choose a category pack or single skill that dispatches agents, also install `atv-agents`.
 
 ## Skill dependencies (subset)
 
@@ -94,11 +94,11 @@ Skills that depend on agents bundled in `atv-agents`:
 |---|---|
 | `ce-review` | Dispatches the full compound-engineering reviewer fleet. Falls back to bundled agents when missing. |
 | `document-review` | Dispatches document-review specialist agents. |
-| `ce-plan`, `ce-ideate`, `deepen-plan` | Dispatch research agents during discovery/ideation. Degrade gracefully if missing. |
+| `kb-plan`, `ce-ideate`, `deepen-plan` | Dispatch research agents during discovery/ideation. Degrade gracefully if missing. |
 
 Skills that reference the [compound-engineering plugin](https://github.com/EveryInc/compound-engineering-plugin) (optional, separate install):
 
-- `ce-plan`, `ce-ideate`, `deepen-plan`, `ce-review`, `document-review` — all degrade gracefully when compound-engineering is not installed.
+- `kb-plan`, `ce-ideate`, `deepen-plan`, `ce-review`, `document-review` — all degrade gracefully when compound-engineering is not installed.
 
 ## What the marketplace does NOT install
 
@@ -112,7 +112,7 @@ These remain available only through `npx atv-starterkit init` (project-level sca
 
 ## Plugin overlap & precedence
 
-Copilot CLI uses **first-found-wins** for skills/agents and **last-wins** for MCP servers (project beats user beats plugin). If you install both `atv-everything` and `atv-pack-shipping`, the plugin loaded first determines which version of `ce-work` is used. **Install one ATV scope at a time** to keep behaviour predictable.
+Copilot CLI uses **first-found-wins** for skills/agents and **last-wins** for MCP servers (project beats user beats plugin). If you install both `atv-everything` and `atv-pack-shipping`, the plugin loaded first determines which version of `kb-work` is used. **Install one ATV scope at a time** to keep behaviour predictable.
 
 ## Versioning
 

@@ -12,16 +12,16 @@ import (
 // VS Code Copilot Chat front-matter, a description that names the skill, and
 // a body that delegates to the canonical SKILL.md path.
 func TestBuildPromptShim_HappyPath(t *testing.T) {
-	got := string(BuildPromptShim("ce-plan"))
+	got := string(BuildPromptShim("kb-plan"))
 
 	mustContain := []string{
 		"mode: agent",
-		"ce-plan",
-		".github/skills/ce-plan/SKILL.md",
+		"kb-plan",
+		".github/skills/kb-plan/SKILL.md",
 	}
 	for _, sub := range mustContain {
 		if !strings.Contains(got, sub) {
-			t.Errorf("BuildPromptShim(\"ce-plan\") missing %q\n--- got ---\n%s", sub, got)
+			t.Errorf("BuildPromptShim(\"kb-plan\") missing %q\n--- got ---\n%s", sub, got)
 		}
 	}
 
@@ -39,12 +39,12 @@ func TestBuildPromptShim_HappyPath(t *testing.T) {
 // names round-trip through both the front-matter description and the skill
 // link target without escaping or quoting damage.
 func TestBuildPromptShim_HyphenatedSkillName(t *testing.T) {
-	got := string(BuildPromptShim("ce-brainstorm"))
+	got := string(BuildPromptShim("kb-brainstorm"))
 
-	if !strings.Contains(got, ".github/skills/ce-brainstorm/SKILL.md") {
+	if !strings.Contains(got, ".github/skills/kb-brainstorm/SKILL.md") {
 		t.Errorf("hyphenated skill name not preserved in link target\n--- got ---\n%s", got)
 	}
-	if !strings.Contains(got, "ce-brainstorm") {
+	if !strings.Contains(got, "kb-brainstorm") {
 		t.Errorf("hyphenated skill name missing from output\n--- got ---\n%s", got)
 	}
 }
@@ -130,10 +130,10 @@ func TestBuildCatalog_IncludesAllPromptShims(t *testing.T) {
 
 func TestBuildCatalog_PromptShimContentMatchesBuilder(t *testing.T) {
 	comps := BuildCatalog(detectStackForTest())
-	target := ".github/prompts/ce-plan.prompt.md"
+	target := ".github/prompts/kb-plan.prompt.md"
 	for _, c := range comps {
 		if filepathToSlash(c.Path) == target {
-			want := string(BuildPromptShim("ce-plan"))
+			want := string(BuildPromptShim("kb-plan"))
 			if string(c.Content) != want {
 				t.Errorf("catalog component %q content drifted from BuildPromptShim output", target)
 			}
@@ -147,8 +147,8 @@ func TestBuildFilteredCatalog_CoreSkillsOnlyIncludesCoreShims(t *testing.T) {
 	comps := BuildFilteredCatalog(detectStackForTest(), []string{"core-skills"})
 	got := promptShimPaths(comps)
 
-	if !got[".github/prompts/ce-plan.prompt.md"] {
-		t.Errorf("core-skills layer missing ce-plan.prompt.md")
+	if !got[".github/prompts/kb-plan.prompt.md"] {
+		t.Errorf("core-skills layer missing kb-plan.prompt.md")
 	}
 	if got[".github/prompts/lfg.prompt.md"] {
 		t.Errorf("core-skills layer should NOT include orchestrator shim lfg.prompt.md")
@@ -162,8 +162,8 @@ func TestBuildFilteredCatalog_OrchestratorsOnlyIncludesOrchestratorShims(t *test
 	if !got[".github/prompts/lfg.prompt.md"] {
 		t.Errorf("orchestrators layer missing lfg.prompt.md")
 	}
-	if got[".github/prompts/ce-plan.prompt.md"] {
-		t.Errorf("orchestrators layer should NOT include core-skill shim ce-plan.prompt.md")
+	if got[".github/prompts/kb-plan.prompt.md"] {
+		t.Errorf("orchestrators layer should NOT include core-skill shim kb-plan.prompt.md")
 	}
 }
 

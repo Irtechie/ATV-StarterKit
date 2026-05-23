@@ -27,7 +27,7 @@ Cherry-pick PR #7 files into `pkg/scaffold/templates/`, register 3 new skill dir
 - **`agent-browser` special handling preserved** — PR #7 adds references/ and templates/ subdirs to agent-browser, which is a content update to the existing skill. The `IncludeAgentBrowser` / Full-preset-only tracking remains unchanged.
 - **Binary size increase** — 20 new agent files + 3 new skill directories + expanded existing files will increase the embedded content. Acceptable for a Go binary.
 - **No runtime behavior changes** — this is purely embedded content. `BuildCatalog`, `BuildFilteredCatalogForPacks`, `WriteAll` flow unchanged.
-- **Beta content excluded** — `ce-work-beta` and `.bak` backup files from PR #7 are not copied.
+- **Beta content excluded** — `kb-work-beta` and `.bak` backup files from PR #7 are not copied.
 
 ## System-Wide Impact
 
@@ -49,7 +49,7 @@ Cherry-pick PR #7 files into `pkg/scaffold/templates/`, register 3 new skill dir
 - [ ] `go build ./...` succeeds
 - [ ] `go test ./...` passes
 - [ ] No changes to `presets.go`, `wizard.go`, `stackAgents` map, or `skillComponents()` logic
-- [ ] `ce-work-beta` and `.bak` files excluded
+- [ ] `kb-work-beta` and `.bak` files excluded
 
 ## Success Metrics
 
@@ -109,10 +109,10 @@ Create in `pkg/scaffold/templates/skills/`:
 **1d. Update existing skill directories (~20 dirs)**
 
 Replace/update content in existing skill directories. Key updates:
-- `ce-brainstorm/` — major SKILL.md rewrite
-- `ce-plan/` — major SKILL.md expansion
+- `kb-brainstorm/` — major SKILL.md rewrite
+- `kb-plan/` — major SKILL.md expansion
 - `ce-review/` — rewrite + add `references/` subdir
-- `ce-work/` — rewrite
+- `kb-work/` — rewrite
 - `ce-compound/` — rewrite + add `references/`, `assets/` subdirs
 - `document-review/` — rewrite + add `references/` subdir
 - `feature-video/` — major update
@@ -125,13 +125,13 @@ Replace/update content in existing skill directories. Key updates:
 ```go
 var coreSkillDirectories = []string{
     "brainstorming",
-    "ce-brainstorm",
+    "kb-brainstorm",
     "ce-compound",
     "ce-compound-refresh",  // NEW
     "ce-ideate",            // NEW
-    "ce-plan",
+    "kb-plan",
     "ce-review",
-    "ce-work",
+    "kb-work",
     "deepen-plan",
     "document-review",
     "setup",
@@ -153,11 +153,11 @@ var orchestratorSkillDirectories = []string{
 gstack.CategoryPlanning: {
     {Label: "Brainstorming — explore what to build", Key: "core-skills:brainstorming", Source: "atv"},
     {Label: "CE Ideate — structured idea exploration", Key: "core-skills:ce-ideate", Source: "atv"},  // NEW
-    {Label: "Plan — turn ideas into an implementation plan", Key: "core-skills:ce-plan", Source: "atv"},
+    {Label: "Plan — turn ideas into an implementation plan", Key: "core-skills:kb-plan", Source: "atv"},
     {Label: "Deepen Plan — parallel research to harden the plan", Key: "core-skills:deepen-plan", Source: "atv"},
 },
 gstack.CategoryShipping: {
-    {Label: "CE Work — execute plans with quality checks", Key: "core-skills:ce-work", Source: "atv"},
+    {Label: "KB Work — execute plans with quality checks", Key: "core-skills:kb-work", Source: "atv"},
     {Label: "LFG — full autonomous pipeline", Key: "orchestrators:lfg", Source: "atv"},
     {Label: "SLFG — swarm mode parallel execution", Key: "orchestrators:slfg", Source: "atv"},
     {Label: "CE Compound — document solutions", Key: "core-skills:ce-compound", Source: "atv"},

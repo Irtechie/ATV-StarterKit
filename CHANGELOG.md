@@ -122,7 +122,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Fixed
 
-- **ce-brainstorm and brainstorming templates restored** — the compound-engineering update (v2.4.0) accidentally flattened both SKILL.md files into single lines, breaking YAML frontmatter parsing and making `/ce-brainstorm` undiscoverable. Both templates now have proper multi-line content with valid frontmatter.
+- **kb-brainstorm and brainstorming templates restored** — the compound-engineering update (v2.4.0) accidentally flattened both SKILL.md files into single lines, breaking YAML frontmatter parsing and making `/kb-brainstorm` undiscoverable. Both templates now have proper multi-line content with valid frontmatter.
 
 ### Changed
 

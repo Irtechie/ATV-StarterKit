@@ -66,7 +66,7 @@ Only `land` and `takeoff` are gaps. This plan closes them.
   - `orchestratorSkillDirectories` (~line 187) — opt-in workflow orchestrators (`lfg`, `slfg`, `ralph-loop`, etc.).
   - `easterEggSkillDirectories` (~line 197) — opt-in fun extras (`meme-iq`).
 - `pkg/scaffold/templates/skills/<name>/SKILL.md` — embedded via `//go:embed all:templates`. Walked by `skillComponents()` and filtered by the selected directories.
-- `pkg/tui/categories.go` `atvCategoryMapping` — maps display categories to ATV skill entries shown in the customize multi-select. The shipping category currently lists `ce-work`, `lfg`, `slfg`, `ce-compound`, `ce-compound-refresh`, `claude-permissions-optimizer`. Land/takeoff fit cleanly here.
+- `pkg/tui/categories.go` `atvCategoryMapping` — maps display categories to ATV skill entries shown in the customize multi-select. The shipping category currently lists `kb-work`, `lfg`, `slfg`, `ce-compound`, `ce-compound-refresh`, `claude-permissions-optimizer`. Land/takeoff fit cleanly here.
 - `pkg/tui/presets.go` — Starter/Pro/Full all include `LayerCoreSkills` and `LayerOrchestrators`. Adding `land`/`takeoff` to either layer means all three presets pick them up automatically.
 
 ### Decision: which layer for `land` and `takeoff`?
@@ -76,7 +76,7 @@ They are session lifecycle workflows that wrap commit/push/PR (land) and backlog
 **Decision:** Add to `coreSkillDirectories`. Rationale:
 
 1. They have no runtime prerequisites (unlike `lfg` which orchestrates other skills).
-2. They are short, self-contained protocols — closer to `setup` and `ce-plan` in spirit than to `lfg`.
+2. They are short, self-contained protocols — closer to `setup` and `kb-plan` in spirit than to `lfg`.
 3. Putting them in core means the **Starter** preset gets them, which matches user intent: someone choosing the "lightest install" still expects basic session start/end protocols.
 4. Easy to revisit later — moving them to orchestrators is a one-line slice edit.
 
@@ -186,7 +186,7 @@ None needed. This is a wiring change against an existing internal API.
   - `{Label: "Takeoff — backlog briefing at session start", Key: "core-skills:takeoff", Source: "atv"}`
   - `{Label: "Land — commit, push, and open a PR at session end", Key: "core-skills:land", Source: "atv"}`
 - Wording is suggestive — implementer may refine after re-reading the SKILL.md files.
-- Ordering: place `takeoff` before `ce-work` (start of session) and `land` after `claude-permissions-optimizer` (end of session). Keeps the category readable as a session timeline.
+- Ordering: place `takeoff` before `kb-work` (start of session) and `land` after `claude-permissions-optimizer` (end of session). Keeps the category readable as a session timeline.
 - Default selection is automatic — `defaultSelectedSkillKeys` selects every non-easter-egg ATV entry.
 
 **Patterns to follow:**

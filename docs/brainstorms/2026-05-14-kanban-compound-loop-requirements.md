@@ -1,14 +1,14 @@
 ---
 date: 2026-05-14
 topic: kanban-compound-loop
-brainstorm_style: kanban-brainstorm
+brainstorm_style: kb-brainstorm
 ---
 
 # Close the Compound Engineering Loop in Kanban Skills
 
 ## Problem Frame
 
-kanban-work executes vertical slices well (Plan + Work) but stops short of the full compound engineering loop. Review is a suggestion the agent can skip. Compound doesn't exist. Learning never triggers. The system builds features but doesn't get smarter from building them.
+kb-work executes vertical slices well (Plan + Work) but stops short of the full compound engineering loop. Review is a suggestion the agent can skip. Compound doesn't exist. Learning never triggers. The system builds features but doesn't get smarter from building them.
 
 The gap: after a kanban completes, nothing captures what was learned, nothing feeds that back into the system, and nothing prevents the same mistakes on the next kanban.
 
@@ -28,14 +28,14 @@ The gap: after a kanban completes, nothing captures what was learned, nothing fe
 
 **Review Integration**
 
-- R1. After all kanban slices complete (Step 5), kanban-work MUST invoke `ce-review` on the full diff automatically — not suggest it
+- R1. After all kanban slices complete (Step 5), kb-work MUST invoke `ce-review` on the full diff automatically — not suggest it
 - R2. Review runs async/background — it does not block the developer from seeing the completion summary
-- R3. P0/P1 review findings MUST be resolved before the PR ships (Step 6 — "Ship It" in kanban-work). P2/P3 are logged in the manifest but do not block
+- R3. P0/P1 review findings MUST be resolved before the PR ships (Step 6 — "Ship It" in kb-work). P2/P3 are logged in the manifest but do not block
 - R4. If ce-review is already running or was already invoked for this branch, skip duplicate invocation
 
 **Compound Step**
 
-- R5. After review completes and P0/P1 findings are resolved (or immediately if none found), kanban-work invokes `ce-compound` automatically
+- R5. After review completes and P0/P1 findings are resolved (or immediately if none found), kb-work invokes `ce-compound` automatically
 - R6. ce-compound receives context about all slices executed, the review findings (if any), and what was resolved
 - R7. If the compound step determines nothing novel was learned (pure CRUD, scaffolding), it logs "No novel patterns — standard implementation" and skips doc creation
 - R8. Compound output lands in `docs/solutions/` per existing ce-compound behavior — no new location
@@ -48,9 +48,9 @@ The gap: after a kanban completes, nothing captures what was learned, nothing fe
 
 **Automatic Learning Trigger**
 
-- R12. After compound completes, kanban-work auto-runs `/learn` to extract instincts from the session
+- R12. After compound completes, kb-work auto-runs `/learn` to extract instincts from the session
 - R13. `/learn` runs regardless of whether compound produced a doc — review findings alone may contain learnable patterns
-- R14. The full loop is hands-off once kanban-work starts: Work → Review (async) → Resolve P0/P1s (interactive if needed) → Compound → Learn → Ship
+- R14. The full loop is hands-off once kb-work starts: Work → Review (async) → Resolve P0/P1s (interactive if needed) → Compound → Learn → Ship
 
 **Automatic Evolution**
 
@@ -68,7 +68,7 @@ The gap: after a kanban completes, nothing captures what was learned, nothing fe
 
 ## Success Criteria
 
-- Running `kanban-work` on a manifest → completing all slices → triggers review + compound + learn automatically with zero manual intervention (except P0/P1 resolution if findings exist)
+- Running `kb-work` on a manifest → completing all slices → triggers review + compound + learn automatically with zero manual intervention (except P0/P1 resolution if findings exist)
 - After 3-5 kanban runs, `.atv/instincts/project.yaml` exists with real patterns extracted from the work
 - Stale instincts decay and don't pollute future `/evolve` runs
 - Resolved P0/P1 review findings appear as observations in the learning pipeline
@@ -76,8 +76,8 @@ The gap: after a kanban completes, nothing captures what was learned, nothing fe
 
 ## Scope Boundaries
 
-- Do NOT rewrite the core logic of ce-compound, ce-review, /learn, /instincts, or /evolve — but extending their data model (e.g., adding `last_observed` field) and adding pre/post-invocation logic in kanban-work is in scope
-- Do NOT restructure kanban-plan — it already has `expected_files` and slice decomposition
+- Do NOT rewrite the core logic of ce-compound, ce-review, /learn, /instincts, or /evolve — but extending their data model (e.g., adding `last_observed` field) and adding pre/post-invocation logic in kb-work is in scope
+- Do NOT restructure kb-plan — it already has `expected_files` and slice decomposition
 - Do NOT add per-slice micro-learnings — batch at end is the chosen pattern
 - Do NOT stuff CLAUDE.md or AGENTS.md — learnings go through the instinct pipeline
 - Do NOT change how review agents work internally — only wire their output into the loop
@@ -107,9 +107,9 @@ The gap: after a kanban completes, nothing captures what was learned, nothing fe
 - **Staleness check only at /evolve (rejected):** By the time instincts reach 0.8 confidence, they may already be stale from early observations. Continuous decay prevents this — CrewAI pattern
 - **CLAUDE.md stuffing (rejected):** Context bloat is the #1 failure mode per research. Claude Code caps at 25KB, Windsurf at 6K chars. ATV's on-demand skill loading is architecturally superior — landscape research
 
-## Slice Candidates (advisory for /kanban-plan)
+## Slice Candidates (advisory for /kb-plan)
 
-- **Wire ce-review as mandatory async step** — kanban-work invokes ce-review automatically after all slices complete, runs in background, P1s block shipping
+- **Wire ce-review as mandatory async step** — kb-work invokes ce-review automatically after all slices complete, runs in background, P1s block shipping
 - **Add compound step** — after review, invoke ce-compound with full feature context, skip if nothing novel
 - **Feed resolved P1s into observations** — format review findings as structured observations for /learn
 - **Auto-trigger /learn** — after compound completes, run /learn automatically to extract instincts
@@ -129,4 +129,4 @@ The gap: after a kanban completes, nothing captures what was learned, nothing fe
 
 ## Next Steps
 
-→ `/kanban-plan` for vertical-slice decomposition
+→ `/kb-plan` for vertical-slice decomposition

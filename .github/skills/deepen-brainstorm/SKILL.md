@@ -237,7 +237,7 @@ Write the enhanced brainstorm:
 - The brainstorm still contains every original decision and scope boundary.
 - Research additions distinguish verified facts from inference.
 - The top summary names the strongest decision, weakest decision, biggest risk, and remaining open questions.
-- The document is ready to feed into `ce-plan` or `kanban-plan`.
+- The document is ready to feed into `kb-plan` or `kb-plan`.
 
 ## Post-Enhancement Options
 
@@ -245,6 +245,6 @@ After writing the enhanced brainstorm, ask what to do next:
 
 1. **View changes** - Show what research added
 2. **Revisit challenged decisions** - Discuss decisions that research challenged
-3. **Proceed to planning** - Run `/ce-plan` or `/kanban-plan` with the brainstorm path
+3. **Proceed to planning** - Run `/kb-plan` or `/kb-plan` with the brainstorm path
 4. **Deepen further** - Run another research pass on specific decisions
 5. **Share to Proof** - Upload to Proof for collaborative review, after explicit confirmation

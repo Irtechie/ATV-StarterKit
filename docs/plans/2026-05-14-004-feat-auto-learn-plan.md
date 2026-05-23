@@ -6,7 +6,7 @@ blockers: [slice-003]
 verification: verification-only
 hitl: false
 expected_files:
-  - .github/skills/kanban-work/SKILL.md
+  - .github/skills/kb-work/SKILL.md
 status: pending
 ---
 

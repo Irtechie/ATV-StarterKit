@@ -12,23 +12,23 @@ The kanban skills are an **enforcement-first agent pipeline** that decomposes wo
 ```text
 /klfg — the orchestrator (hands-off, one command)
    │
-   ├─ /kanban-brainstorm    ← research-first requirements
+   ├─ /kb-brainstorm    ← research-first requirements
    │
-   ├─ /kanban-plan          ← vertical-slice decomposition with DAG
+   ├─ /kb-plan          ← vertical-slice decomposition with DAG
    │
-   └─ /kanban-work          ← sequential execution engine
+   └─ /kb-work          ← sequential execution engine
          │
          ├─ 3.0  Scope Lock             (proactive — blocks writes before they happen)
          ├─ 3    Execute                 (TDD / integration / verification-only)
          ├─ 3.5  System-Wide Tests       (trace side effects 2 levels out)
          ├─ 3.6  Diff-Scope Verification (reactive — checks git diff after the fact)
          ├─ 3.7  Destructive Guard       (blocks rm -rf, force push, DROP TABLE)
-         ├─ 3.8  QA Gate                 (lint + browser) → /kanban-repair on failure
+         ├─ 3.8  QA Gate                 (lint + browser) → /kb-repair on failure
          ├─ 3.9  Figma Sync             (UI slices only)
          ├─ 4    Verify & Update
-         └─ 5    Completion              (persists scope context for kanban-complete)
+         └─ 5    Completion              (persists scope context for kb-complete)
    │
-   └─ /kanban-complete       ← post-work quality & learning
+   └─ /kb-complete       ← post-work quality & learning
          │
          ├─ 1    ce-review              (multi-agent code review, scope pre-loaded)
          ├─ 2    Resolution Gate         (P0/P1 must be fixed)
@@ -46,7 +46,7 @@ The kanban skills are an **enforcement-first agent pipeline** that decomposes wo
 
 **When to use:** You want hands-off execution from idea to reviewed, documented code. One command, walk away.
 
-**How it's different from `/lfg`:** The upstream `/lfg` runs a horizontal pipeline (plan → deepen → work → review → compound). `/klfg` enforces vertical slicing — every slice cuts through all layers end-to-end — and splits the pipeline: kanban-work owns slice execution + gates, kanban-complete owns quality review + learning.
+**How it's different from `/lfg`:** The upstream `/lfg` runs a horizontal pipeline (plan → deepen → work → review → compound). `/klfg` enforces vertical slicing — every slice cuts through all layers end-to-end — and splits the pipeline: kb-work owns slice execution + gates, kb-complete owns quality review + learning.
 
 ```
 /klfg "add user streak tracking"
@@ -54,22 +54,22 @@ The kanban skills are an **enforcement-first agent pipeline** that decomposes wo
 
 ---
 
-### `/kanban-brainstorm` — Research-First Requirements
+### `/kb-brainstorm` — Research-First Requirements
 
 **What it does:** Runs market/landscape research *before* asking product questions. Questions are sharper because they're grounded in real prior art.
 
 **Produces:** `docs/brainstorms/*-requirements.md`
 
-**Key difference from `/ce-brainstorm`:** Inverts the order. ce-brainstorm asks questions first, then validates. kanban-brainstorm researches first, then asks — so questions are "given X exists, should we do Y?" instead of "what do you want?"
+**Key difference from `/kb-brainstorm`:** Inverts the order. kb-brainstorm asks questions first, then validates. kb-brainstorm researches first, then asks — so questions are "given X exists, should we do Y?" instead of "what do you want?"
 
 **When to use:**
 - Prior art or competitive landscape materially changes framing
-- Output is intended to feed `/kanban-plan` (vertical slices)
+- Output is intended to feed `/kb-plan` (vertical slices)
 - You need research to inform the conversation before committing to an approach
 
 ---
 
-### `/kanban-plan` — Vertical Slice Decomposition
+### `/kb-plan` — Vertical Slice Decomposition
 
 **What it does:** Breaks a brainstorm/PRD/feature description into independently-executable vertical slices with a dependency DAG, verification strategy, and HITL flags.
 
@@ -77,7 +77,7 @@ The kanban skills are an **enforcement-first agent pipeline** that decomposes wo
 - `docs/plans/YYYY-MM-DD-000-kanban-<name>-manifest.md` — the DAG
 - `docs/plans/YYYY-MM-DD-NNN-<type>-<name>-plan.md` — one per slice
 
-**Key innovation — `expected_files`:** Every slice must declare which files it will create or modify. This isn't guidance — it's the contract that `kanban-work` enforces at Steps 3.0 and 3.6. If a slice doesn't declare its files, execution cannot begin.
+**Key innovation — `expected_files`:** Every slice must declare which files it will create or modify. This isn't guidance — it's the contract that `kb-work` enforces at Steps 3.0 and 3.6. If a slice doesn't declare its files, execution cannot begin.
 
 **Slice format:**
 ```yaml
@@ -111,9 +111,9 @@ status: pending
 
 ---
 
-### `/kanban-work` — Sequential Slice Executor
+### `/kb-work` — Sequential Slice Executor
 
-**What it does:** Executes all slices from a kanban manifest in dependency order, running every safety gate per slice. After all slices complete, persists scope context for `kanban-complete` to pick up.
+**What it does:** Executes all slices from a kanban manifest in dependency order, running every safety gate per slice. After all slices complete, persists scope context for `kb-complete` to pick up.
 
 **The Gauntlet (per-slice):**
 
@@ -130,11 +130,11 @@ status: pending
 
 **Multi-agent board sync:** Uses `docs/kanban.md` as a shared handoff file. Agents claim slices before working and release after completing. Board wins over manifest if they diverge.
 
-**Resume support:** Re-running `kanban-work` on the same manifest picks up where it left off. Already-done slices are not re-run.
+**Resume support:** Re-running `kb-work` on the same manifest picks up where it left off. Already-done slices are not re-run.
 
 ---
 
-### `/kanban-qa` — Quality Assurance Gate
+### `/kb-qa` — Quality Assurance Gate
 
 **What it does:** Hard quality verification. The browser reports what rendered. The linter reports what's dirty. The model does not self-report.
 
@@ -148,11 +148,11 @@ status: pending
 - Atomic commits per fix (one commit = one revert if it regresses)
 - Enhanced stuck detection (reverts, multi-file spirals, same-file circles)
 
-**On failure:** Invokes `kanban-repair`. Does NOT stop immediately — gives repair a chance to fix it surgically.
+**On failure:** Invokes `kb-repair`. Does NOT stop immediately — gives repair a chance to fix it surgically.
 
 ---
 
-### `/kanban-repair` — Surgical Fix Loop
+### `/kb-repair` — Surgical Fix Loop
 
 **What it does:** When QA finds failures, repair attempts targeted fixes without losing context. No handoff to a new agent — the executing agent keeps its full session.
 
@@ -173,21 +173,21 @@ status: pending
 
 ---
 
-### `/kanban-complete` — Post-Work Quality & Learning
+### `/kb-complete` — Post-Work Quality & Learning
 
-**What it does:** After `kanban-work` finishes all slices, runs the quality review and knowledge capture pipeline. Separated from kanban-work so the user gets a natural pause point before investing in review and documentation.
+**What it does:** After `kb-work` finishes all slices, runs the quality review and knowledge capture pipeline. Separated from kb-work so the user gets a natural pause point before investing in review and documentation.
 
 **Pipeline:**
-1. **ce-review** — multi-agent code review with scope-verified file list pre-loaded from kanban-work's gates (skips redundant scope discovery)
+1. **ce-review** — multi-agent code review with scope-verified file list pre-loaded from kb-work's gates (skips redundant scope discovery)
 2. **Resolution Gate** — P0/P1 findings must be fixed before proceeding. P2/P3 logged but don't block.
 3. **Compound + Learn + Evolve** — document patterns (ce-compound), extract instincts (/learn), and promote mature ones (/evolve every 5th completion)
 4. **Cleanup** — prune QA screenshots, trim observations log to 90 days
 
-**When to use:** After `kanban-work` reports all slices complete. `klfg` prompts automatically. Standalone users invoke it manually with the manifest path.
+**When to use:** After `kb-work` reports all slices complete. `klfg` prompts automatically. Standalone users invoke it manually with the manifest path.
 
 **Standalone invocation:**
 ```
-/kanban-complete docs/plans/2025-05-16-001-kanban-feature-manifest.md
+/kb-complete docs/plans/2025-05-16-001-kanban-feature-manifest.md
 ```
 
 ---
@@ -214,15 +214,15 @@ The kanban skills build on the ATV foundation:
 
 | ATV Component | How Kanban Uses It |
 |---------------|-------------------|
-| `ce-brainstorm` | kanban-brainstorm extends it with research-first ordering |
-| `ce-review` | Called by kanban-complete with scope-verified file list (skips redundant discovery) |
-| `ce-compound` | Called by kanban-complete for novel patterns |
-| `/learn` + `/evolve` | Called by kanban-complete after every completion |
+| `kb-brainstorm` | kb-brainstorm extends it with research-first ordering |
+| `ce-review` | Called by kb-complete with scope-verified file list (skips redundant discovery) |
+| `ce-compound` | Called by kb-complete for novel patterns |
+| `/learn` + `/evolve` | Called by kb-complete after every completion |
 | `docs/solutions/` | Consumed by `learnings-researcher` during planning |
-| `docs/brainstorms/` | Produced by kanban-brainstorm, consumed by kanban-plan |
-| `docs/plans/` | Produced by kanban-plan, consumed by kanban-work |
-| `agent-browser` | Used by kanban-qa for browser verification |
-| `kanban-repair` | Called by kanban-qa when checks fail |
+| `docs/brainstorms/` | Produced by kb-brainstorm, consumed by kb-plan |
+| `docs/plans/` | Produced by kb-plan, consumed by kb-work |
+| `agent-browser` | Used by kb-qa for browser verification |
+| `kb-repair` | Called by kb-qa when checks fail |
 
 ---
 
@@ -231,12 +231,12 @@ The kanban skills build on the ATV foundation:
 | Command | Does What | Produces |
 |---------|-----------|----------|
 | `/klfg "feature"` | Full pipeline, one command | PR with everything |
-| `/kanban-brainstorm "idea"` | Research → requirements | `docs/brainstorms/*-requirements.md` |
-| `/kanban-plan path/to/reqs.md` | Slice decomposition | Manifest + per-slice plans |
-| `/kanban-work path/to/manifest.md` | Execute all slices | Working code, scope context |
-| `/kanban-complete path/to/manifest.md` | Review + learn | Reviewed code, documentation |
-| `/kanban-qa` | Lint + browser checks | Pass/fail with repair attempt |
-| `/kanban-repair` | Fix QA failures | Atomic fix commits |
+| `/kb-brainstorm "idea"` | Research → requirements | `docs/brainstorms/*-requirements.md` |
+| `/kb-plan path/to/reqs.md` | Slice decomposition | Manifest + per-slice plans |
+| `/kb-work path/to/manifest.md` | Execute all slices | Working code, scope context |
+| `/kb-complete path/to/manifest.md` | Review + learn | Reviewed code, documentation |
+| `/kb-qa` | Lint + browser checks | Pass/fail with repair attempt |
+| `/kb-repair` | Fix QA failures | Atomic fix commits |
 
 ---
 
@@ -246,9 +246,9 @@ The kanban skills build on the ATV foundation:
 |-----------|-------------------|------------------|
 | Decomposition | Horizontal phases | Vertical slices |
 | Scope enforcement | None — trusts the agent | Hard gates at Steps 3.0 + 3.6 |
-| QA | Post-hoc (gstack-qa) | Per-slice (kanban-qa + repair) |
-| Review | Separate step | kanban-complete (scope pre-loaded from work) |
-| Learning | Separate step | kanban-complete (auto-cadence) |
+| QA | Post-hoc (gstack-qa) | Per-slice (kb-qa + repair) |
+| Review | Separate step | kb-complete (scope pre-loaded from work) |
+| Learning | Separate step | kb-complete (auto-cadence) |
 | Resumability | Limited | Full — manifest tracks per-slice status |
 | Multi-agent | Not designed for it | Board sync protocol in kanban.md |
 | Destructive safety | `/gstack-careful` (optional) | Step 3.7 (mandatory, cannot be skipped) |
@@ -260,16 +260,16 @@ The kanban skills build on the ATV foundation:
 ```
 .github/skills/
 ├── klfg/SKILL.md              # Pipeline orchestrator
-├── kanban-brainstorm/SKILL.md # Research-first requirements
-├── kanban-plan/SKILL.md       # Vertical slice decomposition
-├── kanban-work/SKILL.md       # Sequential executor + all gates
-├── kanban-complete/SKILL.md   # Post-work review + learning
-├── kanban-qa/SKILL.md         # Quality assurance (lint + browser)
-└── kanban-repair/SKILL.md     # Surgical fix loop
+├── kb-brainstorm/SKILL.md # Research-first requirements
+├── kb-plan/SKILL.md       # Vertical slice decomposition
+├── kb-work/SKILL.md       # Sequential executor + all gates
+├── kb-complete/SKILL.md   # Post-work review + learning
+├── kb-qa/SKILL.md         # Quality assurance (lint + browser)
+└── kb-repair/SKILL.md     # Surgical fix loop
 
 docs/
-├── brainstorms/               # Requirements docs from kanban-brainstorm
-├── plans/                     # Manifests + slice plans from kanban-plan
+├── brainstorms/               # Requirements docs from kb-brainstorm
+├── plans/                     # Manifests + slice plans from kb-plan
 ├── solutions/                 # Institutional knowledge from ce-compound
 ├── kanban.md                  # Live board (multi-agent handoff)
 └── kanban-done.md             # Archived completed features
@@ -287,10 +287,10 @@ docs/
 
 - **[All-The-Vibes/ATV-StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)** — The foundational framework. Compound Engineering pipeline, learning system, observer hooks, agent architecture, and 45+ skills that this builds on.
 - **[Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin)** — Planning-to-knowledge pipeline by Every, Inc.
-- **[gstack](https://github.com/garrytan/gstack)** — Sprint execution engine by Garry Tan / Y Combinator. Research from gstack's `/qa` informed kanban-qa's continuous console monitoring and enhanced stuck detection.
-- **[agent-browser](https://github.com/vercel-labs/agent-browser)** — Browser automation layer by Vercel Labs. Powers kanban-qa's browser verification.
+- **[gstack](https://github.com/garrytan/gstack)** — Sprint execution engine by Garry Tan / Y Combinator. Research from gstack's `/qa` informed kb-qa's continuous console monitoring and enhanced stuck detection.
+- **[agent-browser](https://github.com/vercel-labs/agent-browser)** — Browser automation layer by Vercel Labs. Powers kb-qa's browser verification.
 - **[Andrej Karpathy](https://x.com/karpathy/status/2015883857489522876)** — Behavioral guardrails philosophy. The kanban pipeline's enforcement-over-suggestion approach is a direct response to Karpathy's observation that "models make wrong assumptions on your behalf and just run along with them."
-- **[mattpocock/skills](https://github.com/mattpocock/skills)** — Inspiration for kanban-plan's slice-to-issues pattern.
+- **[mattpocock/skills](https://github.com/mattpocock/skills)** — Inspiration for kb-plan's slice-to-issues pattern.
 
 ---
 

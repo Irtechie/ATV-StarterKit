@@ -199,7 +199,7 @@ func (p *Printer) PrintNextSteps(hasGstack bool, hasAgentBrowser bool, manifestP
 	fmt.Println("  Next steps:")
 	fmt.Println(titleStyle.Render("    1.") + " Open this folder in VS Code")
 	fmt.Println(titleStyle.Render("    2.") + " Install recommended extensions when prompted")
-	fmt.Println(titleStyle.Render("    3.") + ` Try: /ce-brainstorm "your first feature idea"`)
+	fmt.Println(titleStyle.Render("    3.") + ` Try: /kb-brainstorm "your first feature idea"`)
 	step := 4
 	if hasGstack {
 		fmt.Println(titleStyle.Render(fmt.Sprintf("    %d.", step)) + ` Try: /gstack-office-hours to start a gstack sprint`)

@@ -160,4 +160,4 @@ The same lifecycle should also be easy after install: users should be able to se
 
 ## Next Steps
 
--> /ce-plan for structured implementation planning
+-> /kb-plan for structured implementation planning

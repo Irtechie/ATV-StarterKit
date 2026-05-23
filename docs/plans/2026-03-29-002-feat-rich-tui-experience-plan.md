@@ -3,7 +3,7 @@ title: "feat: Rich TUI Experience with Presets and Install Progress"
 type: feat
 status: active
 date: 2026-03-29
-origin: docs/brainstorms/2026-03-29-rich-tui-experience-brainstorm.md
+origin: docs/brainstorms/2026-03-29-rich-tui-experienkb-brainstorm.md
 ---
 
 # feat: Rich TUI Experience with Presets and Install Progress
@@ -139,7 +139,7 @@ Three changes:
 
 ### Origin
 
-- **Brainstorm:** [docs/brainstorms/2026-03-29-rich-tui-experience-brainstorm.md](docs/brainstorms/2026-03-29-rich-tui-experience-brainstorm.md) — presets, hybrid huh+bubbletea, step-by-step progress
+- **Brainstorm:** [docs/brainstorms/2026-03-29-rich-tui-experienkb-brainstorm.md](docs/brainstorms/2026-03-29-rich-tui-experienkb-brainstorm.md) — presets, hybrid huh+bubbletea, step-by-step progress
 
 ### Internal References
 

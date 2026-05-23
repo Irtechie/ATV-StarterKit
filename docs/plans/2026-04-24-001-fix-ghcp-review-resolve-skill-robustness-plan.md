@@ -45,7 +45,7 @@ In scope:
 - Size-class branching for diff fetching
 
 Out of scope:
-- Resolving merge conflicts automatically (skill surfaces the blocker and recommends `ce-work`; does not fix)
+- Resolving merge conflicts automatically (skill surfaces the blocker and recommends `kb-work`; does not fix)
 - Implementing a `pr-review-toolkit`-side chunking strategy (that belongs in that skill)
 - Changing how Copilot-review is configured on repos (that's a repo admin task)
 - Adding new reviewers beyond Copilot + pr-review-toolkit
@@ -59,7 +59,7 @@ Out of scope:
 
 ### Related prior art
 
-- `~/.claude/skills/ce-work/` — the skill recommended as a next step when merge conflicts are detected; referenced but not modified
+- `~/.claude/skills/kb-work/` — the skill recommended as a next step when merge conflicts are detected; referenced but not modified
 - `pr-review-toolkit:review-pr` — invoked via `Skill()`; contract assumed stable
 - GitHub REST endpoints already used: `/pulls/{n}`, `/pulls/{n}/reviews`, `/pulls/{n}/comments`, `/pulls/{n}/files`
 
@@ -70,7 +70,7 @@ Out of scope:
 - **Decision:** Use `gh api .../pulls/{n}/files --paginate` instead of `gh pr diff` for large PRs. **Rationale:** `/files` paginates and gives per-file patch snippets; `gh pr diff` is a single blob with the 20k cap.
 - **Decision:** Size thresholds: ≤ 20 files OR ≤ 2,000 lines = "small" (full diff); otherwise "large" (per-file fetch, adjudicator iterates file-by-file). **Rationale:** 20k is GitHub's hard cap; 2k is a soft cap where full-diff reasoning stays useful in a single prompt.
 - **Decision:** Copilot fallback is "single-reviewer mode", not abort. **Rationale:** pr-review-toolkit alone still provides value. Aborting wastes a user invocation.
-- **Decision:** Merge conflict is a blocker but a **reported** blocker, not a crash. The skill prints the state, recommends `ce-work` to resolve conflicts, and exits cleanly with exit-reason context. **Rationale:** The skill's job is PR review remediation, not merge mediation; but it should tell the user what the real blocker is.
+- **Decision:** Merge conflict is a blocker but a **reported** blocker, not a crash. The skill prints the state, recommends `kb-work` to resolve conflicts, and exits cleanly with exit-reason context. **Rationale:** The skill's job is PR review remediation, not merge mediation; but it should tell the user what the real blocker is.
 
 ## Open Questions
 
@@ -94,7 +94,7 @@ Step 0 — Preflight
   ├─ gh auth status ──────────────────── fail? stop with clear error
   ├─ detect PR ───────────────────────── none? ask user for #
   ├─ fetch PR metadata (size, merge state, head SHA)
-  │    ├─ mergeStateStatus == DIRTY ──── report blocker, recommend ce-work, STOP
+  │    ├─ mergeStateStatus == DIRTY ──── report blocker, recommend kb-work, STOP
   │    ├─ changedFiles > 20 || lines > 2000 ─ mark size_class = "large"
   │    └─ else ──────────────────────── mark size_class = "small"
   ├─ probe Copilot availability
@@ -138,7 +138,7 @@ Step 0 — Preflight
 
 **Test scenarios:**
 - Happy path: small clean PR → preflight reports all green, proceeds to Step 1
-- Edge case: PR #9 scenario — DIRTY merge state → preflight reports blocker and stops with ce-work recommendation
+- Edge case: PR #9 scenario — DIRTY merge state → preflight reports blocker and stops with kb-work recommendation
 - Edge case: 15k-line PR → preflight reports `size_class=large` and picks per-file strategy
 - Edge case: repo without Copilot → preflight marks `copilot_available=false` and continues in single-reviewer mode
 - Integration: user invokes skill with explicit PR number arg → preflight uses that, skips auto-detect
@@ -253,7 +253,7 @@ Step 0 — Preflight
 - Modify: `~/.claude/skills/ghcp-review-resolve/SKILL.md` (Step 0 and Step 8 "Final summary")
 
 **Approach:**
-- In Step 0, after fetching merge state, if DIRTY: emit the preflight table, then a single-paragraph "Recommended next action" with two options (`git rebase` manual, or `Skill(skill="compound-engineering:ce-work", args="resolve the merge conflicts")`), then stop the skill with a clean exit
+- In Step 0, after fetching merge state, if DIRTY: emit the preflight table, then a single-paragraph "Recommended next action" with two options (`git rebase` manual, or `Skill(skill="compound-engineering:kb-work", args="resolve the merge conflicts")`), then stop the skill with a clean exit
 - Make "stop cleanly after reporting blockers" an explicit skill mode, not an error state — no crash, no partial side effects
 - In Step 8's "what not to do" list, reinforce: a reported blocker is not a failure; the skill did its job by identifying what's in the way
 
@@ -262,7 +262,7 @@ Step 0 — Preflight
 
 **Test scenarios:**
 - Happy path: mergeable PR → no blocker, proceeds
-- Edge case: DIRTY state → skill reports table, recommends ce-work, exits with no side effects
+- Edge case: DIRTY state → skill reports table, recommends kb-work, exits with no side effects
 - Edge case: `UNKNOWN` merge state (GitHub hasn't computed yet) → skill waits up to 30s for a definitive state, then proceeds or reports
 - Guardrail: blocker-exit path must not post any PR comments, submit any reviews, or run any fix loop
 
@@ -300,11 +300,11 @@ Step 0 — Preflight
 
 ## System-Wide Impact
 
-- **Interaction graph:** Skill invokes `pr-review-toolkit:review-pr` (unchanged contract), `gh api` REST + GraphQL endpoints, and recommends but does not invoke `compound-engineering:ce-work` on the merge-conflict path.
+- **Interaction graph:** Skill invokes `pr-review-toolkit:review-pr` (unchanged contract), `gh api` REST + GraphQL endpoints, and recommends but does not invoke `compound-engineering:kb-work` on the merge-conflict path.
 - **Error propagation:** New preflight can exit the skill cleanly before any side effect; all later steps assume preflight passed and its flags are set. If a later step is ever invoked without preflight flags, it must refuse to run rather than assume defaults.
 - **State lifecycle risks:** Idempotency check reads PR state that could change between preflight and Step 2. Mitigation: re-check head SHA immediately before any mutation (reviewer request, comment post, commit push) — this is already in the skill's existing Guardrail ("If the PR head SHA changes mid-run, stop").
 - **API surface parity:** Only one skill file changes. No other skill depends on this one's internal structure.
-- **Integration coverage:** Manual re-run on PR #9 is the end-to-end integration test. Expected new output: preflight table identifies DIRTY + prior-resolved, recommends ce-work, exits cleanly with zero inline comments posted.
+- **Integration coverage:** Manual re-run on PR #9 is the end-to-end integration test. Expected new output: preflight table identifies DIRTY + prior-resolved, recommends kb-work, exits cleanly with zero inline comments posted.
 - **Unchanged invariants:** Guardrails (no approve, no merge, no close, no acting on rejected findings, no fabricated text) remain intact. No change to the inline-fix loop's per-comment verification discipline.
 
 ## Risks & Dependencies
@@ -328,4 +328,4 @@ Step 0 — Preflight
 - `~/.claude/skills/ghcp-review-resolve/SKILL.md` (current version, 256 lines)
 - GitHub REST: [Pulls API — Get a pull request](https://docs.github.com/en/rest/pulls/pulls)
 - GitHub GraphQL: `PullRequest.reviewThreads` field
-- Referenced but not modified: `compound-engineering:ce-work` skill
+- Referenced but not modified: `compound-engineering:kb-work` skill

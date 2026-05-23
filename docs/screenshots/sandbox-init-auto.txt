@@ -36,11 +36,11 @@
   ✅ .github/copilot-setup-steps.yml
   ✅ .github/copilot-mcp-config.json
   ✅ .github/skills/brainstorming/SKILL.md
-  ✅ .github/skills/ce-brainstorm/SKILL.md
+  ✅ .github/skills/kb-brainstorm/SKILL.md
   ✅ .github/skills/ce-compound/SKILL.md
-  ✅ .github/skills/ce-plan/SKILL.md
+  ✅ .github/skills/kb-plan/SKILL.md
   ✅ .github/skills/ce-review/SKILL.md
-  ✅ .github/skills/ce-work/SKILL.md
+  ✅ .github/skills/kb-work/SKILL.md
   ✅ .github/skills/deepen-plan/SKILL.md
   ✅ .github/skills/document-review/SKILL.md
   ✅ .github/skills/feature-video/SKILL.md
@@ -78,4 +78,4 @@
   Next steps:
     1. Open this folder in VS Code
     2. Install recommended extensions when prompted
-    3. Try: /ce-brainstorm "your first feature idea"
+    3. Try: /kb-brainstorm "your first feature idea"

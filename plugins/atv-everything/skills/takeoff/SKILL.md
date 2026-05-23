@@ -67,7 +67,7 @@ for plan in docs/plans/*.md; do
 done
 ```
 
-Skip plans with `status: done`, `status: archived`, or missing frontmatter. Mention explicitly in the output that this is a `docs/plans/` fallback because the repo has no `backlog/` directory. If the fallback also yields zero active plans, drop into the empty-list edge case (congratulate + suggest `/ce-ideate` or `/ce-plan`).
+Skip plans with `status: done`, `status: archived`, or missing frontmatter. Mention explicitly in the output that this is a `docs/plans/` fallback because the repo has no `backlog/` directory. If the fallback also yields zero active plans, drop into the empty-list edge case (congratulate + suggest `/ce-ideate` or `/kb-plan`).
 
 ### Step 3: Classify each task
 
@@ -136,7 +136,7 @@ Start with **AGENTSAPI-1**. It's the next unblocked HIGH-priority item and clear
 
 ### Step 5: Offer a next step
 
-End with a single question: "Want me to open the plan for `<ID>` and start `/ce-work` on it?" — do not auto-start. Takeoff is for orientation, not execution.
+End with a single question: "Want me to open the plan for `<ID>` and start `/kb-work` on it?" — do not auto-start. Takeoff is for orientation, not execution.
 
 ### Step 6: Final banner
 
@@ -178,5 +178,5 @@ If no arguments are given, use defaults.
 - **`backlog/` present but CLI missing** → parse task markdown files directly.
 - **`backlog` CLI returns non-zero** → report the error honestly, fall back to `docs/plans/`, still emit banner.
 - **Everything is blocked** → surface the root blockers and ask whether to create a task to unblock them.
-- **Task list is empty** → congratulate the user and suggest `/ce-ideate` or `/ce-plan` to generate new work.
+- **Task list is empty** → congratulate the user and suggest `/ce-ideate` or `/kb-plan` to generate new work.
 - **Tasks without priority set** → treat as MEDIUM.

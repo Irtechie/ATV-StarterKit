@@ -10,7 +10,7 @@ import (
 // AuditFinding describes one marketplace-incompatible string located
 // inside a SKILL.md or agent file.
 type AuditFinding struct {
-	SkillOrAgent string // "skill:ce-plan" or "agent:security-reviewer"
+	SkillOrAgent string // "skill:kb-plan" or "agent:security-reviewer"
 	Pattern      string // human-readable pattern label
 	Match        string // first matched text (truncated)
 	LineNumber   int    // 1-based; 0 if line tracking not applicable
@@ -63,11 +63,10 @@ var auditPatterns = []auditPattern{
 // The reason field is informational — it is not enforced but provides
 // a paper trail for future cleanup work.
 var auditAllowList = map[string]string{
-	"skill:deepen-plan":              "References compound-engineering plugin cache and research agents during the discovery phase. Falls back to limited discovery when compound-engineering is absent.",
-	"skill:ce-ideate":                "References compound-engineering research agents for multi-perspective ideation. Falls back to single-perspective when absent.",
-	"skill:ce-plan":                  "Delegates deep research to compound-engineering's research agents when available. In-process planning otherwise.",
-	"skill:ce-review":                "Dispatches the full compound-engineering reviewer fleet (correctness, testing, maintainability, project-standards, agent-native, security, performance, api-contract, data-migrations, reliability, adversarial, cli-readiness, previous-comments, language-specific reviewers). Without compound-engineering, ce-review uses only the agents bundled in atv-agents.",
-	"skill:document-review":          "Dispatches compound-engineering document-review reviewers (coherence, feasibility, product-lens, design-lens, security-lens, scope-guardian, adversarial). Falls back to atv-agents when absent.",
+	"skill:deepen-plan":                "References compound-engineering plugin cache and research agents during the discovery phase. Falls back to limited discovery when compound-engineering is absent.",
+	"skill:ce-ideate":                  "References compound-engineering research agents for multi-perspective ideation. Falls back to single-perspective when absent.",
+	"skill:ce-review":                  "Dispatches the full compound-engineering reviewer fleet (correctness, testing, maintainability, project-standards, agent-native, security, performance, api-contract, data-migrations, reliability, adversarial, cli-readiness, previous-comments, language-specific reviewers). Without compound-engineering, ce-review uses only the agents bundled in atv-agents.",
+	"skill:document-review":            "Dispatches compound-engineering document-review reviewers (coherence, feasibility, product-lens, design-lens, security-lens, scope-guardian, adversarial). Falls back to atv-agents when absent.",
 	"agent:project-standards-reviewer": "References compound-engineering:research:learnings-researcher and the compound-engineering plugin cache for standards lookup. Skips the lookup gracefully when compound-engineering is not installed.",
 }
 

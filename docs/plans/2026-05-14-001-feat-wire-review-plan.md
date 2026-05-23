@@ -6,7 +6,7 @@ blockers: []
 verification: verification-only
 hitl: false
 expected_files:
-  - .github/skills/kanban-work/SKILL.md
+  - .github/skills/kb-work/SKILL.md
 status: pending
 ---
 
@@ -14,7 +14,7 @@ status: pending
 
 ## What to Build
 
-Replace the current suggestion in kanban-work Step 5 ("Suggest `/ce-review`") with a mandatory automated invocation. After all slices pass, the agent MUST invoke `ce-review` on the full feature diff. This is enforcement — not a suggestion the agent can skip.
+Replace the current suggestion in kb-work Step 5 ("Suggest `/ce-review`") with a mandatory automated invocation. After all slices pass, the agent MUST invoke `ce-review` on the full feature diff. This is enforcement — not a suggestion the agent can skip.
 
 ## Acceptance Criteria
 
@@ -27,7 +27,7 @@ Replace the current suggestion in kanban-work Step 5 ("Suggest `/ce-review`") wi
 
 ## Implementation
 
-In kanban-work SKILL.md, replace Step 5 item 4:
+In kb-work SKILL.md, replace Step 5 item 4:
 
 **Before:**
 ```

@@ -65,7 +65,7 @@ $ atv-installer init
 Next steps:
   1. Open this folder in VS Code
   2. Install recommended extensions when prompted
-  3. Try: /ce-brainstorm "your first feature idea"
+  3. Try: /kb-brainstorm "your first feature idea"
 ```
 
 **Guided mode (`--guided`):**
@@ -76,7 +76,7 @@ $ atv-installer init --guided
 
 ? What's your primary stack? [TypeScript]
 ? Which components do you want?
-  ✓ Core pipeline skills (ce-brainstorm, ce-plan, ce-work, ce-review, ce-compound)
+  ✓ Core pipeline skills (kb-brainstorm, kb-plan, kb-work, ce-review, ce-compound)
   ✓ Orchestrators (lfg, slfg)
   ✓ Universal agents (security-sentinel, performance-oracle, code-simplicity-reviewer, architecture-strategist)
   ✓ Stack-specific agents (kieran-typescript-reviewer)
@@ -157,7 +157,7 @@ The ATV Starter Kit scaffolds **all 6 Copilot lifecycle hook types**. Each hook 
 | **System Instructions** | `copilot-instructions.md` — project conventions, stack info, ATV workflow overview |
 | **Setup Steps** | `copilot-setup-steps.yml` — auto-detected install/build/test commands |
 | **MCP Servers** | `copilot-mcp-config.json` — Context7 (SSE), GitHub (npx), Azure (npx), Terraform (npx) |
-| **Core Skills** | ce-brainstorm, ce-plan, ce-work, ce-review, ce-compound, lfg, slfg, deepen-plan, setup, brainstorming, document-review |
+| **Core Skills** | kb-brainstorm, kb-plan, kb-work, ce-review, ce-compound, lfg, slfg, deepen-plan, setup, brainstorming, document-review |
 | **Universal Agents** | security-sentinel, performance-oracle, code-simplicity-reviewer, architecture-strategist, repo-research-analyst, best-practices-researcher, framework-docs-researcher, learnings-researcher, pattern-recognition-specialist, spec-flow-analyzer, pr-comment-resolver, agent-native-reviewer |
 | **VS Code** | `extensions.json` — Copilot, Copilot Chat, Bicep, Azure Tools, Terraform |
 | **Docs Structure** | `docs/plans/`, `docs/brainstorms/`, `docs/solutions/` |

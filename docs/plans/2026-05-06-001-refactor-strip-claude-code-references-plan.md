@@ -166,7 +166,7 @@ The scope per user confirmation covers all skill surfaces in this repo, includin
   - `agent-native-architecture/SKILL.md` and `references/*.md`
   - `create-agent-skills/SKILL.md`, `references/api-security.md`, `references/official-spec.md`, `workflows/*.md`
   - `claude-permissions-optimizer/SKILL.md`, `scripts/extract-commands.mjs`
-  - `ce-*` skills (ce-plan, ce-work, ce-review, ce-brainstorm, ce-compound, ce-compound-refresh, ce-ideate)
+  - `ce-*` skills (kb-plan, kb-work, ce-review, kb-brainstorm, ce-compound, ce-compound-refresh, ce-ideate)
   - `dspy-ruby/SKILL.md` (Anthropic API examples)
   - `setup/SKILL.md`, `land/SKILL.md`, `report-bug/SKILL.md`, `report-bug-ce/SKILL.md`
   - `feature-video/SKILL.md`, `git-commit*/SKILL.md`, `git-clean-gone-branches/SKILL.md`, `git-worktree/SKILL.md`
@@ -209,11 +209,11 @@ The scope per user confirmation covers all skill surfaces in this repo, includin
 **Files:**
 - Modify: every file from the U1 inventory scoped to `pkg/scaffold/templates/skills/` (17 files).
 - Specifically:
-  - `ce-work/SKILL.md`, `document-review/SKILL.md`, `land/SKILL.md`
+  - `kb-work/SKILL.md`, `document-review/SKILL.md`, `land/SKILL.md`
   - `claude-permissions-optimizer/SKILL.md`, `claude-permissions-optimizer/scripts/extract-commands.mjs`
   - `test-browser/SKILL.md`, `ce-review/SKILL.md`, `ce-review/references/persona-catalog.md`
   - `ce-ideate/SKILL.md`, `feature-video/SKILL.md`, `ce-compound/SKILL.md`
-  - `setup/SKILL.md`, `ce-plan/SKILL.md`, `ce-brainstorm/SKILL.md`
+  - `setup/SKILL.md`, `kb-plan/SKILL.md`, `kb-brainstorm/SKILL.md`
   - `deepen-plan/SKILL.md`, `atv-security/SKILL.md`, `ce-compound-refresh/SKILL.md`
 
 **Approach:**
@@ -227,7 +227,7 @@ The scope per user confirmation covers all skill surfaces in this repo, includin
 **Test scenarios:**
 - Automated: `go test ./pkg/scaffold/...` passes (parity test, install-flow tests).
 - Automated: `go vet ./...` passes.
-- Spot-check: `diff -ru pkg/scaffold/templates/skills/ce-work/SKILL.md .github/skills/ce-work/SKILL.md` shows no semantic divergence (only template-marker differences if any).
+- Spot-check: `diff -ru pkg/scaffold/templates/skills/kb-work/SKILL.md .github/skills/kb-work/SKILL.md` shows no semantic divergence (only template-marker differences if any).
 
 **Verification:**
 - `grep -rniE "claude code|\.claude/|anthropic" pkg/scaffold/templates/skills/` returns zero unexpected hits.
@@ -261,7 +261,7 @@ The scope per user confirmation covers all skill surfaces in this repo, includin
 **Verification:**
 - The final grep returns zero unexpected hits.
 - `go test ./...` is green.
-- The plan document moves to `status: completed` (handled by `ce-work` at land time).
+- The plan document moves to `status: completed` (handled by `kb-work` at land time).
 
 ---
 

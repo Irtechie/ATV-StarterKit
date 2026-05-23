@@ -46,7 +46,7 @@ Manual cherry-pick was chosen because it's exactly how CE content is already man
 
 - **Preset impact — content only, no structural changes**: All three presets (Starter, Pro, Full) already include `LayerCoreSkills`, `LayerOrchestrators`, `LayerUniversalAgents`, and `LayerStackAgents`. New agents and skills flow through existing layers with no preset structure changes needed. The presets' `ATVLayers` slices remain identical.
 
-- **Beta skills excluded**: `ce-work-beta` is not copied into templates/ until stable.
+- **Beta skills excluded**: `kb-work-beta` is not copied into templates/ until stable.
 
 - **Frontmatter updates applied**: All 27 modified agents get their content replaced with the PR #7 version. This includes `user-invocable: true` frontmatter additions and major content rewrites to agents like `dhh-rails-reviewer` (JSON-output persona format), `kieran-*-reviewer`, `pr-comment-resolver`, and `repo-research-analyst`.
 
@@ -100,10 +100,10 @@ Most get `user-invocable: true` added. Major rewrites:
 
 ### Modified Skills to Update (~20 files)
 Major rewrites:
-- `ce-brainstorm` — 294 additions, substantially reworked
-- `ce-plan` — 776 additions, major expansion
+- `kb-brainstorm` — 294 additions, substantially reworked
+- `kb-plan` — 776 additions, major expansion
 - `ce-review` — 500 additions + new references/ directory
-- `ce-work` — 174 additions, reworked
+- `kb-work` — 174 additions, reworked
 - `ce-compound` — 221 additions + new references/ and assets/ directories
 - `document-review` — 264 additions + new references/ directory
 - `agent-browser` — 556 additions + new references/ and templates/ directories
@@ -139,14 +139,14 @@ Major rewrites:
 14. Replace/update content of ~20 existing skill directories (including adding references/, scripts/, assets/ subdirectories where PR #7 introduces them)
 
 ### Files to Skip
-- `ce-work-beta` — beta, not stable
+- `kb-work-beta` — beta, not stable
 - `.github/copilot-mcp-config.json.bak.*` — backup file from PR author's local state
 
 ## Resolved Questions
 
 - **Include all 48 agents or curate?** Include all. New review-persona agents are universal (no `stackAgents` entries), so they flow through the existing `universal-agents` layer in all three presets.
 - **How to handle multi-file skill directories?** Just place the files. `skillComponents()` already uses `fs.WalkDir` to traverse all files recursively — no code change needed. `//go:embed all:templates` embeds the full tree.
-- **Include beta skills?** No. `ce-work-beta` is excluded until stable.
+- **Include beta skills?** No. `kb-work-beta` is excluded until stable.
 - **Where does claude-permissions-optimizer go?** Into `orchestratorSkillDirectories` — the existing bucket for non-core workflow tools. Adding a new `utility-skills` layer would require changes across `catalog.go`, `wizard.go`, and all three presets in `presets.go`, which violates YAGNI for a single skill.
 - **Do presets need changes?** No. All three presets (Starter, Pro, Full) already include `LayerCoreSkills`, `LayerOrchestrators`, `LayerUniversalAgents`, and `LayerStackAgents`. New content flows through existing layers.
 - **Does agent-browser registration change?** No. `agent-browser` has special handling in `WizardResult.IncludeAgentBrowser`, preset-level tracking (Full only), and its own key in `atvCategoryMapping`. PR #7's changes are content-only updates to the existing skill directory.
@@ -154,4 +154,4 @@ Major rewrites:
 
 ## Next Steps
 
-→ `/ce-plan` for implementation details
+→ `/kb-plan` for implementation details

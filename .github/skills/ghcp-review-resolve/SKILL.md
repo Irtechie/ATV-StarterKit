@@ -106,7 +106,7 @@ Recommended next action — resolve conflicts before re-running this skill:
     # resolve conflicts, then: git push --force-with-lease
 
   Option B (delegated):
-    Skill(skill="compound-engineering:ce-work", args="resolve the merge conflicts on PR #<N>")
+    Skill(skill="compound-engineering:kb-work", args="resolve the merge conflicts on PR #<N>")
 ```
 
 No reviewers are contacted. No comments are posted. No commits are made. The skill exits cleanly.
@@ -612,7 +612,7 @@ Recommended next action — resolve conflicts before re-running this skill:
     # resolve conflicts, then: git push --force-with-lease
 
   Option B (delegated):
-    Skill(skill="compound-engineering:ce-work", args="resolve the merge conflicts on PR #9")
+    Skill(skill="compound-engineering:kb-work", args="resolve the merge conflicts on PR #9")
 
 No reviewers contacted. No comments posted. No commits made. PR not closed/approved/merged.
 ```

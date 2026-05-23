@@ -17,12 +17,16 @@ import (
 // ∪ easterEggSkillDirectories (enforced by parity tests).
 var promptShimSkillDirectories = []string{
 	// Compound Engineering core workflow
-	"ce-brainstorm",
-	"ce-plan",
-	"ce-work",
+	"kb-brainstorm",
+	"kb-plan",
+	"kb-work",
+	"kb-complete",
 	"ce-review",
 	"ce-compound",
 	"ce-ideate",
+	"deepen-brainstorm",
+	"improve-codebase-architecture",
+	"tdd",
 	// Session lifecycle
 	"takeoff",
 	"land",
@@ -41,6 +45,7 @@ var promptShimSkillDirectories = []string{
 	// Security
 	"atv-security",
 	// Orchestrators
+	"klfg",
 	"lfg",
 }
 
@@ -49,20 +54,23 @@ var promptShimSkillDirectories = []string{
 // so the next maintainer understands the choice. This list plus
 // promptShimSkillDirectories must cover every shipped skill (parity-tested).
 var nonUserFacingSkills = []string{
-	// Sub-skill invoked by ce-brainstorm; not a top-level command.
+	// Sub-skill invoked by kb-brainstorm; not a top-level command.
 	"brainstorming",
 	// Sub-skill invoked by ce-compound; not a top-level command.
 	"ce-compound-refresh",
-	// Sub-skill invoked by ce-plan; not a top-level command.
+	// Sub-skill invoked by kb-plan; not a top-level command.
 	"deepen-plan",
 	// Sub-skill invoked by ce-review and the document-review pipeline.
 	"document-review",
 	// Bootstrap helper invoked during install, not by users at runtime.
 	"setup",
 	// Behavioral guideline reference text, not an invocable command.
+	"kb-first-principles",
 	"karpathy-guidelines",
 	// Orchestrator sub-skills — internal building blocks of /lfg.
 	"feature-video",
+	"kb-qa",
+	"kb-repair",
 	"ralph-loop",
 	"resolve_todo_parallel",
 	"slfg",

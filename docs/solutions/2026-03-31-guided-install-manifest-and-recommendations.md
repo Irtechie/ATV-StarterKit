@@ -59,9 +59,9 @@ It combines:
 1. **Install outcomes**
    - installer warnings/failures surface a top recommendation to fix prerequisites or degraded setup first
 2. **Repo memory state**
-   - no brainstorms → recommend `/ce-brainstorm`
-   - brainstorms but no plans → recommend `/ce-plan`
-   - plan files with unchecked boxes → recommend `/ce-work`
+   - no brainstorms → recommend `/kb-brainstorm`
+   - brainstorms but no plans → recommend `/kb-plan`
+   - plan files with unchecked boxes → recommend `/kb-work`
    - completed plans but no solution docs → recommend `/ce-compound`
 3. **Installed capabilities**
    - usable gstack install → recommend `/gstack-office-hours`

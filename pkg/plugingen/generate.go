@@ -233,7 +233,7 @@ func Generate(cfg Config) error {
 	}
 	everythingManifest := PluginManifest{
 		Name:        "atv-everything",
-		Description: fmt.Sprintf("ATV Starter Kit — install everything in one shot: all %d skills (slash commands like /ce-plan, /atv-security, /autoresearch) and all %d reviewer/specialist agents. Equivalent to the Full preset of `atv init`, scoped to skills + agents only (no MCP servers, hooks, or instructions templates — for those use `npx atv-starterkit init`).", len(skillNames), len(agentFiles)),
+		Description: fmt.Sprintf("ATV Starter Kit — install everything in one shot: all %d skills (slash commands like /kb-plan, /atv-security, /autoresearch) and all %d reviewer/specialist agents. Equivalent to the Full preset of `atv init`, scoped to skills + agents only (no MCP servers, hooks, or instructions templates — for those use `npx atv-starterkit init`).", len(skillNames), len(agentFiles)),
 		Version:     cfg.KitVersion,
 		Author:      defaultAuthor(),
 		Repository:  defaultRepository(),

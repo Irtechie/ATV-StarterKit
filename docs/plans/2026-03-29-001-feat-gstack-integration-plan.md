@@ -44,11 +44,11 @@ Extend the Go installer with:
 ┌──────────────────────────────────────────────────────────────┐
 │ wizard.go: Function-based TUI                                │
 │  ┌─────────────────────────────────────────────────────────┐ │
-│  │ Planning:  ce-brainstorm (ATV), office-hours (gstack)   │ │
+│  │ Planning:  kb-brainstorm (ATV), office-hours (gstack)   │ │
 │  │ Review:    ce-review (ATV), review (gstack)             │ │
 │  │ QA:        qa, browse (gstack) [requires Bun]           │ │
 │  │ Security:  security-sentinel (ATV), cso (gstack)        │ │
-│  │ Shipping:  ce-work (ATV), ship (gstack)                 │ │
+│  │ Shipping:  kb-work (ATV), ship (gstack)                 │ │
 │  │ Safety:    careful, freeze, guard (gstack)              │ │
 │  │ ...                                                     │ │
 │  └─────────────────────────────────────────────────────────┘ │
@@ -167,7 +167,7 @@ pkg/gstack/
 - [ ] Update `copilot-instructions.md` templates:
   - Add conditional gstack skill section listing
   - ATV skills listed first in each category
-  - Format: `Available skills: /ce-brainstorm (planning), /office-hours (planning, gstack), ...`
+  - Format: `Available skills: /kb-brainstorm (planning), /office-hours (planning, gstack), ...`
 - [ ] Update `pkg/output/printer.go`:
   - New status indicator for gstack operations: 🔗 Cloned, 🔨 Built
   - Show gstack install progress (clone → strip → build)
@@ -230,7 +230,7 @@ func TestFullInstallFlow(t *testing.T) {
     
     // Verify ATV files exist
     assert.FileExists(t, filepath.Join(sandboxDir, ".github", "copilot-instructions.md"))
-    assert.FileExists(t, filepath.Join(sandboxDir, ".github", "skills", "ce-brainstorm", "SKILL.md"))
+    assert.FileExists(t, filepath.Join(sandboxDir, ".github", "skills", "kb-brainstorm", "SKILL.md"))
     
     // Verify gstack files exist
     assert.DirExists(t, filepath.Join(sandboxDir, ".github", "skills", "gstack"))
@@ -263,10 +263,10 @@ go test ./test/sandbox/ -short
 | Layer | Mechanism | Location |
 |-------|-----------|----------|
 | Institutional knowledge | `/ce-compound` writes structured solution docs with YAML frontmatter | `docs/solutions/**/*.md` |
-| Knowledge retrieval | `learnings-researcher` agent greps `docs/solutions/` before new work | Invoked by `/ce-plan`, `/ce-review` |
+| Knowledge retrieval | `learnings-researcher` agent greps `docs/solutions/` before new work | Invoked by `/kb-plan`, `/ce-review` |
 | Project config | `/setup` writes review agent config | `compound-engineering.local.md` |
-| Design context | `/ce-brainstorm` writes design docs, `/ce-plan` auto-discovers them | `docs/brainstorms/*.md` |
-| Plan context | `/ce-plan` writes plans, `/ce-work` reads them | `docs/plans/*.md` |
+| Design context | `/kb-brainstorm` writes design docs, `/kb-plan` auto-discovers them | `docs/brainstorms/*.md` |
+| Plan context | `/kb-plan` writes plans, `/kb-work` reads them | `docs/plans/*.md` |
 | Protected artifacts | `/ce-review` prevents deletion of `docs/plans/`, `docs/solutions/` | Enforced in SKILL.md rules |
 
 ### gstack's Memory System (New, Additive)

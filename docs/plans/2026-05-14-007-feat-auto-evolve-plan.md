@@ -6,7 +6,7 @@ blockers: [slice-004, slice-006]
 verification: verification-only
 hitl: false
 expected_files:
-  - .github/skills/kanban-work/SKILL.md
+  - .github/skills/kb-work/SKILL.md
 status: pending
 ---
 
@@ -56,7 +56,7 @@ A simple plain-text integer file (`.atv/kanban-completions.txt`) rather than YAM
 - Do NOT modify `/learn` (already wired in Slice 4)
 - Do NOT change the cadence from 5 without brainstorm revision
 - Do NOT make evolve blocking — if it fails or finds nothing, shipping continues
-- Single file edit (kanban-work SKILL.md) plus new `.atv/kanban-completions.txt` on first run
+- Single file edit (kb-work SKILL.md) plus new `.atv/kanban-completions.txt` on first run
 
 ## Test Scenarios
 

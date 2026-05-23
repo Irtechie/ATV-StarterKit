@@ -50,11 +50,11 @@ Shallow clone gstack at install time via Go's `os/exec` (calling `git clone --de
 
 ### catalog.go changes
 - Reorganize layers by function instead of source:
-  - `"planning"` — ATV: ce-brainstorm, ce-plan, deepen-plan | gstack: office-hours, plan-ceo-review, plan-eng-review, plan-design-review, autoplan
+  - `"planning"` — ATV: kb-brainstorm, kb-plan, deepen-plan | gstack: office-hours, plan-ceo-review, plan-eng-review, plan-design-review, autoplan
   - `"review"` — ATV: ce-review | gstack: review, design-review, design-shotgun
   - `"qa-testing"` — gstack: qa, qa-only, benchmark, browse
   - `"security"` — ATV: security-sentinel agent | gstack: cso
-  - `"shipping"` — ATV: ce-work | gstack: ship, land-and-deploy, canary, document-release
+  - `"shipping"` — ATV: kb-work | gstack: ship, land-and-deploy, canary, document-release
   - `"safety"` — gstack: careful, freeze, guard, unfreeze
   - `"debugging"` — gstack: investigate
   - `"retrospective"` — gstack: retro
@@ -86,4 +86,4 @@ Shallow clone gstack at install time via Go's `os/exec` (calling `git clone --de
 
 ## Next Steps
 
-→ `/ce-plan` for implementation details
+→ `/kb-plan` for implementation details

@@ -66,7 +66,7 @@ func TestGenerate_ProducesEveryPerSkillPlugin(t *testing.T) {
 // whole marketplace.json with "Plugin name must be kebab-case".
 func TestPluginNameForSkill_KebabCaseOnly(t *testing.T) {
 	cases := map[string]string{
-		"ce-plan":               "atv-skill-ce-plan",
+		"kb-plan":               "atv-skill-kb-plan",
 		"resolve_todo_parallel": "atv-skill-resolve-todo-parallel",
 		"atv-security":          "atv-skill-atv-security",
 		"meme-iq":               "atv-skill-meme-iq",
@@ -426,16 +426,16 @@ func TestAudit_FlagsNonAllowListedFindings(t *testing.T) {
 }
 
 func TestAudit_PassesAllowListedFindings(t *testing.T) {
-	// Read the actual ce-plan body which has compound-engineering refs
+	// Read the actual kb-plan body which has compound-engineering refs
 	// allow-listed. Audit should return nothing for it.
-	body, err := os.ReadFile(filepath.Join(repoRoot(t), "pkg", "scaffold", "templates", "skills", "ce-plan", "SKILL.md"))
+	body, err := os.ReadFile(filepath.Join(repoRoot(t), "pkg", "scaffold", "templates", "skills", "kb-plan", "SKILL.md"))
 	if err != nil {
-		t.Fatalf("read ce-plan: %v", err)
+		t.Fatalf("read kb-plan: %v", err)
 	}
-	contents := map[string]string{"skill:ce-plan": string(body)}
+	contents := map[string]string{"skill:kb-plan": string(body)}
 	findings := Audit(contents)
 	if len(findings) != 0 {
-		t.Errorf("ce-plan should be fully allow-listed, got findings: %v", findings)
+		t.Errorf("kb-plan should be fully allow-listed, got findings: %v", findings)
 	}
 }
 

@@ -585,7 +585,7 @@ func TestE2EFullGuidedInstallLifecycle(t *testing.T) {
 		skillsDir := filepath.Join(root, ".github", "skills")
 		assertDirExists(t, skillsDir)
 		// Verify at least core skills exist
-		for _, skill := range []string{"brainstorming", "ce-brainstorm", "ce-plan", "ce-review", "ce-work"} {
+		for _, skill := range []string{"brainstorming", "kb-brainstorm", "kb-plan", "ce-review", "kb-work"} {
 			skillPath := filepath.Join(skillsDir, skill, "SKILL.md")
 			assertFileExists(t, skillPath)
 		}

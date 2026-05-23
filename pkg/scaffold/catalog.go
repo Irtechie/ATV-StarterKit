@@ -19,8 +19,8 @@ type Component struct {
 	Path      string // relative path in target directory
 	Content   []byte // file content (empty for dirs)
 	IsDir     bool
-	MergeJSON bool // if true, merge with existing JSON instead of skipping
-	HookType  int  // 1-6 matching Copilot lifecycle hooks
+	MergeJSON bool     // if true, merge with existing JSON instead of skipping
+	HookType  HookType // matching Copilot lifecycle/context hooks
 }
 
 // BuildCatalog returns the full list of components for the given stack.
@@ -42,6 +42,7 @@ func BuildCatalog(stack detect.Stack) []Component {
 
 	// Hook 4: Skills (from .github/skills/ in this repo)
 	catalog = append(catalog, skills()...)
+	catalog = append(catalog, promptShims()...)
 
 	// Hook 5: Agents (from .github/agents/ in this repo)
 	catalog = append(catalog, agents(stack)...)
@@ -113,6 +114,7 @@ func BuildFilteredCatalogForPacks(packs []installstate.StackPack, primaryStack d
 	}
 	if len(selectedSkillDirs) > 0 {
 		catalog = append(catalog, skillComponents(selectedSkillDirs)...)
+		catalog = append(catalog, promptShimComponents(selectedPromptShimsForLayers(layerSet))...)
 	}
 	if layerSet["universal-agents"] || layerSet["stack-agents"] {
 		catalog = append(catalog, agentsForPacks(normalizedPacks, layerSet["universal-agents"], layerSet["stack-agents"])...)
@@ -137,6 +139,7 @@ func BuildFilteredCatalogForPacks(packs []installstate.StackPack, primaryStack d
 func directories() []Component {
 	dirs := []string{
 		".github/skills",
+		".github/prompts",
 		".github/agents",
 		".github/hooks/scripts",
 		".vscode",
@@ -164,19 +167,16 @@ func documentationDirectories() []Component {
 
 var coreSkillDirectories = []string{
 	"brainstorming",
-	"ce-brainstorm",
+	"kb-brainstorm",
 	"ce-compound",
 	"ce-compound-refresh",
 	"ce-ideate",
-	"ce-plan",
+	"kb-plan",
 	"ce-review",
-	"ce-work",
 	"deepen-brainstorm",
 	"deepen-plan",
 	"document-review",
 	"improve-codebase-architecture",
-	"kanban-plan",
-	"kanban-brainstorm",
 	"setup",
 	"tdd",
 	// Session lifecycle
@@ -190,7 +190,7 @@ var coreSkillDirectories = []string{
 	// ATV Quality
 	"unslop",
 	// Behavioral Guidelines
-	"kanban-first-principles",
+	"kb-first-principles",
 	"karpathy-guidelines",
 	// Experimentation
 	"autoresearch",
@@ -203,7 +203,10 @@ var coreSkillDirectories = []string{
 
 var orchestratorSkillDirectories = []string{
 	"feature-video",
-	"kanban-work",
+	"kb-complete",
+	"kb-qa",
+	"kb-repair",
+	"kb-work",
 	"klfg",
 	"lfg",
 	"ralph-loop",
