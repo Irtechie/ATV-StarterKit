@@ -20,6 +20,38 @@
 
 KB means **Kanban-Based**: the workflow still uses vertical slices, a shared board, and manifest files, but every user-facing workflow command uses the voice-friendly `kb-` prefix so you do not have to say "kanban".
 
+## 2026-05-23 KB Workflow Split
+
+The voice-friendly KB workflow now has a smaller standalone home:
+
+**[Irtechie/working-skill-repo](https://github.com/Irtechie/working-skill-repo)**
+
+Use that repo when you want the current working KB skill bundle copied into
+GitHub Copilot or Codex projects. This ATV fork still keeps the broader ATV
+StarterKit, CE skills, agents, plugin experiments, historical docs, and upstream
+lineage. The new repo is the trimmed day-to-day bundle.
+
+What changed:
+
+- `kanban-*` user-facing workflows became `kb-*`.
+- `kb-route` is now the default entry point for ambiguous work.
+- `kb-map-bootstrap` and `kb-map` create/update project memory so new sessions
+  can recover context without a long chat history.
+- `todo.md` and `todo-done.md` replace `docs/kanban.md` and
+  `docs/kanban-done.md` for the current KB workflow.
+- `kb-fix`, `kb-functional-test`, `kb-gate`, `kb-check`, `kb-research`,
+  `kb-epic`, `kb-compact`, and `kb-ship` were added to cover small fixes,
+  deterministic testing, P0/P1 gates, research, large initiatives, token
+  trimming, and release readiness.
+- `kb-work` owns slice execution and calls `kb-complete` only after all slices
+  are done or intentionally skipped.
+- `klfg` remains the full hands-off orchestrator for brainstorm -> plan -> work
+  -> complete.
+
+This repo can still carry the full ATV and CE ecosystem. The point of the split
+is discoverability: active projects should find the smaller KB bundle first,
+while this repo remains the larger starter kit and historical source.
+
 You can run the stages directly, or let `/klfg` orchestrate them. The pipeline:
 
 1. **Researches** the landscape before asking you product questions (not after)
