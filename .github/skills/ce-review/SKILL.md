@@ -103,46 +103,54 @@ Routing rules:
 
 17 reviewer personas in layered conditionals, plus CE-specific agents. See the persona catalog included below for the full catalog.
 
+### Runtime Agent Types
+
+`ce-review` is this skill/orchestrator, not an Agent tool `agent_type`.
+
+Never call the Agent tool with `agent_type: ce-review`. When this skill needs subagents, use runtime-valid reviewer agent types such as `code-review`, `correctness-reviewer`, `testing-reviewer`, `maintainability-reviewer`, `project-standards-reviewer`, `security-reviewer`, `performance-reviewer`, `api-contract-reviewer`, `reliability-reviewer`, `adversarial-reviewer`, `agent-native-reviewer`, `learnings-researcher`, or `repo-research-analyst`.
+
+If a desired persona does not exist as a runtime agent type, use `code-review` with the persona instructions in the task prompt rather than inventing an agent type. A broader valid reviewer is better than a failed dispatch.
+
 **Always-on (every review):**
 
 | Agent | Focus |
 |-------|-------|
-| `compound-engineering:review:correctness-reviewer` | Logic errors, edge cases, state bugs, error propagation |
-| `compound-engineering:review:testing-reviewer` | Coverage gaps, weak assertions, brittle tests |
-| `compound-engineering:review:maintainability-reviewer` | Coupling, complexity, naming, dead code, abstraction debt |
-| `compound-engineering:review:project-standards-reviewer` | AGENTS.md compliance -- frontmatter, references, naming, portability |
-| `compound-engineering:review:agent-native-reviewer` | Verify new features are agent-accessible |
-| `compound-engineering:research:learnings-researcher` | Search docs/solutions/ for past issues related to this PR |
+| `correctness-reviewer` | Logic errors, edge cases, state bugs, error propagation |
+| `testing-reviewer` | Coverage gaps, weak assertions, brittle tests |
+| `maintainability-reviewer` | Coupling, complexity, naming, dead code, abstraction debt |
+| `project-standards-reviewer` | AGENTS.md compliance -- frontmatter, references, naming, portability |
+| `agent-native-reviewer` | Verify new features are agent-accessible |
+| `learnings-researcher` | Search docs/solutions/ for past issues related to this PR |
 
 **Cross-cutting conditional (selected per diff):**
 
 | Agent | Select when diff touches... |
 |-------|---------------------------|
-| `compound-engineering:review:security-reviewer` | Auth, public endpoints, user input, permissions |
-| `compound-engineering:review:performance-reviewer` | DB queries, data transforms, caching, async |
-| `compound-engineering:review:api-contract-reviewer` | Routes, serializers, type signatures, versioning |
-| `compound-engineering:review:data-migrations-reviewer` | Migrations, schema changes, backfills |
-| `compound-engineering:review:reliability-reviewer` | Error handling, retries, timeouts, background jobs |
-| `compound-engineering:review:adversarial-reviewer` | Diff >=50 changed non-test/non-generated/non-lockfile lines, or auth, payments, data mutations, external APIs |
-| `compound-engineering:review:cli-readiness-reviewer` | CLI command definitions, argument parsing, CLI framework usage, command handler implementations |
-| `compound-engineering:review:previous-comments-reviewer` | Reviewing a PR that has existing review comments or threads |
+| `security-reviewer` | Auth, public endpoints, user input, permissions |
+| `performance-reviewer` | DB queries, data transforms, caching, async |
+| `api-contract-reviewer` | Routes, serializers, type signatures, versioning |
+| `api-contract-reviewer` or `reliability-reviewer` | Migrations, schema changes, backfills |
+| `reliability-reviewer` | Error handling, retries, timeouts, background jobs |
+| `adversarial-reviewer` | Diff >=50 changed non-test/non-generated/non-lockfile lines, or auth, payments, data mutations, external APIs |
+| `code-review` | CLI command definitions, argument parsing, CLI framework usage, command handler implementations |
+| `repo-research-analyst` or `code-review` | Reviewing a PR that has existing review comments or threads |
 
 **Stack-specific conditional (selected per diff):**
 
 | Agent | Select when diff touches... |
 |-------|---------------------------|
-| `compound-engineering:review:dhh-rails-reviewer` | Rails architecture, service objects, session/auth choices, or Hotwire-vs-SPA boundaries |
-| `compound-engineering:review:kieran-rails-reviewer` | Rails application code where conventions, naming, and maintainability are in play |
-| `compound-engineering:review:kieran-python-reviewer` | Python modules, endpoints, scripts, or services |
-| `compound-engineering:review:kieran-typescript-reviewer` | TypeScript components, services, hooks, utilities, or shared types |
-| `compound-engineering:review:julik-frontend-races-reviewer` | Stimulus/Turbo controllers, DOM events, timers, animations, or async UI flows |
+| `code-review` | Rails architecture, service objects, session/auth choices, or Hotwire-vs-SPA boundaries |
+| `code-review` | Rails application code where conventions, naming, and maintainability are in play |
+| `kieran-python-reviewer` | Python modules, endpoints, scripts, or services |
+| `kieran-typescript-reviewer` | TypeScript components, services, hooks, utilities, or shared types |
+| `code-review` | Stimulus/Turbo controllers, DOM events, timers, animations, or async UI flows |
 
 **CE conditional (migration-specific):**
 
 | Agent | Select when diff includes migration files |
 |-------|------------------------------------------|
-| `compound-engineering:review:schema-drift-detector` | Cross-references schema.rb against included migrations |
-| `compound-engineering:review:deployment-verification-agent` | Produces deployment checklist with SQL verification queries |
+| `api-contract-reviewer` | Cross-references schema changes against included migrations |
+| `reliability-reviewer` | Produces deployment checklist with verification queries |
 
 ## Review Scope
 
@@ -359,7 +367,7 @@ Review team:
 - kieran-rails -- controller and Turbo flow changed in app/controllers and app/views
 - dhh-rails -- diff adds service objects around ordinary Rails CRUD
 - data-migrations -- adds migration 20260303_add_index_to_orders
-- schema-drift-detector -- migration files present
+- schema drift check -- migration files present; dispatch `api-contract-reviewer` with schema-drift instructions
 ```
 
 This is progress reporting, not a blocking confirmation.
@@ -381,7 +389,7 @@ Persona sub-agents do focused, scoped work and should use cheaper/faster models 
 
 Use the platform's cheapest capable model for all persona and CE sub-agents. In Copilot CLI, pass `model: "haiku"` in the Agent tool call. On other platforms, use the equivalent fast/cheap tier (e.g., `gpt-4o-mini` in Codex). If the platform has no model override mechanism or the available model names are unknown, omit the model parameter and let agents inherit the default -- a working review on the parent model is better than a broken dispatch from an unrecognized model name.
 
-CE always-on agents (agent-native-reviewer, learnings-researcher) and CE conditional agents (schema-drift-detector, deployment-verification-agent) also use the cheaper model tier since they perform scoped, focused work.
+CE always-on agents (agent-native-reviewer, learnings-researcher) and migration-specific conditional checks (schema drift via `api-contract-reviewer`, deployment verification via `reliability-reviewer`) also use the cheaper model tier since they perform scoped, focused work.
 
 The orchestrator (this skill) stays on the default model because it handles intent discovery, reviewer selection, finding merge/dedup, and synthesis -- tasks that benefit from stronger reasoning.
 
@@ -413,7 +421,7 @@ Each persona sub-agent returns JSON matching the findings schema included below:
 
 **CE always-on agents** (agent-native-reviewer, learnings-researcher) are dispatched as standard Agent calls in parallel with the persona agents. Give them the same review context bundle the personas receive: entry mode, any PR metadata gathered in Stage 1, intent summary, review base branch name when known, `BASE:` marker, file list, diff, and `UNTRACKED:` scope notes. Do not invoke them with a generic "review this" prompt. Their output is unstructured and synthesized separately in Stage 6.
 
-**CE conditional agents** (schema-drift-detector, deployment-verification-agent) are also dispatched as standard Agent calls when applicable. Pass the same review context bundle plus the applicability reason (for example, which migration files triggered the agent). For schema-drift-detector specifically, pass the resolved review base branch explicitly so it never assumes `main`. Their output is unstructured and must be preserved for Stage 6 synthesis just like the CE always-on agents.
+**Migration-specific checks** are dispatched as valid Agent calls when applicable: use `api-contract-reviewer` for schema drift and `reliability-reviewer` for deployment verification. Pass the same review context bundle plus the applicability reason (for example, which migration files triggered the check). For schema drift specifically, pass the resolved review base branch explicitly so it never assumes `main`. Their output is unstructured and must be preserved for Stage 6 synthesis just like the CE always-on agents.
 
 ### Stage 5: Merge findings
 
@@ -449,8 +457,8 @@ Assemble the final report using **pipe-delimited markdown tables for findings** 
 6. **Pre-existing.** Separate section, does not count toward verdict.
 7. **Learnings & Past Solutions.** Surface learnings-researcher results: if past solutions are relevant, flag them as "Known Pattern" with links to docs/solutions/ files.
 8. **Agent-Native Gaps.** Surface agent-native-reviewer results. Omit section if no gaps found.
-9. **Schema Drift Check.** If schema-drift-detector ran, summarize whether drift was found. If drift exists, list the unrelated schema objects and the required cleanup command. If clean, say so briefly.
-10. **Deployment Notes.** If deployment-verification-agent ran, surface the key Go/No-Go items: blocking pre-deploy checks, the most important verification queries, rollback caveats, and monitoring focus areas. Keep the checklist actionable rather than dropping it into Coverage.
+9. **Schema Drift Check.** If the schema drift check ran, summarize whether drift was found. If drift exists, list the unrelated schema objects and the required cleanup command. If clean, say so briefly.
+10. **Deployment Notes.** If the deployment verification check ran, surface the key Go/No-Go items: blocking pre-deploy checks, the most important verification queries, rollback caveats, and monitoring focus areas. Keep the checklist actionable rather than dropping it into Coverage.
 11. **Coverage.** Suppressed count, residual risks, testing gaps, failed/timed-out reviewers, and any intent uncertainty carried by non-interactive modes.
 12. **Verdict.** Ready to merge / Ready with fixes / Not ready. Fix order if applicable. When an `explicit` plan has unaddressed requirements, the verdict must reflect it — a PR that's code-clean but missing planned requirements is "Not ready" unless the omission is intentional. When an `inferred` plan has unaddressed requirements, note it in the verdict reasoning but do not block on it alone.
 

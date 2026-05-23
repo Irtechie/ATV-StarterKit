@@ -31,7 +31,9 @@ Before code review, run `kb-check` against the completed manifest scope. If dete
 
 If the manifest contains user-visible, API/CLI, persistence, auth, streaming, or integration changes, run `kb-functional-test` before `ce-review` to confirm the functional coverage is real and not mock-only.
 
-**Invoke `ce-review`** — full multi-agent code review on the feature diff.
+**Invoke the `ce-review` skill** — full multi-agent code review on the feature diff.
+
+`ce-review` is a skill/orchestrator, not an Agent tool type. Do not call the Agent tool with `agent_type: ce-review`. Load/run the `ce-review` skill, and let that skill spawn valid reviewer agent types such as `code-review`, `correctness-reviewer`, `security-reviewer`, or `adversarial-reviewer`.
 
 This is mandatory. Do not skip, defer, or make it optional.
 
