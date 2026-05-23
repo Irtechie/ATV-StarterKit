@@ -33,6 +33,12 @@ This prevents the agent from picking up stale personal handoffs when the user is
 
 Before lookup or refresh, check the standard layout.
 
+- Standard memory files must be checked by exact path under the project root, not by grep/glob:
+  - `<repo>/todo.md`
+  - `<repo>/docs/context/PROJECT.md`
+  - `<repo>/docs/handoffs/active/`
+  - `<repo>/docs/handoffs/parked/`
+  - `<repo>/docs/handoffs/done/`
 - If `todo.md` or `docs/context/PROJECT.md` is missing, invoke `kb-map-bootstrap`.
 - If only directories are missing, create them during `refresh`.
 - Never overwrite non-empty user docs without reading and merging.
@@ -92,6 +98,8 @@ Stop reading once you can answer:
 - Which KB lane should handle the request?
 
 Report route, docs loaded, and any stale-work refresh needed. Do not bulk-load all context docs.
+
+Do not use `rg`, glob, or whole-repo search to find the standard memory files. Use search only after the exact project-root memory files are loaded and only for task-specific context.
 
 ## Missing Memory and Setup
 

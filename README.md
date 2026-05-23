@@ -45,6 +45,8 @@ What changed:
   lane for the idea/request, while map decides lookup, refresh, or bootstrap.
 - `kb-map` is now project-root anchored: it reads memory from the active repo,
   not `~`, `.copilot/handoffs`, the whole drive, or sibling repos.
+- `kb-map` checks standard memory files by exact path under the repo root, not
+  by broad grep/glob.
 - `kb-map-bootstrap` and `kb-map` create/update project memory so new sessions
   can recover context without a long chat history.
 - `todo.md` and `todo-done.md` replace `docs/kanban.md` and
