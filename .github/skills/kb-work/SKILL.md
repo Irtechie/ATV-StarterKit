@@ -12,8 +12,8 @@ Run all vertical slices from a `kb-plan` manifest in dependency order. Keep each
 
 1. Read the KB manifest.
 2. Validate the dependency DAG and statuses.
-3. Confirm execution with the user unless they requested non-interactive execution.
-4. Execute ready slices in topological order.
+3. Confirm execution once unless the user already asked to run/execute/work the manifest.
+4. Execute ready slices in topological order without asking between slices.
 5. Update the manifest after each slice so the workflow is resumable.
 
 ## Input
@@ -34,7 +34,9 @@ Run all vertical slices from a `kb-plan` manifest in dependency order. Keep each
 4. **Check status** - skip any slices already marked `done`. Resume from the first runnable `pending` slice.
 5. **Check worktree** - note dirty or untracked files before executing so unrelated user changes are not staged or reverted.
 6. **Sync with board** - read `todo.md` and confirm its status table matches the manifest. If they diverge, the board wins — another agent may have updated it. Reconcile the manifest from the board before proceeding.
-7. **Confirm with user:** "Ready to execute N remaining slices in order. Proceed?"
+7. **Confirm once only when needed:** If the user did not explicitly ask to run/execute/work the manifest, ask: "Ready to execute N remaining slices in order. Proceed?" If the user already asked to execute, continue without this prompt.
+
+After initial execution starts, do not ask before moving from one runnable slice to the next.
 
 Treat statuses as:
 
@@ -80,6 +82,27 @@ Execute with a topological sort:
 ## Execution Loop
 
 For each slice in dependency order:
+
+### Continuous Execution Rule
+
+Slices should run continuously once execution has started.
+
+Do **not** ask "Proceed to execute slice-N?" between slices. Move to the next runnable slice automatically after:
+
+- slice status is updated;
+- board and manifest are synced;
+- required deterministic checks pass;
+- QA/repair gates pass or are not applicable.
+
+Pause only when a real gate requires it:
+
+- HITL decision or missing value that cannot be generated safely;
+- blocked/manual/parked slice with no unrelated runnable work;
+- destructive command approval;
+- out-of-scope file edit or diff-scope failure;
+- QA/repair exhaustion or stuck loop;
+- dependency deadlock;
+- user explicitly asked to pause or stop.
 
 ### Step 1: Check HITL Flag
 

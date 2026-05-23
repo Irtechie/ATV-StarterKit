@@ -60,6 +60,10 @@ What changed:
   trimming, and release readiness.
 - `kb-work` owns slice execution and calls `kb-complete` only after all slices
   are done or intentionally skipped.
+- Once `kb-work` starts execution, runnable slices continue without per-slice
+  confirmation. It pauses only for HITL, blocked/manual work, destructive
+  approval, scope failures, QA/repair exhaustion, dependency deadlock, or an
+  explicit user stop.
 - Active handoffs no longer jump straight to `kb-work` unless they link a valid
   KB manifest. Phase-shaped handoffs route through `kb-plan` first.
 - Before planning from a handoff, `kb-plan` checks for existing brainstorm,
