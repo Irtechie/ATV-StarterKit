@@ -89,3 +89,20 @@ This project uses ATV's continuous learning system to capture and evolve pattern
 - Run `/instincts` to check what patterns the project has learned
 - Run `/evolve` periodically to graduate well-established conventions
 - Review generated skills before committing — they're a starting point
+
+<!-- KB-WORKFLOW-INSTRUCTIONS:START -->
+Use the KB workflow in this repo. For ambiguous workflow requests, start with `kb-route`; skills live under `.github/skills/`.
+
+Fresh-session preflight:
+- If `todo.md` or `docs/context/PROJECT.md` is missing, run `kb-map-bootstrap` immediately.
+- If context or handoff folders are partially missing, run `kb-map refresh`.
+- Do not ask for confirmation unless a non-empty user file would be overwritten.
+
+Every token must pay rent: no preamble, no filler, lead with the route/answer/command/code, and expand only when it prevents rework or preserves safety.
+
+Project memory:
+- `todo.md` for active work, blockers, parked work, and handoff pointers.
+- `todo-done.md` for completed-work summaries.
+- `docs/context/PROJECT.md` for the project route map.
+- `docs/handoffs/active/`, `docs/handoffs/parked/`, and `docs/handoffs/done/` for resumable handoffs.
+<!-- KB-WORKFLOW-INSTRUCTIONS:END -->
