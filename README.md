@@ -99,6 +99,10 @@ What changed:
   bloat, repeated rediscovery, durable refreshes, and closed handoffs. It stores
   pointers and the actual issue so later deep memory review can be targeted
   instead of a blind full scan.
+- `kb-memory-review` is the explicit high-cost pass that consumes those signals,
+  reconciles/compacts/consolidates targeted memory docs, invokes narrower helper
+  skills when useful, and updates the maintenance index. It is recommended by
+  thresholds but does not run automatically.
 - Once `kb-work` starts execution, runnable slices continue without per-slice
   confirmation. It pauses only for HITL, blocked/manual work, destructive
   approval, scope failures, QA/repair exhaustion, dependency deadlock, or an

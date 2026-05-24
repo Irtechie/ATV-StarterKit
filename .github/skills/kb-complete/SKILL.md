@@ -209,7 +209,7 @@ If any signal counter crosses a conservative threshold, add a recommendation to 
 Recommendation format:
 
 ```text
-Memory review recommended: <reason>. Run a future deep memory pass against docs/context/memory-maintenance.md before the next large feature.
+Memory review recommended: <reason>. Run `kb-memory-review` against docs/context/memory-maintenance.md before the next large feature.
 ```
 
 ## Step 4: Cleanup
