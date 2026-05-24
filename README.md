@@ -20,6 +20,21 @@
 
 KB means **Kanban-Based**: the workflow still uses vertical slices, a shared board, and manifest files, but every user-facing workflow command uses the voice-friendly `kb-` prefix so you do not have to say "kanban".
 
+## Fresh Session Loop
+
+The KB workflow is meant to make every new task safe to start in a fresh
+session:
+
+1. Finish or pause the current task with a handoff.
+2. Close the old session.
+3. Start a new session in the project repo.
+4. Run `kb-start <next task or handoff>`.
+
+`kb-start` calls `kb-map`, which reads local project memory and points the new
+session to the specific files it needs. The handoff tells the model what work is
+being resumed; `docs/context/PROJECT.md` tells it what the app is and where the
+relevant architecture docs live.
+
 ## 2026-05-23 KB Workflow Split
 
 The voice-friendly KB workflow now has a smaller standalone home:
@@ -91,6 +106,12 @@ does not crawl the whole drive, search unrelated repos, or load every
 architecture file by default. The goal is scoped orientation: get the model to
 the project truth that matters now so tokens are spent on execution instead of
 rediscovery.
+
+`docs/context/PROJECT.md` is the entry map. It explains what the app is, how to
+run and test it, what major subsystems exist, and which subsystem documents to
+read next. `docs/context/architecture/*.md` files are the deeper subsystem
+notes. `kb-map` should read `PROJECT.md` first, then follow its pointers to the
+smallest relevant architecture file for the current task.
 
 When memory is missing, `kb-map` invokes `kb-map-bootstrap` to build the project
 map once. After that, normal startup is cheap: `kb-start` calls `kb-map lookup
