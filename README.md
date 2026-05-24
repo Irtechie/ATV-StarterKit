@@ -113,6 +113,9 @@ What changed:
   `ce-review` and `ce-compound-refresh` keep routing, gates, and safety rules in
   `SKILL.md`, while detailed phase mechanics live in lazy `references/` files.
   The goal is lower startup load without losing review or learning behavior.
+- The 2026-05-24 token-diet pass reduced `ce-review` to 235 lines and
+  `ce-compound-refresh` to 289 lines in the working bundle by moving execution
+  details into lazy references, not by deleting behavior.
 - The working bundle should stay portable: skills, agents, scripts, templates,
   and durable references only. Project-generated brainstorms, plans, research,
   handoffs, and context maps belong in the project that created them or in this
