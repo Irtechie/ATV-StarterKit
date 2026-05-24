@@ -88,6 +88,13 @@ Some work is legitimately enabling infrastructure: migrations, auth plumbing, sh
 | `verification-only` | Config, scaffolding, ops | Builds pass, no regression |
 | `hitl` | UX taste, design judgment | Human confirms acceptable |
 
+Also record `test_level` and `functional_risk` for each slice. `kb-functional-test` owns this classification:
+
+- `test_level`: `none`, `unit`, `integration`, `functional-api`, `functional-cli`, `functional-browser`, or `full`
+- `functional_risk`: `none`, `narrow`, `broad`, or `full`
+
+Use `unit` only when a unit test can genuinely prove the changed behavior. Use functional levels when a unit test could pass while the user-visible, API, CLI, browser, persistence, auth/session, streaming, or integration path is broken.
+
 ## Process
 
 ### 1. Understand the Source Material
@@ -133,6 +140,8 @@ Break the work into thin end-to-end slices. For each slice, determine:
 - **Title** - short descriptive name
 - **What it delivers** - end-to-end behavior description
 - **Verification mode** - tdd / integration / verification-only / hitl
+- **Test level** - none / unit / integration / functional-api / functional-cli / functional-browser / full
+- **Functional risk** - none / narrow / broad / full
 - **Blocked by** - which other slices must complete first, or none
 - **HITL flag** - does this need human judgment? Most should be `false` if the brainstorm was thorough.
 - **Expected files** - which files this slice will create or modify, with operation type. Used by `kb-work` for diff-scope verification and edit-safety.
@@ -152,6 +161,7 @@ Check the proposed breakdown against:
 - Dependencies: blockers are necessary, not accidental.
 - Verification: each slice has agent-runnable tests/checks where possible.
 - Functional coverage: user-visible or cross-boundary slices include a narrow functional check unless explicitly justified.
+- Test-level classification: each slice says whether unit, integration, API/CLI/browser functional, or full-suite proof is required.
 - HITL: human flags are limited to credentials, external systems, subjective approval, or true decisions.
 - Expected files: each slice declares likely touched files and scope.
 
@@ -178,6 +188,8 @@ slices:
     path: docs/plans/YYYY-MM-DD-001-<type>-<name>-plan.md
     blockers: []
     verification: tdd
+    test_level: unit
+    functional_risk: none
     hitl: false
     status: pending
     owner: agent
@@ -192,6 +204,8 @@ slices:
     path: docs/plans/YYYY-MM-DD-002-<type>-<name>-plan.md
     blockers: [slice-001]
     verification: tdd
+    test_level: functional-browser
+    functional_risk: narrow
     hitl: false
     status: pending
     notes: ""
@@ -221,6 +235,8 @@ slice_id: slice-NNN
 title: "<title>"
 blockers: []
 verification: tdd
+test_level: unit
+functional_risk: none
 hitl: false
 expected_files:
   - path: ""

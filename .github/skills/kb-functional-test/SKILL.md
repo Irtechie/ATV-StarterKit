@@ -8,6 +8,42 @@ argument-hint: "[slice plan, feature, changed files, or test file]"
 
 Functional tests prove the real workflow works. Unit tests prove parts. Both matter, but mocked tests that never exercise the behavior do not count.
 
+## Ownership
+
+This skill owns the test-level decision for KB work. `kb-plan` records the initial decision, `kb-work` re-checks it before marking a slice done, and `kb-complete` uses it for manifest-level smoke coverage.
+
+`verification` describes the workflow mode (`tdd`, `integration`, `functional`, `verification-only`, `hitl`). `test_level` describes the concrete proof required:
+
+| `test_level` | Use When | Minimum Proof |
+|---|---|---|
+| `none` | copy/style/docs-only, dead-code removal, generated/config-only with build/lint coverage | lint/build/check only |
+| `unit` | isolated pure logic, parser/formatter/helper, no public workflow boundary | focused unit test that fails before fix |
+| `integration` | wiring between modules, persistence, callbacks, service boundaries, API contract internals | integration test using real collaborating code where practical |
+| `functional-api` | HTTP/API workflow, action/tool endpoint, command handler, data contract visible to callers | API smoke/test through public surface |
+| `functional-cli` | CLI command or script behavior users/operators invoke | CLI smoke script/test with real arguments and observable output |
+| `functional-browser` | UI flow, DOM state, navigation, visual interaction, browser-only behavior | headless Playwright/Cypress/browser probe with observable assertions |
+| `full` | release/high-risk flow touching auth, persistence, integration, UI, or multiple critical paths | targeted functional checks plus broader suite/smoke |
+
+`functional_risk` is the execution breadth: `none`, `narrow`, `broad`, or `full`.
+
+## How To Decide
+
+Classify from concrete evidence, not vibes:
+
+1. Read the slice acceptance criteria and `expected_files`.
+2. Identify the public surface touched: UI, API, CLI, tool/action, job, event, persistence, auth/session, streaming, external integration.
+3. Ask: "Could a unit test pass while the user-visible workflow is broken?"
+   - If yes, require integration or functional proof.
+   - If no, unit-level proof may be enough.
+4. Ask: "Does the changed behavior cross a boundary?"
+   - Process/module boundary -> `integration`.
+   - API/CLI/tool public boundary -> `functional-api` or `functional-cli`.
+   - Browser/DOM/user interaction boundary -> `functional-browser`.
+5. Ask: "Did a bug escape lower-level tests before?"
+   - If yes, add a functional regression check at the level where the bug escaped.
+
+Default upward when uncertain. A narrow functional check is cheaper than shipping a workflow lie.
+
 ## When Functional Tests Are Required
 
 Require at least one functional or integration-style test when a change touches:
@@ -19,6 +55,19 @@ Require at least one functional or integration-style test when a change touches:
 - a bug that escaped unit tests.
 
 Skip or defer functional tests only when the change is pure copy/style, dead-code removal, local refactor with existing coverage, or a generated/config-only change covered by build/lint.
+
+## Model Delegation
+
+This decision is eligible for small/mini models when the platform supports model-tiered subagents.
+
+Good mini-model tasks:
+
+- classify `test_level` and `functional_risk` from a slice plan;
+- audit whether existing tests are meaningful or mocked theater;
+- suggest the narrowest deterministic command or Playwright/API/CLI probe;
+- summarize required test inputs.
+
+Do not use a mini model as the final proof of behavior. The proof is the command, test, browser probe, screenshot, or failing/passing output. Escalate to a stronger model when classification depends on architecture, auth/security, flaky async behavior, complex UI state, or repeated failures.
 
 ## Test Quality Audit
 
@@ -66,6 +115,7 @@ Add the command to `docs/context/operations/testing.md` and make `kb-check` able
 
 Report:
 
+- selected `test_level`;
 - functional risk level: none, narrow, broad, full;
 - tests audited;
 - weak tests found;

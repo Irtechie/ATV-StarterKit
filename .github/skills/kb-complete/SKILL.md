@@ -29,7 +29,7 @@ If the manifest has no scope-check notes (older format), fall back to `git diff 
 
 Before code review, run `kb-check` against the completed manifest scope. If deterministic checks fail, route to `kb-repair` or `kb-fix` before `ce-review`. LLM review does not replace executable verification.
 
-If the manifest contains user-visible, API/CLI, persistence, auth, streaming, or integration changes, run `kb-functional-test` before `ce-review` to confirm the functional coverage is real and not mock-only.
+If the manifest contains slices with `test_level` of `integration`, `functional-api`, `functional-cli`, `functional-browser`, or `full`, run `kb-functional-test` before `ce-review` to confirm the functional coverage is real and not mock-only. Also run it when the diff shows user-visible, API/CLI, persistence, auth, streaming, or integration changes without an adequate recorded test level.
 
 **Invoke the `ce-review` skill** — full multi-agent code review on the feature diff.
 

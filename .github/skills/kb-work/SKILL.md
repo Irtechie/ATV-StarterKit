@@ -30,7 +30,7 @@ Run all vertical slices from a `kb-plan` manifest in dependency order. Keep each
 
 1. **Read the manifest** - parse the YAML frontmatter to get the ordered slice list.
 2. **Validate DAG** - confirm no cycles in blockers, all referenced slice IDs exist, and all slice files exist.
-3. **Validate slice contracts** - each slice plan must have `expected_files`, `verification`, `blockers`, `status`, and acceptance criteria. If these are missing, stop and route to `kb-plan`; do not infer a manifest from a phase list.
+3. **Validate slice contracts** - each slice plan must have `expected_files`, `verification`, `blockers`, `status`, and acceptance criteria. New slice plans should also have `test_level` and `functional_risk`. If core fields are missing, stop and route to `kb-plan`; do not infer a manifest from a phase list. If only `test_level` or `functional_risk` is missing on an older plan, invoke `kb-functional-test` to classify them before execution.
 4. **Check status** - skip any slices already marked `done`. Resume from the first runnable `pending` slice.
 5. **Check worktree** - note dirty or untracked files before executing so unrelated user changes are not staged or reverted.
 6. **Sync with board** - read `todo.md` and confirm its status table matches the manifest. If they diverge, the board wins — another agent may have updated it. Reconcile the manifest from the board before proceeding.
@@ -134,6 +134,19 @@ If the slice plan has fewer than 3 acceptance criteria or no test scenarios:
 - Run a lightweight deepening pass on this single slice.
 - Add concrete test scenarios and likely file paths.
 - Keep the pass bounded; do not re-plan the whole feature.
+
+### Step 2.5: Test-Level Classification
+
+Before editing, ensure the slice has a recorded test obligation:
+
+- `test_level`: `none`, `unit`, `integration`, `functional-api`, `functional-cli`, `functional-browser`, or `full`
+- `functional_risk`: `none`, `narrow`, `broad`, or `full`
+
+If either field is missing, stale, or contradicted by the acceptance criteria or `expected_files`, invoke `kb-functional-test` with the slice plan. Record the result in the slice frontmatter or notes before implementation.
+
+Use small/mini model subagents for this classification when the platform supports model-tiered agents. Keep the task bounded: classify the slice, audit existing tests for mocked theater, and suggest the narrowest deterministic proof. Escalate to the main model for complex architecture/auth/security/flaky async decisions or repeated test failures.
+
+Do not use `unit` just because it is cheaper. Use `unit` only when unit-level proof can fail for the user-facing bug or behavior. If a unit test could pass while the workflow is broken, require integration or functional proof.
 
 ### Step 3.0: Scope Lock
 
@@ -277,7 +290,8 @@ After the slice completes:
    - Invoke `kb-check` for deterministic verification.
    - Prefer existing scripts, lint, typecheck, tests, browser checks, builds, and CI-equivalent commands over LLM inspection.
    - If a full suite is too expensive or unavailable, run the narrowest deterministic check that proves the slice and record why.
-   - For `functional` slices or user-visible/cross-boundary changes, invoke `kb-functional-test` to audit whether the test actually proves the workflow.
+   - Invoke `kb-functional-test` whenever `test_level` is `integration`, `functional-api`, `functional-cli`, `functional-browser`, or `full`, or when user-visible/cross-boundary changes appear despite a lower test level.
+   - Record `test-level: <value>; functional-risk: <value>; proof: <command/artifact>` in the manifest notes.
 
 4. **Assess memory impact**
    - Classify the slice as `memory-impact: none`, `operational`, or `durable`.

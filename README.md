@@ -85,6 +85,11 @@ What changed:
   `kb-epic`, `kb-compact`, and `kb-ship` were added to cover small fixes,
   deterministic testing, P0-P4 gates, research, large initiatives, token
   trimming, and release readiness.
+- `kb-functional-test` owns test-level classification for slices. Plans record
+  `test_level` (`none`, `unit`, `integration`, `functional-api`,
+  `functional-cli`, `functional-browser`, or `full`) and `functional_risk`
+  (`none`, `narrow`, `broad`, or `full`). Small/mini models may classify or
+  audit test quality when available, but executable checks remain the proof.
 - `kb-brainstorm` now proceeds to `kb-plan` when the requirements artifact is
   gate-clean. It pauses only for unresolved blockers, required human decisions,
   required research, or an explicit user stop.
