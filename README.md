@@ -84,6 +84,10 @@ What changed:
 - `kb-brainstorm` now proceeds to `kb-plan` when the requirements artifact is
   gate-clean. It pauses only for unresolved blockers, required human decisions,
   required research, or an explicit user stop.
+- `kb-brainstorm` multiple-choice questions now always include an escape hatch
+  such as `Other / let me explain` or `None of these`. If the answer may need an
+  image, screenshot, file, pasted output, diagram, or longer explanation, the
+  skill should ask in normal chat instead of the blocking question UI.
 - `kb-work` owns slice execution and calls `kb-complete` only after all slices
   are done or intentionally skipped.
 - Once `kb-work` starts execution, runnable slices continue without per-slice
