@@ -128,6 +128,90 @@ Then add:
 kb-map-refresh: done - <docs updated>
 ```
 
+## Step 3.75: Memory Maintenance Signals
+
+Update `docs/context/memory-maintenance.md` before cleanup. This file is a targeted signal index for future deep memory review. It must contain pointers, not just counters.
+
+Create the file if it does not exist:
+
+```markdown
+# Memory Maintenance
+
+Last deep review: never
+
+## Counters Since Last Review
+
+- Completed KB cycles: 0
+- Durable memory refreshes: 0
+- Closed handoffs: 0
+- Contradiction signals: 0
+- Overlap signals: 0
+- Stale-doc signals: 0
+- Bloat signals: 0
+- Repeated-rediscovery signals: 0
+
+## Signals Since Last Review
+```
+
+For every `kb-complete` run:
+
+1. Increment `Completed KB cycles` by 1.
+2. Increment `Durable memory refreshes` if Step 3.5 ran `kb-map refresh`.
+3. Increment `Closed handoffs` by the number of handoffs moved to `docs/handoffs/done/` during this completion.
+4. Append exact signals found during review, compound, learn, evolve, memory refresh, and cleanup.
+
+Signal types:
+
+| Type | Record When |
+|---|---|
+| `contradiction` | two memory docs, handoffs, plans, requirements, or architecture notes disagree |
+| `overlap` | two docs cover the same topic and may need consolidation/cross-linking |
+| `stale-doc` | a memory doc references old paths, old behavior, old commands, or removed systems |
+| `bloat` | a memory doc, handoff folder, research index, or `todo-done.md` is growing past useful startup size |
+| `repeated-rediscovery` | this work re-learned something already discovered in another brainstorm, plan, research note, or solution |
+
+Signal entry format:
+
+```markdown
+### YYYY-MM-DD - <type> - <short topic>
+- Source: `<repo-relative path or manifest note>`
+- Found during: `kb-complete` / `<step or skill>`
+- Signal: <one or two sentences with the actual issue>
+- Suggested pass: <refresh, compact, consolidate, replace, cross-link, or promote>
+```
+
+Examples:
+
+```markdown
+### 2026-05-24 - contradiction - playbook source of truth
+- Source: `docs/context/architecture/playbooks.md`
+- Found during: `kb-map refresh`
+- Signal: requirements say playbooks are YAML-backed; architecture says Python class registry is canonical.
+- Suggested pass: reconcile architecture and decision docs.
+
+### 2026-05-24 - overlap - installer deployment research
+- Source: `docs/context/research/electron-installer.md`
+- Found during: `kb-complete`
+- Signal: overlaps older `docs/context/research/sharepoint-deployment.md` on SharePoint update delivery.
+- Suggested pass: consolidate or cross-link research notes.
+```
+
+Do not invent signals to satisfy a quota. If no signal exists, only increment counters and add a manifest note: `memory-maintenance: no new signals`.
+
+If any signal counter crosses a conservative threshold, add a recommendation to the final report, but do not run the deep pass automatically:
+
+- Completed KB cycles >= 5
+- Durable memory refreshes >= 10
+- Closed handoffs >= 10
+- Any contradiction signals >= 2
+- Any combined signals >= 8
+
+Recommendation format:
+
+```text
+Memory review recommended: <reason>. Run a future deep memory pass against docs/context/memory-maintenance.md before the next large feature.
+```
+
 ## Step 4: Cleanup
 
 Prune ephemeral artifacts. Heavy KB usage generates file sprawl — clean it up per-feature, not manually.
@@ -172,6 +256,7 @@ KB <name> complete.
 - Learn: <N new, M updated | no new patterns>
 - Evolve: <promoted N | skipped | no candidates>
 - Project memory: <refreshed | skipped with reason>
+- Memory maintenance: <N signals recorded | no new signals | review recommended>
 - Cleanup: done
 
 Ready to ship. Run /land when you're ready to push and open a PR.
@@ -193,6 +278,7 @@ Ready to ship. Run /land when you're ready to push and open a PR.
 - **Review engine:** `ce-review` with scope passthrough
 - **Documentation:** `ce-compound` → `docs/solutions/`
 - **Project memory:** `kb-map refresh` → `docs/context/*`, `todo.md`, handoffs
+- **Memory maintenance:** `docs/context/memory-maintenance.md` signal index
 - **Learning:** `/learn` → `.atv/instincts/project.yaml`
 - **Evolution:** `/evolve` → `.github/skills/learned-*/`
 - **Shipping:** `/land` (separate, deliberate act — not part of this skill)

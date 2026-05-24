@@ -94,6 +94,11 @@ What changed:
   skill should ask in normal chat instead of the blocking question UI.
 - `kb-work` owns slice execution and calls `kb-complete` only after all slices
   are done or intentionally skipped.
+- `kb-complete` now records memory-maintenance signals in
+  `docs/context/memory-maintenance.md`: contradictions, overlaps, stale docs,
+  bloat, repeated rediscovery, durable refreshes, and closed handoffs. It stores
+  pointers and the actual issue so later deep memory review can be targeted
+  instead of a blind full scan.
 - Once `kb-work` starts execution, runnable slices continue without per-slice
   confirmation. It pauses only for HITL, blocked/manual work, destructive
   approval, scope failures, QA/repair exhaustion, dependency deadlock, or an
