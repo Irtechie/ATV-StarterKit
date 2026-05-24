@@ -78,6 +78,25 @@ What changed:
 - `klfg` remains the full hands-off orchestrator for brainstorm -> plan -> work
   -> complete.
 
+### Why KB Map Exists
+
+`kb-map` is the context router for fresh sessions. The workflow assumes sessions
+are disposable: instead of keeping one expensive chat open for days, a new
+session should enter a repo, resolve the active project root, and load only the
+local memory needed for the current handoff, bug, feature, or plan.
+
+It points the model to `todo.md`, `docs/context/PROJECT.md`, the relevant
+subsystem architecture docs, operations/testing notes, and active handoffs. It
+does not crawl the whole drive, search unrelated repos, or load every
+architecture file by default. The goal is scoped orientation: get the model to
+the project truth that matters now so tokens are spent on execution instead of
+rediscovery.
+
+When memory is missing, `kb-map` invokes `kb-map-bootstrap` to build the project
+map once. After that, normal startup is cheap: `kb-start` calls `kb-map lookup
+<request>`, `kb-map` returns the relevant docs and likely route, and the next
+skill can work without the user reteaching the app.
+
 This repo can still carry the full ATV and CE ecosystem. The point of the split
 is discoverability: active projects should find the smaller KB bundle first,
 while this repo remains the larger starter kit and historical source.
