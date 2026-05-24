@@ -20,6 +20,11 @@
 
 KB means **Kanban-Based**: the workflow still uses vertical slices, a shared board, and manifest files, but every user-facing workflow command uses the voice-friendly `kb-` prefix so you do not have to say "kanban".
 
+Most KB skills are augmentations on top of the ATV StarterKit and CE
+review/learning workflow. KB adds the voice-friendly routing, project-memory
+map, fresh-session handoff loop, proportional planning, and execution gates; it
+still depends on selected ATV skills and reviewer agents.
+
 ## Fresh Session Loop
 
 The KB workflow is meant to make every new task safe to start in a fresh
@@ -92,6 +97,45 @@ What changed:
   truth instead of duplicating work.
 - `klfg` remains the full hands-off orchestrator for brainstorm -> plan -> work
   -> complete.
+- The day-to-day working bundle still carries required ATV/CE dependencies:
+  `document-review`, `ce-review`, `ce-compound`, `ce-compound-refresh`, `learn`,
+  `evolve`, `tdd`, `todo-create`, `todo-triage`, and the reviewer/specialist
+  agents in `.github/agents/*.agent.md`.
+- Testing showed the agents are required runtime dependencies, not optional
+  docs. In particular, `document-review` needs its document personas
+  (`coherence-reviewer`, `feasibility-reviewer`, `product-lens-reviewer`,
+  `design-lens-reviewer`, `security-lens-reviewer`, `scope-guardian-reviewer`,
+  `adversarial-document-reviewer`), and `ce-review` needs its code-review
+  personas (`correctness-reviewer`, `testing-reviewer`, security/performance/API
+  reviewers, language reviewers, schema/deployment reviewers, and learning
+  agents).
+
+### Why KB Start Exists
+
+`kb-start` is the workflow router. Its job is to choose the right lane for the
+actual work, not blindly run the ceremony implied by the user's wording.
+
+Every request starts by calling `kb-map lookup <request>` so the session has the
+current project memory before it decides what to do. Then `kb-start` classifies
+the work by task shape, risk, and available artifacts:
+
+- Use `kb-fix` for small, bounded bugs or narrow changes where the likely fix is
+  obvious and verification can prove it.
+- Use `kb-brainstorm` when product behavior, technical framing, success
+  criteria, or tradeoffs are still unclear.
+- Use `kb-plan` when requirements or a handoff already explain the work and the
+  next useful output is vertical slices.
+- Use `kb-work` when a valid manifest and slice plans already exist.
+- Use `kb-epic` when the request is too large for one brainstorm or manifest:
+  migrations, framework rewrites, multi-subsystem initiatives, or long backlogs.
+- Use `kb-research` only when external docs, prior art, framework behavior, or
+  known failure modes could change the decision.
+
+The goal is proportional ceremony. A typo fix should not become a brainstorm. A
+framework migration should not become a quick fix. A clear handoff should not
+rerun discovery just because the user said "brainstorm" casually. The user's
+words are input; the route should be based on the actual task, the repo memory,
+and the cost of being wrong.
 
 ### Why KB Map Exists
 
