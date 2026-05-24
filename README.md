@@ -63,6 +63,10 @@ What changed:
   first, then chooses the right lane.
 - `kb-start` now delegates project-memory setup to `kb-map`; route chooses the
   lane for the idea/request, while map decides lookup, refresh, or bootstrap.
+- `kb-start` now has a startup-only session hygiene check. It recommends
+  handoff/restart only when context pressure exists and durable local memory can
+  replace the live chat at lower total context cost or lower drift risk. It does
+  not interrupt active work just because a session is long.
 - `kb-map` is now project-root anchored: it reads memory from the active repo,
   not `~`, `.copilot/handoffs`, the whole drive, or sibling repos.
 - `kb-map` checks standard memory files by exact path under the repo root, not

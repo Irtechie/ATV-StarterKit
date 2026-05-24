@@ -21,6 +21,53 @@ On every fresh session or ambiguous work request:
 
 If `kb-map` cannot identify a valid active project root, ask the user to change into the project directory or provide the project path before routing. Drive roots such as `E:\`, home directories, and global skill/config folders are not valid project roots unless the user explicitly chose them. Do not route from global handoffs or home-directory memory when the user is working in a repo.
 
+## Session Hygiene Check
+
+Run this check only when `kb-start` begins a request. Do not interrupt an active brainstorm, plan, work slice, review, or test loop just to suggest a restart.
+
+Goal: decide whether the user is better served by staying in the current session, compacting, or creating/updating a handoff and restarting fresh.
+
+Use exact context telemetry when the platform exposes it. In GitHub Copilot CLI, `/context` shows context usage. If the agent cannot read telemetry directly, do not guess a percentage; use the evidence-based fallback below.
+
+Context thresholds when exact telemetry is available:
+
+| Context Used | Default |
+|---|---|
+| `<60%` | Stay in session. Do not mention restart unless the user asks. |
+| `60-80%` | Mention restart only if the user is switching tasks or lanes. |
+| `80-90%` | Recommend handoff/restart before starting substantial new work. |
+| `>90%` | Strongly recommend handoff/restart, or compact if the user must continue here. |
+
+Evidence-based fallback when telemetry is unavailable:
+
+- Suggest restart when the session is long, tool output has been heavy, compaction likely happened, the user is switching tasks, or the agent is relying on chat history instead of local files.
+- Do not suggest restart merely because the session feels long.
+
+Before recommending restart, estimate rebuild cost:
+
+| Rebuild Cost | Signals | Recommendation |
+|---|---|---|
+| Low | current handoff exists; `todo.md`, `PROJECT.md`, and manifest/plan pointers are current | Recommend fresh session when context pressure exists. |
+| Medium | project memory exists but handoff needs updating | Offer to update/create a handoff, then restart. |
+| High | important nuance is only in chat; mid-debug observations matter; no current handoff/map | Stay, or compact first, then write durable memory before restarting. |
+
+Restart rule:
+
+> Do not recommend a fresh session merely because the session is long. Recommend it only when durable local memory can replace the live chat at lower total context cost or lower drift risk.
+
+When restart is advisable, ask once:
+
+```text
+This looks like a good reset point. I can create/update a handoff so the next session starts cleanly, or we can keep going here.
+
+1. Create/update handoff and restart
+2. Compact current context and continue
+3. Continue in this session
+4. Other / let me explain
+```
+
+If the user chooses handoff/restart, create or update the active handoff under `docs/handoffs/active/`, ensure `todo.md` points to it, and include the exact `kb-start <handoff/task>` prompt for the next session. Do not run the next workflow in the old session unless the user asks.
+
 ## Read Order
 
 Read only what `kb-map` points to, then only what is needed to route:
