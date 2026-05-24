@@ -109,6 +109,36 @@ What changed:
   personas (`correctness-reviewer`, `testing-reviewer`, security/performance/API
   reviewers, language reviewers, schema/deployment reviewers, and learning
   agents).
+- Heavy inherited ATV/CE skills now use a token diet in the working bundle:
+  `ce-review` and `ce-compound-refresh` keep routing, gates, and safety rules in
+  `SKILL.md`, while detailed phase mechanics live in lazy `references/` files.
+  The goal is lower startup load without losing review or learning behavior.
+- The working bundle should stay portable: skills, agents, scripts, templates,
+  and durable references only. Project-generated brainstorms, plans, research,
+  handoffs, and context maps belong in the project that created them or in this
+  broader starter-kit history, not in the trimmed global skill repo.
+
+### Skill Runtime Surface
+
+The KB bundle ships the full `.github/agents/*.agent.md` surface for now because
+real testing showed missing ATV agents break `document-review` and `ce-review`
+dispatch. Treat agents in three tiers:
+
+- **Required dispatch agents** are called by skills and must stay installed.
+- **Conditional specialists** are used only when the diff/task warrants their
+  lens.
+- **Optional direct-use agents** can be trimmed later only after benchmark runs
+  prove no workflow depends on them.
+
+### Skill Benchmarking
+
+Line count is only a proxy. A better benchmark runs fixed prompts in a scratch
+repo and records whether `kb-start` chooses the right lane, `kb-map` loads only
+repo-local memory, slices include `expected_files` and verification, runnable
+slices continue without unnecessary user prompts, review agents dispatch, tests
+run deterministically, and completed work lands in the right lifecycle files.
+
+Shorter skills win only when those behaviors stay intact.
 
 ### Why KB Start Exists
 
