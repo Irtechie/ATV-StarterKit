@@ -1,18 +1,18 @@
 ---
 name: kb-complete
-description: "Post-work quality and learning pipeline. Runs ce-review -> resolution gate -> compound -> learn -> evolve -> cleanup after kb-work finishes all slices. Use when the user says 'kb complete', 'complete the work', 'run review and learning', 'finish the KB pipeline', or after kb-work reports all slices done."
+description: "Post-work quality and learning pipeline. Runs ce-review -> resolution gate -> follow-up resolution -> proof/demo evidence -> compound -> learn -> evolve -> memory refresh/compact -> cleanup after kb-work finishes all slices. Use when the user says 'kb complete', 'complete the work', 'run review and learning', 'finish the KB pipeline', or after kb-work reports all slices done."
 argument-hint: "[path to KB manifest, or blank to find latest]"
 ---
 
 # KB Complete - Post-Work Quality & Learning Pipeline
 
-After `kb-work` finishes executing all slices, this skill runs the quality review, knowledge capture, and cleanup steps. Separated from kb-work so the user can choose when to run it — `klfg` prompts automatically, standalone users invoke it manually.
+After `kb-work` finishes executing all slices, this skill runs the quality review, follow-up resolution, proof/demo evidence, knowledge capture, memory-health, and cleanup steps. Separated from kb-work so the user can choose when to run it — `klfg` prompts automatically, standalone users invoke it manually.
 
 ## Input
 
 <input> #$ARGUMENTS </input>
 
-**If input is empty:** Scan `docs/plans/` for the most recent `*-kanban-*-manifest.md` file with `status: completed`. If found, use it. Otherwise ask: "Which KB manifest should I complete?"
+**If input is empty:** Scan `docs/plans/` for the most recent `*-kb-*-manifest.md` file with `status: completed`. If none is found, ask: "Which KB manifest should I complete?"
 
 **If input is a path:** Read the manifest at that path.
 
@@ -20,13 +20,20 @@ After `kb-work` finishes executing all slices, this skill runs the quality revie
 
 1. **Read the manifest** — confirm `status: completed` (all slices done/skipped). If slices are still `pending` or `in_progress`, stop: "This manifest has unfinished slices. Run `kb-work` first."
 2. **Collect scope context** — scan each slice's `notes` field for `scope-check:` entries. Build the combined list of scope-verified files across all slices. This becomes the review scope.
-3. **Identify the branch baseline** — run `git merge-base HEAD main` to establish the diff range.
+3. **Collect memory impact** — scan slice notes for `memory-impact:` and `kb-map-refresh:` entries.
+4. **Identify the branch baseline** — run `git merge-base HEAD main` to establish the diff range.
 
 If the manifest has no scope-check notes (older format), fall back to `git diff --name-only $(git merge-base HEAD main)..HEAD` for the file list.
 
 ## Step 1: Code Review
 
-**Invoke `ce-review`** — full multi-agent code review on the feature diff.
+Before code review, run `kb-check` against the completed manifest scope. If deterministic checks fail, route to `kb-repair` or `kb-fix` before `ce-review`. LLM review does not replace executable verification.
+
+If the manifest contains slices with `test_level` of `integration`, `functional-api`, `functional-cli`, `functional-browser`, or `full`, run `kb-functional-test` before `ce-review` to confirm the functional coverage is real and not mock-only. Also run it when the diff shows user-visible, API/CLI, persistence, auth, streaming, or integration changes without an adequate recorded test level.
+
+**Invoke the `ce-review` skill** — full multi-agent code review on the feature diff.
+
+`ce-review` is a skill/orchestrator, not an Agent tool type. Do not call the Agent tool with `agent_type: ce-review`. Load/run the `ce-review` skill, and let that skill spawn valid reviewer agent types such as `code-review`, `correctness-reviewer`, `security-reviewer`, or `adversarial-reviewer`.
 
 This is mandatory. Do not skip, defer, or make it optional.
 
@@ -49,6 +56,8 @@ Review findings from `ce-review` determine whether completion is allowed:
 
 This gate is mandatory. The agent MUST NOT proceed to Step 3 while unresolved P0/P1 findings exist.
 
+For any P2/P3 findings, invoke `kb-gate` with the rectify prompt. Do not silently leave fixable P2/P3 issues when the user would prefer a clean finish.
+
 After resolving all P0/P1s, update the manifest notes with a summary:
 `review: P0=0 P1=2(resolved) P2=3(logged) P3=1(logged)`
 
@@ -64,6 +73,47 @@ This connects the review → learn pipeline. Only P0/P1 findings are worth learn
 
 Create `.atv/observations.jsonl` if it doesn't exist. Append, never overwrite.
 
+## Step 2.5: Follow-Up Resolution Gate
+
+Mirror the useful part of the original LFG finish pattern: do not leave known,
+fixable follow-up work unresolved just because the main implementation passed.
+
+1. Collect unresolved review findings, TODO files, checklist items, and manifest
+   notes produced by `ce-review`, `kb-gate`, `kb-work`, `kb-qa`, or
+   `kb-functional-test`.
+2. Resolve all safe/actionable P0/P1 findings before continuing.
+3. For P2/P3 and todo-style follow-ups, run the smallest suitable resolver:
+   `kb-gate` rectify prompt, `todo-triage`, `todo-create`, or a repo-local
+   todo/PR-comment resolver if one is installed.
+4. Do not parallelize follow-ups that touch the same files or depend on the same
+   decision. Parallel resolution is allowed only when file scopes are disjoint.
+5. Record: `follow-up-resolution: resolved N, logged M, blocked K`.
+
+Blocked/human-required items stay visible in `todo.md` or the manifest with evidence
+paths. They must not disappear into chat history.
+
+## Step 2.6: Proof and Demo Evidence Gate
+
+Run a final evidence pass after review fixes, because review changes can alter
+behavior.
+
+1. Re-run `kb-check` or the narrow deterministic commands affected by review
+   fixes.
+2. If user-visible, API/CLI, browser, persistence, auth, streaming, or
+   integration behavior changed, run `kb-functional-test` again on the final
+   diff. For browser/UI work, use the available browser automation path from the
+   repo or platform; do not require one specific browser tool.
+3. If the change is visual, workflow-heavy, reviewer-facing, or the user/PR
+   expects a demo, capture demo evidence. Use a repo-local `feature-video` or
+   equivalent demo skill if installed; otherwise capture screenshots, logs, or a
+   concise manual demo checklist and add an alert with the missing tool.
+4. Store proof in the manifest notes: commands run, routes/screens/workflows
+   checked, artifacts created, and any skipped proof with reason.
+
+This replaces the old hard-coded `/test-browser` and `/feature-video` steps with
+a generic evidence gate that works across browser, CLI, API, desktop, and service
+projects.
+
 ## Step 3: Compound & Learn
 
 After the resolution gate passes, document what this feature taught the system:
@@ -78,7 +128,7 @@ After the resolution gate passes, document what this feature taught the system:
    - Record result in manifest notes: `learn: N new instincts, M updated` or `learn: no new patterns`
    - This is automatic — do not ask the user whether to run it
 6. **Check evolution cadence:**
-   - Read `.atv/kanban-completions.txt` (create with `0` if missing)
+   - Read `.atv/kb-completions.txt` (create with `0` if missing)
    - Increment by 1
    - Write the new value back
    - If the new value is divisible by 5:
@@ -87,28 +137,150 @@ After the resolution gate passes, document what this feature taught the system:
    - If not divisible by 5: skip silently
    - Commit the counter file with the manifest update
 
+## Step 3.5: Project Memory Refresh Gate
+
+Before cleanup or final "complete", make sure a fresh session can resume without a lesson from the user.
+
+Run `kb-map refresh` when any of these are true:
+
+- The manifest contains `memory-impact: durable`.
+- `kb-work` left any `refresh=pending` note.
+- Review fixes changed behavior, architecture, run/test commands, integrations, or known sharp edges.
+- `docs/context/PROJECT.md` points to stale subsystem docs after the feature diff.
+
+Skip with a manifest note only when changes are clearly cosmetic, copy-only, formatting-only, lint-only, or isolated tests with no durable behavior change:
+
+```text
+kb-map-refresh: skipped - cosmetic/no durable architecture change
+```
+
+When refresh runs, update affected docs only:
+
+- `docs/context/PROJECT.md` for route-map, command, or subsystem index changes.
+- `docs/context/architecture/*` for durable subsystem behavior.
+- `docs/context/operations/*` for run/test/deploy/QA changes.
+- `docs/context/research/*` for reusable research outcomes.
+- `docs/context/decisions/*` for accepted/rejected approaches.
+- `todo.md` and handoff files for current operational state.
+
+Then add:
+
+```text
+kb-map-refresh: done - <docs updated>
+```
+
+## Step 3.75: Memory Maintenance Signals
+
+Update `docs/context/memory-maintenance.md` before cleanup. This file is a targeted signal index for future deep memory review. It must contain pointers, not just counters.
+
+Create the file if it does not exist:
+
+```markdown
+# Memory Maintenance
+
+Last deep review: never
+
+## Counters Since Last Review
+
+- Completed KB cycles: 0
+- Durable memory refreshes: 0
+- Closed handoffs: 0
+- Contradiction signals: 0
+- Overlap signals: 0
+- Stale-doc signals: 0
+- Bloat signals: 0
+- Repeated-rediscovery signals: 0
+
+## Signals Since Last Review
+```
+
+For every `kb-complete` run:
+
+1. Increment `Completed KB cycles` by 1.
+2. Increment `Durable memory refreshes` if Step 3.5 ran `kb-map refresh`.
+3. Increment `Closed handoffs` by the number of handoffs moved to `docs/handoffs/done/` during this completion.
+4. Append exact signals found during review, compound, learn, evolve, memory refresh, and cleanup.
+
+Signal types:
+
+| Type | Record When |
+|---|---|
+| `contradiction` | two memory docs, handoffs, plans, requirements, or architecture notes disagree |
+| `overlap` | two docs cover the same topic and may need consolidation/cross-linking |
+| `stale-doc` | a memory doc references old paths, old behavior, old commands, or removed systems |
+| `bloat` | a memory doc, handoff folder, research index, or `todo-done.md` is growing past useful startup size |
+| `repeated-rediscovery` | this work re-learned something already discovered in another brainstorm, plan, research note, or solution |
+
+Signal entry format:
+
+```markdown
+### YYYY-MM-DD - <type> - <short topic>
+- Source: `<repo-relative path or manifest note>`
+- Found during: `kb-complete` / `<step or skill>`
+- Signal: <one or two sentences with the actual issue>
+- Suggested pass: <refresh, compact, consolidate, replace, cross-link, or promote>
+```
+
+Generic examples:
+
+```markdown
+### 2026-05-24 - contradiction - workflow source of truth
+- Source: `docs/context/architecture/workflows.md`
+- Found during: `kb-map refresh`
+- Signal: requirements and architecture describe different canonical workflow definitions.
+- Suggested pass: reconcile architecture and decision docs.
+
+### 2026-05-24 - overlap - release deployment research
+- Source: `docs/context/research/release-packaging.md`
+- Found during: `kb-complete`
+- Signal: overlaps older deployment research on the same update-delivery path.
+- Suggested pass: consolidate or cross-link research notes.
+```
+
+Do not invent signals to satisfy a quota. If no signal exists, only increment counters and add a manifest note: `memory-maintenance: no new signals`.
+
+If any signal counter crosses a conservative threshold, add a recommendation to the final report, but do not run the deep pass automatically:
+
+- Completed KB cycles >= 5
+- Durable memory refreshes >= 10
+- Closed handoffs >= 10
+- Any contradiction signals >= 2
+- Any combined signals >= 8
+
+Recommendation format:
+
+```text
+Memory review recommended: <reason>. Run `kb-memory-review` against docs/context/memory-maintenance.md before the next large feature.
+```
+
+## Step 3.7: Compact and Alert Gate
+
+Run `kb-compact` when review, learning, memory refresh, or maintenance signals show that durable memory is getting too large for fresh-session startup.
+
+Use targeted compaction only:
+
+- Compact a specific bloated architecture doc, handoff, research note, `todo-done.md`, or memory-maintenance section.
+- Preserve exact paths, commands, current truth, known sharp edges, and unresolved decisions.
+- Do not compact away active work, blockers, HITL items, open handoffs, or evidence needed for review.
+- Record the result in manifest notes: `compact: <path> compacted` or `compact: skipped - no startup bloat`.
+
+Alert the user in the final report when any condition needs deliberate follow-up:
+
+- `kb-memory-review` threshold crossed.
+- P2/P3 findings remain logged after the rectify gate.
+- A memory contradiction, stale-doc signal, or repeated-rediscovery signal was recorded.
+- Compacting was skipped because the doc was too risky to summarize safely.
+- A required tool, reviewer, compound, learn, evolve, refresh, or compact step failed.
+
+Alerts are concise status lines, not extra ceremony. They should tell the user exactly what needs attention and which file contains the evidence.
+
 ## Step 4: Cleanup
 
 Prune ephemeral artifacts. Heavy KB usage generates file sprawl — clean it up per-feature, not manually.
 
 1. **QA screenshots** — delete `.atv/qa-screenshots/` contents for this feature's slices. Screenshots should already be referenced in commits or PR bodies. Safe to remove.
 
-2. **Observations log** — trim `.atv/observations.jsonl` entries older than 90 days. Matches the recency decay half-life in `/learn`. Append-only logs grow indefinitely without this.
-
-   ```bash
-   # Keep entries from the last 90 days
-   python -c "
-   import json, sys
-   from datetime import datetime, timedelta
-   cutoff = (datetime.utcnow() - timedelta(days=90)).isoformat()
-   lines = open('.atv/observations.jsonl').readlines()
-   kept = [l for l in lines if json.loads(l).get('ts','') >= cutoff]
-   open('.atv/observations.jsonl','w').writelines(kept)
-   print(f'observations: kept {len(kept)}/{len(lines)}')
-   "
-   ```
-
-   If Python is unavailable or the file doesn't exist, skip with a note.
+2. **Observations log** — trim `.atv/observations.jsonl` entries older than 90 days. Matches the recency decay half-life in `/learn`. Use any available local scripting runtime; if no suitable runtime is available or the file does not exist, skip with a note.
 
 3. **Plan files** — leave manifests and slice plans in `docs/plans/`. Lightweight reference material, useful for tracing decisions.
 
@@ -118,6 +290,8 @@ Prune ephemeral artifacts. Heavy KB usage generates file sprawl — clean it up 
    cleanup: screenshots pruned, observations trimmed to 90d
    ```
 
+5. **Todo hygiene** — verify `todo.md` contains only active, `🔒 blocked`, `🧊 parked`, `🛑 human-required`, or handoff-pointer work. If the completed feature or routine slice completion logs remain there, move a compact summary to `todo-done.md` and remove those entries from `todo.md`. `todo.md` must keep its `## Rules` section at the top; do not depend on `todo_rules.md`, `todo-rules.md`, or any separate rules file.
+
 ## Step 5: Done
 
 Update the manifest `status: reviewed` and report:
@@ -125,9 +299,15 @@ Update the manifest `status: reviewed` and report:
 ```text
 KB <name> complete.
 - Review: P0=N P1=N(resolved) P2=N P3=N
+- Follow-up resolution: <resolved N | logged M | blocked K>
+- Proof/demo evidence: <commands/artifacts | skipped with reason>
 - Compound: <written | skipped>
 - Learn: <N new, M updated | no new patterns>
 - Evolve: <promoted N | skipped | no candidates>
+- Project memory: <refreshed | skipped with reason>
+- Memory maintenance: <N signals recorded | no new signals | review recommended>
+- Compact: <ran on paths | skipped with reason>
+- Alerts: <none | concise follow-up lines with evidence paths>
 - Cleanup: done
 
 Ready to ship. Run /land when you're ready to push and open a PR.
@@ -139,7 +319,9 @@ Ready to ship. Run /land when you're ready to push and open a PR.
 |-----------|--------|
 | ce-review fails to run | Log error, ask user whether to retry or skip review |
 | P0/P1 fix breaks tests | Re-run tests, treat as new failure, fix before proceeding |
+| proof/demo evidence cannot run | Log the missing tool/server/credential and alert user with the closest deterministic proof completed |
 | compound/learn/evolve fails | Log error, continue — these are non-blocking |
+| kb-compact fails | Log error and alert user with the bloated file path; do not block completion |
 | Manifest not found | Ask user for path |
 | Manifest has unfinished slices | Stop, tell user to run kb-work first |
 
@@ -147,7 +329,12 @@ Ready to ship. Run /land when you're ready to push and open a PR.
 
 - **Input from:** `kb-work` (completed manifest)
 - **Review engine:** `ce-review` with scope passthrough
+- **Follow-up resolution:** `kb-gate`, `todo-triage`, `todo-create`, or repo-local resolvers
+- **Proof/demo evidence:** `kb-check`, `kb-functional-test`, browser/CLI/API probes, optional repo-local demo skills
 - **Documentation:** `ce-compound` → `docs/solutions/`
+- **Project memory:** `kb-map refresh` → `docs/context/*`, `todo.md`, handoffs
+- **Memory maintenance:** `docs/context/memory-maintenance.md` signal index
+- **Compaction:** `kb-compact` for targeted memory bloat
 - **Learning:** `/learn` → `.atv/instincts/project.yaml`
 - **Evolution:** `/evolve` → `.github/skills/learned-*/`
 - **Shipping:** `/land` (separate, deliberate act — not part of this skill)
