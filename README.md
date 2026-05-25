@@ -236,7 +236,7 @@ notes. `kb-map` should read `PROJECT.md` first, then follow its pointers to the
 smallest relevant architecture file for the current task.
 
 Coverage matters. If a fresh session asks about a named high-risk workflow such
-as installer, release, auth, playbooks, actions, MCP, runtime, or deployment,
+as installer, release, auth, workflows, actions, tools, runtime, or deployment,
 `kb-map` must point to the exact subsystem doc and source-of-truth files without
 broad rediscovery. If it cannot, targeted refresh should create or refine the
 missing child architecture doc and record a memory-maintenance signal.

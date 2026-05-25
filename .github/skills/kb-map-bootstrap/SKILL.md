@@ -81,14 +81,14 @@ docs/context/history/
    - Tool/action layers.
    - Data/storage layers.
    - External integrations.
-   - Runtime shells such as Electron, browser, mobile, or CLI.
+   - Runtime shells such as desktop, browser, mobile, service, worker, or CLI.
    - Build, package, installer, updater, release, and deployment flows.
 
-   Treat complex operational flows as first-class subsystems. An Electron app's
-   installer/update/runtime packaging flow is not "just Electron" if it spans
-   builder config, CI workflows, packaging scripts, release assets, embedded
-   runtimes, startup checks, and update delivery. Create a child architecture doc
-   when one parent doc would force a fresh session to rediscover those files.
+   Treat complex operational flows as first-class subsystems. A runtime,
+   installer, update, or packaging flow is not "just build stuff" if it spans
+   config, CI workflows, packaging scripts, release assets, embedded runtimes,
+   startup checks, and update delivery. Create a child architecture doc when one
+   parent doc would force a fresh session to rediscover those files.
 
 2.5. **Validate dependency and runtime chains**
    Bootstrap is not only a file crawl. For each high-risk subsystem, connect
@@ -190,14 +190,14 @@ docs/context/history/
 
    2. **Cluster cross-cutting concepts**
       Sweep for common concepts such as auth, token, credential, session,
-      storage, telemetry, browser, CDP, IPC, settings, cache, queue, worker,
-      model, tool, and integration. Hits across multiple layers usually need a
-      concept doc even when no single directory owns them.
+      storage, telemetry, browser/runtime control, IPC, settings, cache, queue,
+      worker, model, tool, and integration. Hits across multiple layers usually
+      need a concept doc even when no single directory owns them.
 
    3. **Pattern-match filenames**
-      Group files by shared prefixes/suffixes such as `nav_map_*`,
-      `telemetry_*`, `cdp_*`, `m365-*`, or `*_adapter`. Any group with three or
-      more shipped files is a candidate subsystem or shared-pattern doc.
+      Group files by shared prefixes/suffixes such as `*_map`, `*_bridge`,
+      `telemetry_*`, `*_adapter`, `*_client`, or `*_provider`. Any group with
+      three or more shipped files is a candidate subsystem or shared-pattern doc.
 
    4. **Mine repo memory and prior docs**
       Read existing memories, AGENTS files, root READMEs, and project notes for
@@ -221,7 +221,7 @@ docs/context/history/
 
    8. **Detect cross-process concerns**
       Search for matching API surfaces across runtime boundaries such as
-      Electron main/renderer, frontend/backend, Python/JS, worker/server, or
+      desktop/web, frontend/backend, language/runtime bridges, worker/server, or
       native/web. Cross-process flows deserve docs because no one file explains
       them.
 
@@ -231,14 +231,14 @@ docs/context/history/
       the parent doc has strong child pointers and skip reasons.
 
    10. **Test small-model triage by subsystem**
-      Ask whether a small model could triage failures for auth, browser/CDP,
-      telemetry, storage, install, and top user workflows from the KB alone.
-      Any "no" means the map is not done for that subsystem.
+      Ask whether a small model could triage failures for auth, runtime control,
+      telemetry, storage, install, and top user workflows from the KB alone. Any
+      "no" means the map is not done for that subsystem.
 
    11. **Respect small native glue**
       Small files touching OS APIs, native embeds, security storage, COM,
-      browser embedding, device APIs, or process injection can be critical even
-      when short. Size alone is not a reason to skip native glue.
+      browser/runtime embedding, device APIs, or process injection can be
+      critical even when short. Size alone is not a reason to skip native glue.
 
    12. **Record known-unknowns**
       When a meaningful file, command, page, or workflow is found but not
@@ -304,7 +304,7 @@ docs/context/history/
    - Confirm a fresh session can answer: what this app is, how to run it, how to test it, what work is active, and which subsystem docs to read first.
    - Route-test every area in the coverage inventory marked `should map=yes`.
      Use the area name as the lookup prompt, such as `installer`, `release`,
-     `auth`, `playbooks`, `actions`, `MCP`, `runtime`, or `deployment`.
+     `auth`, `workflows`, `actions`, `tools`, `runtime`, or `deployment`.
    - A passing route test means a fresh session can name the exact subsystem doc,
      source-of-truth files, current mode, known sharp edges, and next files to
      read without broad repo search.

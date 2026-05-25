@@ -146,10 +146,10 @@ When coverage is insufficient:
 5. Re-run `kb-map lookup <same request>` and report the exact docs a fresh
    session should read next.
 
-Example: an installer workflow that spans `electron-builder.config.js`,
-pack/fetch runtime scripts, CI workflows, release assets, and runtime startup
-checks needs its own architecture pointer or child doc. A generic Electron doc
-is not enough if it cannot explain how the installer is built and updated.
+Example: an installer or release workflow that spans build config, packaging
+scripts, CI workflows, release assets, and runtime startup checks needs its own
+architecture pointer or child doc. A generic runtime doc is not enough if it
+cannot explain how the workflow is built, shipped, and updated.
 
 ## Coverage Audit Mode
 
@@ -160,7 +160,7 @@ Do a bounded repo-wide coverage audit:
 
 1. Inventory major surfaces:
    - routes/screens/UI shells;
-   - commands/CLIs/tools/actions/playbooks/MCP capabilities;
+   - commands/CLIs/tools/actions/workflows/service capabilities;
    - jobs/workflows/integrations;
    - data/auth/session/storage;
    - build/test/package/installer/updater/release/deploy flows.
