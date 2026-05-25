@@ -63,6 +63,13 @@ docs/context/history/
    - Data/storage layers.
    - External integrations.
    - Runtime shells such as Electron, browser, mobile, or CLI.
+   - Build, package, installer, updater, release, and deployment flows.
+
+   Treat complex operational flows as first-class subsystems. An Electron app's
+   installer/update/runtime packaging flow is not "just Electron" if it spans
+   builder config, CI workflows, packaging scripts, release assets, embedded
+   runtimes, startup checks, and update delivery. Create a child architecture doc
+   when one parent doc would force a fresh session to rediscover those files.
 
 3. **Create or merge memory files**
    - Preserve existing user docs.
@@ -85,6 +92,12 @@ docs/context/history/
    - One concise doc per major subsystem.
    - Parent docs summarize and point to child docs.
    - Include known sharp edges, rejected approaches, and first files to read.
+   - For high-risk build/release/runtime flows, include:
+     - source of truth and current mode;
+     - key scripts/config/workflows;
+     - generated artifacts and where they come from;
+     - manual or CI steps required to populate release assets;
+     - common failure modes and what not to assume.
 
 7. **Write board and handoff structure**
    - `todo.md` for active work and handoff queue pointers.
@@ -102,6 +115,13 @@ docs/context/history/
 10. **Route test**
    - Run a cheap `kb-map lookup` against the new memory.
    - Confirm a fresh session can answer: what this app is, how to run it, how to test it, what work is active, and which subsystem docs to read first.
+   - Also test at least one high-risk workflow by name when it exists, such as
+     `installer`, `release`, `auth`, `playbooks`, `actions`, `MCP`, `runtime`,
+     or `deployment`. A passing route test means a fresh session can name the
+     exact subsystem doc, source-of-truth files, current mode, known sharp edges,
+     and next files to read without broad repo search.
+   - If the lookup cannot answer a named high-risk workflow from memory, write or
+     refine the missing child subsystem doc before declaring bootstrap complete.
 
 ## Templates
 

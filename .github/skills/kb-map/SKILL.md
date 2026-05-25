@@ -116,6 +116,41 @@ Report route, docs loaded, and any stale-work refresh needed. Do not bulk-load a
 
 Do not use `rg`, glob, or whole-repo search to find the standard memory files. Use search only after the exact project-root memory files are loaded and only for task-specific context.
 
+## Coverage Gap Rule
+
+If lookup cannot get a fresh session meaningfully up to speed on the requested
+subsystem from `PROJECT.md` plus pointed docs, treat that as a project-memory
+coverage gap.
+
+Coverage is insufficient when the agent must rediscover basics by broad search,
+for example:
+
+- the relevant subsystem doc is missing or too generic;
+- a broad parent doc exists but does not point to the child workflow;
+- source-of-truth files, scripts, CI workflows, generated artifacts, or release
+  assets are not named;
+- current mode is unclear, such as bundled runtime vs download-on-demand;
+- known failure modes or "do not assume" notes are missing;
+- the user says the session has no clue about the subsystem after `kb-map`.
+
+When coverage is insufficient:
+
+1. Stop normal routing long enough to run a targeted `refresh` for that
+   subsystem.
+2. Search/read only the files needed to understand the missing workflow.
+3. Update `docs/context/PROJECT.md` and/or the smallest relevant
+   `docs/context/architecture/<subsystem>.md` child doc.
+4. Add a `docs/context/memory-maintenance.md` signal:
+   `stale-doc` or `repeated-rediscovery`, with the missing subsystem and source
+   paths.
+5. Re-run `kb-map lookup <same request>` and report the exact docs a fresh
+   session should read next.
+
+Example: an installer workflow that spans `electron-builder.config.js`,
+pack/fetch runtime scripts, CI workflows, release assets, and runtime startup
+checks needs its own architecture pointer or child doc. A generic Electron doc
+is not enough if it cannot explain how the installer is built and updated.
+
 ## Missing Memory and Setup
 
 If `todo.md` or `docs/context/PROJECT.md` is missing, invoke `kb-map-bootstrap`.
@@ -137,6 +172,8 @@ Refresh is required when work changes:
 - Build, run, test, deploy, or QA commands.
 - Subsystem ownership, entry points, or first files a fresh session should read.
 - Known sharp edges, rejected approaches, or "do not repeat" lessons.
+- A lookup exposed a coverage gap: the map could not explain a named subsystem
+  without broad rediscovery.
 
 Refresh is usually not required for:
 
