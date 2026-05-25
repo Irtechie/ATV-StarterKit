@@ -241,6 +241,11 @@ as installer, release, auth, playbooks, actions, MCP, runtime, or deployment,
 broad rediscovery. If it cannot, targeted refresh should create or refine the
 missing child architecture doc and record a memory-maintenance signal.
 
+Bootstrap owns the first coverage pass: inventory the repo, reconcile discovered
+systems against `PROJECT.md` and `docs/context/architecture/README.md`, and
+route-test every mapped major area. One invisible subsystem is evidence to run a
+coverage audit, not to keep fixing one doc at a time.
+
 When memory is missing, `kb-map` invokes `kb-map-bootstrap` to build the project
 map once. After that, normal startup is cheap: `kb-start` calls `kb-map lookup
 <request>`, `kb-map` returns the relevant docs and likely route, and the next
