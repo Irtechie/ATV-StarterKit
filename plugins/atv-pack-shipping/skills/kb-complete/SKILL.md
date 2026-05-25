@@ -290,7 +290,7 @@ Prune ephemeral artifacts. Heavy KB usage generates file sprawl — clean it up 
    cleanup: screenshots pruned, observations trimmed to 90d
    ```
 
-5. **Todo hygiene** — verify `todo.md` contains only active, `🔒 blocked`, `🧊 parked`, `🛑 human-required`, or handoff-pointer work. If the completed feature or routine slice completion logs remain there, move a compact summary to `todo-done.md` and remove those entries from `todo.md`. `todo.md` must keep its `## Rules` section at the top; do not depend on `todo_rules.md`, `todo-rules.md`, or any separate rules file.
+5. **Todo hygiene** — verify `todo.md` contains only active rows, `🔒 blocked` rows, `🛑 human-required` rows, the `🧊 Parked / Cold Storage` section, or handoff-pointer work. If the completed feature or routine slice completion logs remain there, move a compact summary to `todo-done.md` and remove those entries from `todo.md`. `todo.md` must keep its `## Rules` section at the top; do not depend on `todo_rules.md`, `todo-rules.md`, or any separate rules file.
 
 ## Step 5: Done
 

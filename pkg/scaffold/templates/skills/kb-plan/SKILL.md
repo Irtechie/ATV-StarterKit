@@ -286,17 +286,39 @@ Create or update a compact handoff file under `docs/handoffs/active/` only when 
 # Todo
 
 ## Rules
-- Keep this file current and small.
-- Active, blocked, parked, and human-required work belongs here.
-- Completed work does not stay here. When a feature, slice group, handoff, or fix is complete, move the compact completion summary to `todo-done.md` and remove the completed entry from this file.
-- Do not keep routine "slice complete" or verification-success logs here after completion.
-- Detailed handoffs live under `docs/handoffs/`; link them here instead of pasting full content.
+
+**Conventions:** these match the KB skill spec. Keep them inline here; do not split into `todo_rules.md`, `todo-rules.md`, or any separate rules file.
+
+**This file is the single source of truth for active work** — not chat history, not session SQL, and not stale manifests. Any agent should be able to claim a row from here cold.
+
+**Status markers** (applied to individual rows):
+
+| Marker | Meaning |
+|--------|---------|
+| ⬜ pending | Ready when blockers clear |
+| 🔧 in_progress | Agent claimed and actively working |
+| ✅ done | Complete and verified — move summary to `todo-done.md` promptly |
+| 🔒 blocked | Cannot proceed — explain in `## Blocked` with `Depends on:` |
+| ⊘ skipped | Intentionally skipped with reason |
+| 🛑 human-required | Needs human action (HITL) — also surface under `## Human Required` |
+
+**Section icons** (section headers, not row markers):
+
+- 💡 Feature Ideas — not yet brainstormed; a human promotes to active
+- 📋 Queued Improvements — approved but not yet planned
+- 🧊 Parked / Cold Storage — intentionally out of bounds today; never auto-runs, human-promote only
+- 🛑 Human Required — items only a person can complete (logins, approvals, decisions)
+- 📝 Work Log — short dated entries for cross-session visibility
+
+**Task metadata** lines under a row when relevant: `Task ID:`, `Ready: yes|no`, `Depends on:`, `Discovered from:`, `Validation:`.
+
+**Promotion rules:**
+- Newly discovered work goes to 🧊 Parked / Cold Storage first. Never auto-execute from there.
+- Items stalled because another agent, dependency, tool failure, or missing input must finish first go to 🔒 Blocked, not Parked.
+- Human-required work must not be silently folded into generic blocked notes.
+- Detailed handoffs live under `docs/handoffs/`; link them here instead of pasting content.
 - Refresh cold or parked work older than 72 hours before execution.
-- When all active todos are done, check the handoff queue.
-- These rules live at the top of `todo.md`; do not rely on `todo_rules.md`, `todo-rules.md`, or any separate rules file.
-- `🔒 blocked` means waiting on a dependency, another agent, a tool failure, or missing input. Resume when the blocker clears.
-- `🧊 Parked / Cold Storage` means intentionally out of bounds today. Only a human promotes it back to active; never auto-execute parked work.
-- `🛑 Human Required` means a person must decide, approve, log in, or provide a value before the agent can continue that path.
+- Keep this file current and small. When all active todos are done, check the handoff queue.
 
 ## Objective
 
@@ -318,6 +340,17 @@ Create or update a compact handoff file under `docs/handoffs/active/` only when 
 ## Blocked
 
 ## Work Log
+```
+
+**If `todo-done.md` doesn't exist**, create it with this template:
+
+```markdown
+# Completed Work
+
+> Archive of completed items from `todo.md`. Most recent at top.
+
+## YYYY-MM-DD
+- <feature or slice group> — <compact outcome, important proof, commit/link if available>
 ```
 
 **Add an active work section** for the new KB workflow:
@@ -379,7 +412,6 @@ Use `Suggested route: kb-work` only when the handoff links the generated KB mani
 | 🔒 blocked | Cannot proceed — reason noted |
 | ⊘ skipped | Intentionally skipped with reason |
 | 🛑 human-required | Needs human action (HITL) |
-| 🧊 parked | Intentionally out of bounds; human promotion required |
 
 **Standing sections** (add once, keep across features):
 

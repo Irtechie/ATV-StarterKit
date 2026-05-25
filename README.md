@@ -100,12 +100,13 @@ What changed:
   handoff, and fix summaries move to `todo-done.md`; routine completion logs
   should not stay in `todo.md`. Do not create or depend on `todo_rules.md`,
   `todo-rules.md`, or any separate rules file.
-- Board icons are part of the inline `todo.md` contract: `⬜ pending`,
-  `🔧 in_progress`, `✅ done`, `🔒 blocked`, `⊘ skipped`,
-  `🛑 human-required`, and `🧊 parked`. `🔒 blocked` is for dependency,
-  tool, or another-agent waits that can resume when the blocker clears.
-  `🧊 Parked / Cold Storage` is intentionally out of bounds today and only a
-  human promotes it back to active.
+- Board row markers are part of the inline `todo.md` contract: `⬜ pending`,
+  `🔧 in_progress`, `✅ done`, `🔒 blocked`, `⊘ skipped`, and
+  `🛑 human-required`. Section icons are also standardized: `💡 Feature Ideas`,
+  `📋 Queued Improvements`, `🧊 Parked / Cold Storage`, `🛑 Human Required`,
+  and `📝 Work Log`. `🔒 blocked` is for dependency, tool, or another-agent
+  waits that can resume when the blocker clears. `🧊 Parked / Cold Storage` is
+  intentionally out of bounds today and only a human promotes it back to active.
 - `kb-fix`, `kb-functional-test`, `kb-gate`, `kb-check`, `kb-research`,
   `kb-epic`, `kb-compact`, and `kb-ship` were added to cover small fixes,
   deterministic testing, P0-P4 gates, research, large initiatives, token
