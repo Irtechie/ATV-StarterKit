@@ -25,6 +25,24 @@ review/learning workflow. KB adds the voice-friendly routing, project-memory
 map, fresh-session handoff loop, proportional planning, and execution gates; it
 still depends on selected ATV skills and reviewer agents.
 
+## Token-Minimizing Design
+
+The core purpose of the KB skill set is to reduce wasted context without
+lowering the engineering bar.
+
+- Fresh sessions are expected. Handoffs, `todo.md`,
+  `docs/context/PROJECT.md`, plans, and architecture notes let a new session
+  recover the project instead of carrying days of chat history.
+- `kb-map` builds or refreshes project memory once, then future sessions load
+  exact pointers instead of crawling the repo or making the user reteach the
+  app.
+- `kb-start` chooses the smallest correct lane: small fix, brainstorm, plan,
+  work, complete, ship, or epic. It should not turn a small fix into a large
+  ceremony.
+- Vertical slicing and functional verification cost tokens up front, but they
+  are cheaper than redoing broken or under-tested work later. The target is the
+  fewest wasted tokens per finished, verified change.
+
 ## Fresh Session Loop
 
 The KB workflow is meant to make every new task safe to start in a fresh
