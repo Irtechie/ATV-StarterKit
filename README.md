@@ -408,10 +408,13 @@ After all slices pass, the quality and learning pipeline runs automatically:
 |------|-------------|
 | **Code review** | `ce-review` with scope-verified file list pre-loaded. Multiple persona agents (security, performance, correctness). |
 | **Resolution gate** | Safe/actionable P0-P4 findings are fixed by the agent. Human input is required only for product intent, access, risky operations, competing reasonable paths, or genuine ambiguity. |
+| **Follow-up resolution** | Review/TODO fallout is resolved or explicitly logged before completion. Parallel resolution is allowed only when file scopes are disjoint. |
+| **Proof/demo evidence** | Final checks rerun after review fixes. Browser, CLI, API, desktop, or service proof is captured with available repo/platform tools; visual/demo-worthy changes get screenshots, video, or a recorded demo checklist. |
 | **Compound** | `ce-compound` documents surprising patterns to `docs/solutions/`. Skips boilerplate. |
 | **Learn** | `/learn` extracts instincts from resolved findings + recent work. |
 | **Evolve** | Every 5th completion, `/evolve` checks for instincts ready to become full skills. |
-| **Cleanup** | Prune QA screenshots, trim observations log to 90 days. |
+| **Memory refresh + compact** | `kb-map refresh` updates durable project memory when behavior changed. `kb-compact` trims bloat that hurts fresh-session startup. |
+| **Cleanup + alerts** | Prune QA screenshots, trim observations log to 90 days, and alert on unresolved memory/review/tooling issues with evidence paths. |
 
 ### Step 5: Ship
 
