@@ -1,0 +1,12 @@
+instincts:
+  - id: keep-reusable-skills-domain-generic
+    trigger: "when updating a reusable skill because one project exposed a failure"
+    behavior: "generalize the fix into domain-neutral rules, using the failing project only as evidence; avoid naming project-specific files, app subsystems, languages, vendors, or one-off technologies unless the skill is explicitly for that domain"
+    confidence: 0.8
+    domain: workflow
+    observations: 2
+    first_seen: 2026-05-25
+    last_seen: 2026-05-25
+    evidence:
+      - "commit d0d12eb: removed app/framework-specific examples from kb-map and kb-map-bootstrap after bootstrap coverage tactics became too tied to one app"
+      - "user correction 2026-05-25: skill fixes must benefit every app, e.g. say coding language/runtime instead of Python when the skill is not Python-specific"
