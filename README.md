@@ -254,6 +254,12 @@ paths, and smoke tests. A subsystem doc is not good enough if a smaller fresh
 session still has to rediscover what must exist on disk or what gets used at
 runtime.
 
+Bootstrap must discover concepts, not just folders. It descends into substantial
+child directories, clusters cross-cutting concerns, mines repo memories and
+AGENTS/README files for subsystem hints, checks route/page and filename-prefix
+patterns, and records known-unknowns. `kb-map` also warns when lookup sees a
+thin map compared with the actual repo shape.
+
 When memory is missing, `kb-map` invokes `kb-map-bootstrap` to build the project
 map once. After that, normal startup is cheap: `kb-start` calls `kb-map lookup
 <request>`, `kb-map` returns the relevant docs and likely route, and the next
