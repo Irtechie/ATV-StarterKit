@@ -142,6 +142,11 @@ What changed:
   and durable references only. Project-generated brainstorms, plans, research,
   handoffs, and context maps belong in the project that created them or in this
   broader starter-kit history, not in the trimmed global skill repo.
+- Blocking question pickers are used only when the answer is truly one short
+  choice. For voice dictation, paste, images, screenshots, files, or long
+  corrections, skills should ask in normal chat or include `Other / let me
+  explain` and return to chat. This is part of the token-minimizing design:
+  one good dictated answer is cheaper than several picker turns.
 
 ### Skill Runtime Surface
 
