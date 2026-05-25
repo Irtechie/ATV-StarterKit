@@ -246,6 +246,14 @@ systems against `PROJECT.md` and `docs/context/architecture/README.md`, and
 route-test every mapped major area. One invisible subsystem is evidence to run a
 coverage audit, not to keep fixing one doc at a time.
 
+Bootstrap must also validate chains, not just describe files. For high-risk
+systems like installers, releases, auth, data, integrations, and embedded
+runtimes, it should connect build config, shipped artifacts, install locations,
+first-launch downloads, runtime consumers, version pins, architecture-specific
+paths, and smoke tests. A subsystem doc is not good enough if a smaller fresh
+session still has to rediscover what must exist on disk or what gets used at
+runtime.
+
 When memory is missing, `kb-map` invokes `kb-map-bootstrap` to build the project
 map once. After that, normal startup is cheap: `kb-start` calls `kb-map lookup
 <request>`, `kb-map` returns the relevant docs and likely route, and the next
