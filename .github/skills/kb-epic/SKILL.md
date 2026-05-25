@@ -17,7 +17,7 @@ Create an epic map that points to multiple brainstorms, plans, manifests, handof
 Use `kb-epic` when:
 
 - The request is bigger than one brainstorm or one manifest.
-- Example: Python to .NET migration, Electron rewrite, auth overhaul, full chat architecture replacement.
+- Example: language/runtime migration, app-shell rewrite, auth overhaul, full interaction architecture replacement.
 - One plan would be too large to execute or review.
 - Work spans multiple subsystems.
 - Architecture direction affects many later slices.

@@ -1,12 +1,12 @@
 ---
 name: kb-complete
-description: "Post-work quality and learning pipeline. Runs ce-review -> resolution gate -> compound -> learn -> evolve -> cleanup after kb-work finishes all slices. Use when the user says 'kb complete', 'complete the work', 'run review and learning', 'finish the KB pipeline', or after kb-work reports all slices done."
+description: "Post-work quality and learning pipeline. Runs ce-review -> resolution gate -> compound -> learn -> evolve -> memory refresh/compact -> cleanup after kb-work finishes all slices. Use when the user says 'kb complete', 'complete the work', 'run review and learning', 'finish the KB pipeline', or after kb-work reports all slices done."
 argument-hint: "[path to KB manifest, or blank to find latest]"
 ---
 
 # KB Complete - Post-Work Quality & Learning Pipeline
 
-After `kb-work` finishes executing all slices, this skill runs the quality review, knowledge capture, and cleanup steps. Separated from kb-work so the user can choose when to run it — `klfg` prompts automatically, standalone users invoke it manually.
+After `kb-work` finishes executing all slices, this skill runs the quality review, knowledge capture, memory-health, and cleanup steps. Separated from kb-work so the user can choose when to run it — `klfg` prompts automatically, standalone users invoke it manually.
 
 ## Input
 
@@ -180,19 +180,19 @@ Signal entry format:
 - Suggested pass: <refresh, compact, consolidate, replace, cross-link, or promote>
 ```
 
-Examples:
+Generic examples:
 
 ```markdown
-### 2026-05-24 - contradiction - playbook source of truth
-- Source: `docs/context/architecture/playbooks.md`
+### 2026-05-24 - contradiction - workflow source of truth
+- Source: `docs/context/architecture/workflows.md`
 - Found during: `kb-map refresh`
-- Signal: requirements say playbooks are YAML-backed; architecture says Python class registry is canonical.
+- Signal: requirements and architecture describe different canonical workflow definitions.
 - Suggested pass: reconcile architecture and decision docs.
 
-### 2026-05-24 - overlap - installer deployment research
-- Source: `docs/context/research/electron-installer.md`
+### 2026-05-24 - overlap - release deployment research
+- Source: `docs/context/research/release-packaging.md`
 - Found during: `kb-complete`
-- Signal: overlaps older `docs/context/research/sharepoint-deployment.md` on SharePoint update delivery.
+- Signal: overlaps older deployment research on the same update-delivery path.
 - Suggested pass: consolidate or cross-link research notes.
 ```
 
@@ -212,28 +212,34 @@ Recommendation format:
 Memory review recommended: <reason>. Run `kb-memory-review` against docs/context/memory-maintenance.md before the next large feature.
 ```
 
+## Step 3.7: Compact and Alert Gate
+
+Run `kb-compact` when review, learning, memory refresh, or maintenance signals show that durable memory is getting too large for fresh-session startup.
+
+Use targeted compaction only:
+
+- Compact a specific bloated architecture doc, handoff, research note, `todo-done.md`, or memory-maintenance section.
+- Preserve exact paths, commands, current truth, known sharp edges, and unresolved decisions.
+- Do not compact away active work, blockers, HITL items, open handoffs, or evidence needed for review.
+- Record the result in manifest notes: `compact: <path> compacted` or `compact: skipped - no startup bloat`.
+
+Alert the user in the final report when any condition needs deliberate follow-up:
+
+- `kb-memory-review` threshold crossed.
+- P2/P3 findings remain logged after the rectify gate.
+- A memory contradiction, stale-doc signal, or repeated-rediscovery signal was recorded.
+- Compacting was skipped because the doc was too risky to summarize safely.
+- A required tool, reviewer, compound, learn, evolve, refresh, or compact step failed.
+
+Alerts are concise status lines, not extra ceremony. They should tell the user exactly what needs attention and which file contains the evidence.
+
 ## Step 4: Cleanup
 
 Prune ephemeral artifacts. Heavy KB usage generates file sprawl — clean it up per-feature, not manually.
 
 1. **QA screenshots** — delete `.atv/qa-screenshots/` contents for this feature's slices. Screenshots should already be referenced in commits or PR bodies. Safe to remove.
 
-2. **Observations log** — trim `.atv/observations.jsonl` entries older than 90 days. Matches the recency decay half-life in `/learn`. Append-only logs grow indefinitely without this.
-
-   ```bash
-   # Keep entries from the last 90 days
-   python -c "
-   import json, sys
-   from datetime import datetime, timedelta
-   cutoff = (datetime.utcnow() - timedelta(days=90)).isoformat()
-   lines = open('.atv/observations.jsonl').readlines()
-   kept = [l for l in lines if json.loads(l).get('ts','') >= cutoff]
-   open('.atv/observations.jsonl','w').writelines(kept)
-   print(f'observations: kept {len(kept)}/{len(lines)}')
-   "
-   ```
-
-   If Python is unavailable or the file doesn't exist, skip with a note.
+2. **Observations log** — trim `.atv/observations.jsonl` entries older than 90 days. Matches the recency decay half-life in `/learn`. Use any available local scripting runtime; if no suitable runtime is available or the file does not exist, skip with a note.
 
 3. **Plan files** — leave manifests and slice plans in `docs/plans/`. Lightweight reference material, useful for tracing decisions.
 
@@ -257,6 +263,8 @@ KB <name> complete.
 - Evolve: <promoted N | skipped | no candidates>
 - Project memory: <refreshed | skipped with reason>
 - Memory maintenance: <N signals recorded | no new signals | review recommended>
+- Compact: <ran on paths | skipped with reason>
+- Alerts: <none | concise follow-up lines with evidence paths>
 - Cleanup: done
 
 Ready to ship. Run /land when you're ready to push and open a PR.
@@ -269,6 +277,7 @@ Ready to ship. Run /land when you're ready to push and open a PR.
 | ce-review fails to run | Log error, ask user whether to retry or skip review |
 | P0/P1 fix breaks tests | Re-run tests, treat as new failure, fix before proceeding |
 | compound/learn/evolve fails | Log error, continue — these are non-blocking |
+| kb-compact fails | Log error and alert user with the bloated file path; do not block completion |
 | Manifest not found | Ask user for path |
 | Manifest has unfinished slices | Stop, tell user to run kb-work first |
 
@@ -279,6 +288,7 @@ Ready to ship. Run /land when you're ready to push and open a PR.
 - **Documentation:** `ce-compound` → `docs/solutions/`
 - **Project memory:** `kb-map refresh` → `docs/context/*`, `todo.md`, handoffs
 - **Memory maintenance:** `docs/context/memory-maintenance.md` signal index
+- **Compaction:** `kb-compact` for targeted memory bloat
 - **Learning:** `/learn` → `.atv/instincts/project.yaml`
 - **Evolution:** `/evolve` → `.github/skills/learned-*/`
 - **Shipping:** `/land` (separate, deliberate act — not part of this skill)
