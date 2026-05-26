@@ -191,6 +191,17 @@ Before executing the slice, load the declared scope and enforce it proactively â
 
 This gate pairs with Step 3.6 (Diff-Scope Verification). Scope Lock prevents out-of-scope edits before they happen. Diff-Scope Verification catches anything that slipped through after the fact. Both are mandatory. Neither can be skipped, overridden, or deferred.
 
+### Step 3.1: Regression Snapshot Gate
+
+Before executing a new slice, invoke `kb-regression-snapshot verify` after Scope Lock and before editing implementation files.
+
+- Verify all previous snapshots under `.atv/snapshots/`.
+- If any previous snapshot fails, STOP before new slice execution.
+- Mark the current slice `ðŸ”’ blocked` with the failing snapshot path, target, expected vs observed result, and artifact/log path.
+- Do not continue to implementation, QA, or the next slice until the regression is resolved, parked by the human, or explicitly skipped.
+
+This gate catches entropy between slices. It cannot be skipped, overridden, or deferred.
+
 ### Step 3: Execute
 
 Use a fresh sub-agent when the platform supports delegated execution and the user has permitted it. Otherwise execute the slice locally while keeping the scope limited to this slice.
@@ -307,7 +318,8 @@ After the slice completes:
    - If a full suite is too expensive or unavailable, run the narrowest deterministic check that proves the slice and record why.
    - Invoke `kb-functional-test` whenever `test_level` is `integration`, `functional-api`, `functional-cli`, `functional-browser`, or `full`, or when user-visible/cross-boundary changes appear despite a lower test level.
    - For UI-reachable changes, record UI proof: route/screen exercised, interaction performed, assertion made, browser transport used, and screenshot path when applicable. Do not mark the slice done with backend-only proof if a UI path exists.
-   - Record `test-level: <value>; functional-risk: <value>; proof: <command/artifact>` in the manifest notes.
+   - Invoke `kb-regression-snapshot capture <slice-id>` after deterministic verification and QA pass. Store `.atv/snapshots/<slice-id>.json`.
+   - Record `test-level: <value>; functional-risk: <value>; proof: <command/artifact>; snapshot: <path/result>` in the manifest notes.
 
 4. **Assess memory impact**
    - Classify the slice as `memory-impact: none`, `operational`, or `durable`.

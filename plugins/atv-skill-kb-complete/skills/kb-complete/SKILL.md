@@ -113,6 +113,29 @@ behavior.
 4. Store proof in the manifest notes: commands run, routes/screens/workflows
    checked, artifacts created, and any skipped proof with reason.
 
+Every slice must have machine-verifiable proof recorded in the manifest before
+completion can continue.
+
+Acceptable proof formats:
+
+- test file path + exit code + timestamp;
+- Playwright/Cypress/CDP trace path or browser assertion artifact;
+- API response log path with status/schema assertion result;
+- CLI output log path with command and exit code;
+- snapshot verification result from `.atv/snapshots/<slice-id>.json`.
+
+Not acceptable:
+
+- "I checked and it works";
+- "Page loaded successfully";
+- "Tests pass" without the actual command or test file, exit code, and timestamp;
+- screenshots or prose-only notes without an executable assertion/result;
+- any model-only visual inspection.
+
+If any slice has only prose proof, this gate fails. Return to `kb-work`,
+`kb-check`, `kb-qa`, `kb-functional-test`, or `kb-regression-snapshot` to produce
+executable evidence before proceeding.
+
 This replaces the old hard-coded `/test-browser` and `/feature-video` steps with
 a generic evidence gate that works across browser, CLI, API, desktop, and service
 projects.

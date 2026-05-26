@@ -57,3 +57,5 @@ Good scripts accept scope arguments, print concise pass/fail output, exit nonzer
 ## Output
 
 Report commands run, pass/fail status, failures fixed or parked, checks added, and remaining manual-only verification with why it cannot be automated.
+
+For every check, include machine proof: command or test file path, exit code, timestamp, and log/artifact path when available. Do not summarize as "tests pass" without the executable proof fields.

@@ -146,5 +146,7 @@ Report:
 - weak tests found;
 - functional checks added or run;
 - screenshot evidence path for UI checks;
-- command/results;
+- command/results with command or test file path, exit code, timestamp, and log/trace/artifact path;
 - remaining manual-only verification and why.
+
+For `functional-browser`, proof must include the executed browser assertion file or project test path plus exit code. A screenshot-only or prose-only claim is not functional proof.

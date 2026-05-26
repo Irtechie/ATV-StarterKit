@@ -78,10 +78,22 @@ Read the slice plan's acceptance criteria. For each criterion that describes vis
 
 | Check | Method |
 |-------|--------|
-| Element exists | Query the DOM for the expected element |
-| Text content matches | Read rendered text, compare to expected |
-| Layout is correct | Screenshot comparison against description |
+| Element exists | Write and run a locator assertion against the rendered UI |
+| Text content matches | Write and run a rendered text assertion |
+| Layout is correct | Write and run a deterministic viewport/locator/screenshot assertion when possible |
 | No regressions | Console has no new errors or warnings |
+
+For every visible-behavior acceptance criterion, create an ephemeral assertion file for this QA pass and execute it. Prefer Playwright for browser apps; use the project's equivalent deterministic UI test runner when Playwright is not the stack. The proof must be executable code such as:
+
+```ts
+await expect(page.locator('.margin-value')).toHaveText('42%')
+```
+
+Do not pass a criterion by looking at a screenshot and deciding it seems right. Screenshots are evidence for debugging and review, not the pass/fail oracle. The pass/fail oracle is the executed assertion file, its command, exit code, timestamp, and any trace/log artifact.
+
+Delete the ephemeral assertion file after the QA pass unless keeping it as a reusable regression test is clearly valuable. Preserve the command output, trace path, screenshot path, or log path needed for manifest proof.
+
+If a visible criterion cannot be expressed as a programmatic assertion, flag it as `🛑 human-required` with the reason. Do not substitute model visual inspection for deterministic proof.
 
 **Never read source code during QA.** Test as a user — if you can't verify it from the browser, flag it as needing manual verification.
 

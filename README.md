@@ -107,8 +107,8 @@ What changed:
   and `📝 Work Log`. `🔒 blocked` is for dependency, tool, or another-agent
   waits that can resume when the blocker clears. `🧊 Parked / Cold Storage` is
   intentionally out of bounds today and only a human promotes it back to active.
-- `kb-fix`, `kb-functional-test`, `kb-gate`, `kb-check`, `kb-research`,
-  `kb-epic`, `kb-compact`, and `kb-ship` were added to cover small fixes,
+- `kb-fix`, `kb-functional-test`, `kb-regression-snapshot`, `kb-gate`,
+  `kb-check`, `kb-research`, `kb-epic`, `kb-compact`, and `kb-ship` were added to cover small fixes,
   deterministic testing, P0-P4 gates, research, large initiatives, token
   trimming, and release readiness.
 - `kb-functional-test` owns test-level classification for slices. Plans record
@@ -120,6 +120,13 @@ What changed:
   and `.svelte` changes auto-classify as `functional-browser`; backend/API/unit
   checks can support that proof but cannot replace real navigation, clicks or
   inputs, rendered assertions, screenshots, and cleanup.
+- `kb-qa` must convert visible acceptance criteria into executable browser
+  assertions or the project stack equivalent. Screenshots support the result,
+  but they are not the pass/fail oracle.
+- `kb-regression-snapshot` captures deterministic state after each passed slice
+  in `.atv/snapshots/<slice-id>.json` and verifies prior snapshots before the
+  next slice starts. This keeps old slice behavior machine-checkable across long
+  runs and fresh sessions.
 - `kb-brainstorm` now proceeds to `kb-plan` when the requirements artifact is
   gate-clean. It pauses only for unresolved blockers, required human decisions,
   required research, or an explicit user stop.
@@ -421,7 +428,7 @@ After all slices pass, the quality and learning pipeline runs automatically:
 | **Code review** | `ce-review` with scope-verified file list pre-loaded. Multiple persona agents (security, performance, correctness). |
 | **Resolution gate** | Safe/actionable P0-P4 findings are fixed by the agent. Human input is required only for product intent, access, risky operations, competing reasonable paths, or genuine ambiguity. |
 | **Follow-up resolution** | Review/TODO fallout is resolved or explicitly logged before completion. Parallel resolution is allowed only when file scopes are disjoint. |
-| **Proof/demo evidence** | Final checks rerun after review fixes. Browser, CLI, API, desktop, or service proof is captured with available repo/platform tools; visual/demo-worthy changes get screenshots, video, or a recorded demo checklist. |
+| **Proof/demo evidence** | Final checks rerun after review fixes. Browser, CLI, API, desktop, service, or snapshot proof is captured with available repo/platform tools. Every slice needs machine-verifiable evidence in the manifest: command/test path, exit code, timestamp, trace/log/API artifact, or snapshot result. Prose-only proof fails completion. |
 | **Compound** | `ce-compound` documents surprising patterns to `docs/solutions/`. Skips boilerplate. |
 | **Learn** | `/learn` extracts instincts from resolved findings + recent work. |
 | **Evolve** | Every 5th completion, `/evolve` checks for instincts ready to become full skills. |

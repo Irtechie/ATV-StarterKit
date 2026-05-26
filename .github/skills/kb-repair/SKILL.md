@@ -74,8 +74,11 @@ After each fix, re-run ALL checks — not just the one that failed:
 
 - **Lint** (always)
 - **Browser checks** (if frontend slice)
+- **Regression snapshots** when the failure or fix touches behavior covered by `.atv/snapshots/`
 
 A fix for one failure might introduce another. Catch it immediately. Run the same `kb-qa` Steps 0–7 flow on the affected checks.
+
+Re-verification must use the same deterministic assertion, command, or snapshot check that failed when possible. Do not replace a failed executable check with model judgment or a screenshot-only conclusion.
 
 ### 4. Assess Progress
 
