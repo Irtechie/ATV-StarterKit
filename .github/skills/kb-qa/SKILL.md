@@ -6,20 +6,20 @@ argument-hint: "[slice plan path, or blank to verify the current slice]"
 
 # KB QA — Quality Assurance Gate
 
-Quality verification for all slices. Lint for every slice. Browser checks for frontend slices. On any failure, hands off to `kb-repair` for surgical fixes.
+Quality verification for all slices. Lint for every slice. Browser checks for frontend and UI-reachable behavior. On any failure, hands off to `kb-repair` for surgical fixes.
 
 Prefer deterministic checks over model judgment. Use `kb-check` for lint, typecheck, tests, builds, browser checks, and audits before relying on visual or textual inspection.
 
-Use `kb-functional-test` for user-visible workflows, API/CLI journeys, auth/session/persistence paths, and bugs that escaped unit tests. Headless browser checks are preferred; visible browser sessions must be serialized.
+Use `kb-functional-test` for user-visible workflows, API/CLI journeys, auth/session/persistence paths, and bugs that escaped unit tests. If the changed behavior is reachable through the UI and a browser transport exists, verification must drive it through the UI. Backend/API/unit checks may supplement but cannot replace that UI proof. Headless browser checks are preferred; visible browser sessions must be serialized.
 
 ## When to Run
 
 Called from `kb-work` at Step 3.8, after all safety gates pass.
 
 - **All slices:** lint check (Step 7)
-- **Frontend slices only:** browser verification (Steps 0–6) — triggered when `expected_files` includes frontend file extensions: `.tsx`, `.jsx`, `.html`, `.css`, `.scss`, `.vue`, `.svelte`, `.ejs`, `.hbs`
+- **UI-reachable slices:** browser verification (Steps 0–6) — triggered when `expected_files` includes frontend file extensions (`.tsx`, `.jsx`, `.html`, `.css`, `.scss`, `.vue`, `.svelte`, `.ejs`, `.hbs`) or when backend/API/state changes alter behavior a user reaches through the UI.
 
-If the slice is backend-only, skip browser checks with a one-line note: `qa-browser: skipped — no frontend files in expected_files`. Lint still runs.
+If the slice is truly backend-only with no affected UI path, skip browser checks with a one-line note: `qa-browser: skipped — no UI-reachable behavior changed`. Lint still runs. Do not skip browser checks merely because the implementation file is backend-side.
 
 ## Input
 
@@ -43,7 +43,7 @@ Pick the transport based on what the slice needs, not a fixed priority list.
 2. **Is this a regular site or local dev server?** (localhost, public URLs, no corporate auth)
 
    - Agent Browser if installed (`agent-browser` on PATH) — structured element targeting, fast
-   - Playwright if available — headless, clean viewport control, good for responsive testing
+   - Playwright if available — headless, clean viewport control, required default for local/public UI functional checks
    - CDP as fallback
 
 3. **Does the slice need responsive/viewport testing?** (deep tier, or slice touches layout/grid/responsive components)
@@ -51,7 +51,7 @@ Pick the transport based on what the slice needs, not a fixed priority list.
    - Playwright preferred for multi-viewport. Headless, spawns 375px/768px/1440px cleanly.
    - Fallback: CDP with device emulation.
 
-4. **None available** → Log: `qa: skipped - no browser transport available (checked: CDP, Playwright, Agent Browser)`. Not fatal, but flag it in `todo.md`.
+4. **None available** → Log: `qa: blocked - no browser transport available (checked: CDP, Playwright, Agent Browser)`. For UI-reachable changes this is a blocking verification gap, not a pass. Add a `🔒 blocked` or `🛑 human-required` entry in `todo.md` with the missing transport/setup.
 
 ## Step 1: Connect and Navigate
 
@@ -61,7 +61,7 @@ Pick the transport based on what the slice needs, not a fixed priority list.
    - Map changed files to testable URLs: `pages/dashboard.tsx` → `/dashboard`, `components/Header.tsx` → any page rendering that component.
    - Cross-reference with the slice plan's acceptance criteria for explicit URLs.
    - Dev server URL (default `http://localhost:3000`, respect `DEV_SERVER_URL` env var).
-   - Only test pages that include changed components — do not test the entire app.
+   - Test every changed UI path and every UI-visible acceptance criterion. Do not test the entire app, but do not collapse multiple affected routes into one convenient page.
 4. Wait for the page to reach a stable state (network idle or DOM content loaded).
 
 ## Step 2: Capture Evidence
@@ -74,7 +74,7 @@ Create `.atv/qa-screenshots/` if it doesn't exist.
 
 ## Step 3: Verify Against Slice Requirements
 
-Read the slice plan's acceptance criteria. For each criterion that describes visible behavior:
+Read the slice plan's acceptance criteria. For each criterion that describes visible behavior, verify it through the rendered UI itself:
 
 | Check | Method |
 |-------|--------|
@@ -84,6 +84,8 @@ Read the slice plan's acceptance criteria. For each criterion that describes vis
 | No regressions | Console has no new errors or warnings |
 
 **Never read source code during QA.** Test as a user — if you can't verify it from the browser, flag it as needing manual verification.
+
+Calling backend endpoints, dispatching component events directly, invoking button handlers, mocking network requests, inspecting component state, or reading logs does not satisfy visible-behavior criteria. Those are useful supporting evidence only after the rendered UI path has been exercised.
 
 ## Step 4: Interaction Checks (standard + deep tiers)
 
@@ -208,7 +210,7 @@ Actions are transport-agnostic above. Here's the mapping:
 - Screenshot evidence is mandatory for any failure.
 - Write incrementally, don't batch findings.
 - Auth is sacred — never attempt authenticated routes without a real session.
-- If a check can't be verified from the browser, flag it for manual review rather than guessing.
+- If a UI-reachable check can't be verified from the browser, block or flag human-required setup rather than guessing or substituting backend-only verification.
 
 ## Integration
 

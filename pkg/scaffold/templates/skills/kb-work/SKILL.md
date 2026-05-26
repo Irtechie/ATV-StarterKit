@@ -151,6 +151,18 @@ Use small/mini model subagents for this classification when the platform support
 
 Do not use `unit` just because it is cheaper. Use `unit` only when unit-level proof can fail for the user-facing bug or behavior. If a unit test could pass while the workflow is broken, require integration or functional proof.
 
+Hard gate: when `kb-functional-test` auto-classifies a test level, the agent must not downgrade it. If `expected_files` includes `.tsx`, `.jsx`, `.vue`, or `.svelte`, or if non-UI files change behavior primarily reached through the rendered app UI, the slice is `test_level: functional-browser`.
+
+When `test_level` is `functional-browser`, these steps are mandatory:
+
+1. Start or connect to the running app.
+2. Use Playwright to navigate to the actual feature route/screen in the rendered UI. Use CDP or the repo/platform authenticated browser transport only when Playwright cannot access an authenticated/corporate route.
+3. Exercise the happy path with real clicks, keyboard input, form input, navigation, or other visible controls.
+4. Capture screenshots of key pass/fail states and assert observable rendered outcomes after the action.
+5. Clean up artifacts created during testing: test data, screenshots/traces when no longer needed, temp files, and browser state per repo QA cleanup rules.
+
+Backend/API/unit checks may supplement this proof, but they cannot replace it. This gate cannot be skipped, overridden, or deferred.
+
 ### Step 3.0: Scope Lock
 
 Before executing the slice, load the declared scope and enforce it proactively — prevent out-of-scope edits before they happen.
@@ -259,11 +271,11 @@ This is enforcement, not a warning. The agent MUST NOT execute destructive comma
 Invoke `kb-qa` with the current slice context. QA runs:
 
 - **Lint check** on files in `expected_files` (every slice)
-- **Browser verification** against acceptance criteria (frontend slices only)
+- **Browser verification** against acceptance criteria for frontend slices and any backend/API/state slice whose changed behavior is reachable through the UI
 
 If any check fails, `kb-qa` invokes `kb-repair` for surgical fixes (progress-based, 5-iteration cap). If repair exhausts or gets stuck, STOP — do not proceed to the next slice.
 
-Backend-only slices skip browser checks but still run lint.
+Truly backend-only slices skip browser checks but still run lint. Do not classify a slice as backend-only when the behavior being changed is primarily proven by using the app UI.
 
 This gate is mandatory. It cannot be skipped or deferred.
 
@@ -294,6 +306,7 @@ After the slice completes:
    - Prefer existing scripts, lint, typecheck, tests, browser checks, builds, and CI-equivalent commands over LLM inspection.
    - If a full suite is too expensive or unavailable, run the narrowest deterministic check that proves the slice and record why.
    - Invoke `kb-functional-test` whenever `test_level` is `integration`, `functional-api`, `functional-cli`, `functional-browser`, or `full`, or when user-visible/cross-boundary changes appear despite a lower test level.
+   - For UI-reachable changes, record UI proof: route/screen exercised, interaction performed, assertion made, browser transport used, and screenshot path when applicable. Do not mark the slice done with backend-only proof if a UI path exists.
    - Record `test-level: <value>; functional-risk: <value>; proof: <command/artifact>` in the manifest notes.
 
 4. **Assess memory impact**

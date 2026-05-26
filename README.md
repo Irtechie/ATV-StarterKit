@@ -116,6 +116,10 @@ What changed:
   `functional-cli`, `functional-browser`, or `full`) and `functional_risk`
   (`none`, `narrow`, `broad`, or `full`). Small/mini models may classify or
   audit test quality when available, but executable checks remain the proof.
+- UI-reachable work is tested through the rendered UI. `.tsx`, `.jsx`, `.vue`,
+  and `.svelte` changes auto-classify as `functional-browser`; backend/API/unit
+  checks can support that proof but cannot replace real navigation, clicks or
+  inputs, rendered assertions, screenshots, and cleanup.
 - `kb-brainstorm` now proceeds to `kb-plan` when the requirements artifact is
   gate-clean. It pauses only for unresolved blockers, required human decisions,
   required research, or an explicit user stop.
@@ -374,7 +378,7 @@ verification, blockers, and status.
 | **3.5 System Tests** | Analytical | What fires when this runs? Callbacks, middleware, observers 2 levels out. |
 | **3.6 Diff-Scope** | Reactive | `git diff --name-only` vs declared `expected_files`. Out-of-scope files = **STOP**. Missing expected files = flag incomplete. |
 | **3.7 Destructive Guard** | Preventive | Block `rm -rf`, `git push --force`, `DROP TABLE`, etc. Requires human approval. Cannot be overridden programmatically. |
-| **3.8 QA** | Hard gate | Lint on all slices. Browser verification on frontend slices via CDP, Playwright, or agent-browser. **Slice cannot advance until all checks pass.** On failure → `kb-repair` autonomous fix loop. |
+| **3.8 QA** | Hard gate | Lint on all slices. Browser verification on frontend or UI-reachable slices via Playwright, CDP, or agent-browser. **Slice cannot advance until all checks pass.** On failure → `kb-repair` autonomous fix loop. |
 | **3.9 Figma Sync** | Visual | Compare rendered UI to Figma designs (UI slices only). |
 
 **Why the scope gates matter:** An agent reporting "I only modified `src/foo.py`" is generating that statement from its context window — same source as everything else, same hallucination probability. `git diff --name-only` has zero hallucination probability. The scope lock prevents out-of-scope writes before they happen. The diff-scope gate catches anything that slipped through after.
@@ -391,7 +395,7 @@ verification, blockers, and status.
 | **Playwright** | Local dev servers and public URLs — headless, clean viewport, best for responsive testing at 375px/768px/1440px. |
 | **agent-browser** | Structured element targeting via snapshot refs (`@e1`, `@e2`) — ~100ms latency, no CSS selectors needed. |
 
-For each changed frontend file, it maps the file to the affected page, navigates there, screenshots, checks the console, and verifies acceptance criteria from the slice plan. Every click and form fill gets a before/after console snapshot.
+For each changed frontend file or UI-reachable behavior change, it maps the change to the affected page, navigates there, exercises the real UI controls, screenshots key states, checks the console, and verifies rendered acceptance criteria from the slice plan. Every click and form fill gets a before/after console snapshot. Backend/API calls, component handler invocation, mocked requests, and state inspection are supporting evidence only.
 
 **When QA fails — the autonomous repair loop:**
 

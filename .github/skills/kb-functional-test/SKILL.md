@@ -21,10 +21,29 @@ This skill owns the test-level decision for KB work. `kb-plan` records the initi
 | `integration` | wiring between modules, persistence, callbacks, service boundaries, API contract internals | integration test using real collaborating code where practical |
 | `functional-api` | HTTP/API workflow, action/tool endpoint, command handler, data contract visible to callers | API smoke/test through public surface |
 | `functional-cli` | CLI command or script behavior users/operators invoke | CLI smoke script/test with real arguments and observable output |
-| `functional-browser` | UI flow, DOM state, navigation, visual interaction, browser-only behavior | headless Playwright/Cypress/browser probe with observable assertions |
+| `functional-browser` | UI flow, DOM state, navigation, visual interaction, browser-only behavior, or major functionality exposed through the UI | headless Playwright/Cypress/CDP/agent-browser probe that drives the behavior through the UI with observable assertions |
 | `full` | release/high-risk flow touching auth, persistence, integration, UI, or multiple critical paths | targeted functional checks plus broader suite/smoke |
 
 `functional_risk` is the execution breadth: `none`, `narrow`, `broad`, or `full`.
+
+## Mandatory Auto-Classification
+
+Run this before any judgment-based classification.
+
+If `expected_files` contains `.tsx`, `.jsx`, `.vue`, or `.svelte` files, set `test_level: functional-browser` automatically. The agent must not downgrade this classification to `unit`, `integration`, `functional-api`, `verification-only`, or `none`.
+
+Also set `test_level: functional-browser` when non-UI files change behavior whose primary user path is through the rendered app UI.
+
+`functional-browser` means:
+
+1. Start or connect to the running app.
+2. Use Playwright to navigate to the actual feature route/screen in the rendered UI.
+3. Exercise the happy path with real clicks, keyboard input, form input, navigation, or other user-visible controls.
+4. Assert observable rendered outcomes after the interaction; do not assert only backend calls, component handlers, mocked requests, or internal state.
+5. Capture screenshots of key pass/fail states as evidence.
+6. Clean up any artifacts, test data, screenshots, traces, temp files, or browser state created during testing according to the repo's QA cleanup rules.
+
+If Playwright cannot access the target because the route requires an existing authenticated corporate browser session, use the repo/platform's authenticated browser transport (for example CDP) and record why Playwright was not viable. This is still `functional-browser`; it is not backend/API verification.
 
 ## How To Decide
 
@@ -38,7 +57,7 @@ Classify from concrete evidence, not vibes:
 4. Ask: "Does the changed behavior cross a boundary?"
    - Process/module boundary -> `integration`.
    - API/CLI/tool public boundary -> `functional-api` or `functional-cli`.
-   - Browser/DOM/user interaction boundary -> `functional-browser`.
+   - Browser/DOM/user interaction boundary, or backend behavior whose primary user path is UI-driven -> `functional-browser`.
 5. Ask: "Did a bug escape lower-level tests before?"
    - If yes, add a functional regression check at the level where the bug escaped.
 
@@ -49,12 +68,15 @@ Default upward when uncertain. A narrow functional check is cheaper than shippin
 Require at least one functional or integration-style test when a change touches:
 
 - user-visible UI flow;
+- frontend route/component/state, browser-only behavior, or a major feature path the user reaches through the UI;
 - API route, command, tool/action, or workflow orchestration;
 - auth, permissions, session, persistence, streaming, external integration, or background job behavior;
 - wiring between two or more subsystems;
 - a bug that escaped unit tests.
 
-Skip or defer functional tests only when the change is pure copy/style, dead-code removal, local refactor with existing coverage, or a generated/config-only change covered by build/lint.
+If the changed behavior has a runnable UI path, the functional proof must go through the rendered UI. That means opening the page/screen, interacting with the visible control the user would use, and asserting the rendered result or visible state change. Backend/API/unit tests may supplement that proof, but they do not satisfy it. Do not downgrade to API/backend-only verification because it is faster.
+
+Skip or defer functional tests only when the change is dead-code removal, local refactor with existing coverage and no user-visible path, or a generated/config-only change covered by build/lint. Pure copy/style still needs rendered UI evidence when it changes what a user sees.
 
 ## Model Delegation
 
@@ -83,7 +105,7 @@ If a test mostly asserts mocks were called, snapshots noise, or duplicates imple
 
 ## Execution Timing
 
-- **During a slice:** run the narrowest functional check that proves the changed path. Prefer headless browser/API/CLI checks.
+- **During a slice:** run the narrowest functional check that proves the changed path. For UI-reachable behavior, drive the changed workflow through the UI itself. Prefer headless browser/API/CLI checks only after choosing the correct public surface.
 - **After a manifest:** run broader workflow smoke tests across changed areas.
 - **Before ship:** run full functional/e2e suite when practical, plus targeted high-risk flows.
 - **During parallel work:** only one worker owns browser/e2e execution at a time. Other workers may run unit/lint/typecheck. Queue UI functional checks to avoid spawning many visible sessions.
@@ -93,6 +115,9 @@ If a test mostly asserts mocks were called, snapshots noise, or duplicates imple
 - Headless by default.
 - Visible browser only when debugging visual behavior, SSO/CDP is required, or the user explicitly asks.
 - Prefer programmatic probes: Playwright locators, API checks, DOM text extraction, screenshot assertions, or CLI commands.
+- UI-reachable behavior must be exercised through the rendered UI route/control that a user uses. API calls, backend logs, unit tests, direct state inspection, calling a React/Vue/Svelte component method, invoking a button handler directly, or mocking the request the UI would send are supporting evidence only.
+- A passing UI functional test must include at least one real navigation/open, one real user interaction when the feature is interactive, and one observable rendered assertion after the action. For display-only changes, assert the rendered screen state directly.
+- Map every changed UI file and every UI-visible acceptance criterion to at least one route, screen, or interaction. If a changed component appears on multiple important routes, test the affected route set, not just one convenient page.
 - Save screenshots as evidence for UI functional checks:
   - one baseline/pass screenshot per tested page or major workflow state;
   - mandatory screenshot for each failure state;

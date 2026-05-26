@@ -38,6 +38,8 @@ Prefer existing project commands over invented commands.
 
 Use `kb-functional-test` when a change touches user-visible behavior, API/CLI workflows, persistence, auth, streaming, integrations, or any bug that escaped unit tests.
 
+For UI-reachable changes, the check must exercise the rendered UI. Do not substitute a backend/API call, component-handler invocation, mocked request, or direct state assertion for browser proof. If `.tsx`, `.jsx`, `.vue`, or `.svelte` files changed, expect `test_level: functional-browser` and run or call the UI/browser proof path.
+
 Default timing:
 
 - Slice: narrow functional check for the changed path.

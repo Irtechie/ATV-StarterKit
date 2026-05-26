@@ -301,6 +301,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
    - Code follows existing patterns
    - Figma designs match (if applicable)
    - No console errors or warnings
+   - UI-reachable changes were verified through the rendered UI, not just backend/API calls or component handler tests
    - If the plan has a `Requirements Trace`, verify each requirement is satisfied by the completed work
    - If any `Deferred to Implementation` questions were noted, confirm they were resolved during execution
 
@@ -316,16 +317,26 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 ### Phase 4: Ship It
 
-1. **Capture and Upload Screenshots for UI Changes** (REQUIRED for any UI work)
+1. **Rendered UI Functional Verification for UI Changes** (REQUIRED for any UI work)
 
-   For **any** design changes, new views, or UI modifications, capture and upload screenshots before creating the PR:
+   For **any** design changes, new views, UI modifications, or major behavior reached through the UI, verify through the actual rendered UI before creating the PR. Backend/API calls, component-handler invocation, mocked requests, direct state inspection, or unit tests are supporting evidence only; they do not satisfy this gate.
 
    **Step 1: Start dev server** (if not running)
    ```bash
    bin/dev  # Run in background
    ```
 
-   **Step 2: Capture screenshots with agent-browser CLI**
+   **Step 2: Drive the real UI**
+   Use Playwright for local/public app routes when available. Use CDP or agent-browser only when the route needs an authenticated existing browser session or repo-specific transport.
+
+   Minimum UI proof:
+   - Navigate to the actual route/screen.
+   - Exercise the happy path with real clicks, keyboard input, form input, navigation, or other visible controls.
+   - Assert observable rendered outcomes after the interaction.
+   - Capture screenshots of key pass/fail states.
+   - Clean up created artifacts, test data, traces, temp files, and browser state.
+
+   **Example with agent-browser CLI**
    ```bash
    agent-browser open http://localhost:3000/[route]
    agent-browser snapshot -i
@@ -345,6 +356,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
    - **New screens**: Screenshot of the new UI
    - **Modified screens**: Before AND after screenshots
    - **Design implementation**: Screenshot showing Figma design match
+   - **Interactive changes**: Before action, after action, and the rendered assertion that proves the behavior
 
 2. **Commit and Create Pull Request**
 
@@ -444,7 +456,7 @@ Before creating PR, verify:
 - [ ] Linting passes (use linting-agent)
 - [ ] Code follows existing patterns
 - [ ] Figma designs match implementation (if applicable)
-- [ ] Before/after screenshots captured and uploaded (for UI changes)
+- [ ] UI changes tested through the rendered UI with real interactions, rendered assertions, and before/after evidence
 - [ ] Commit messages follow conventional format
 - [ ] PR description includes Post-Deploy Monitoring & Validation section (or explicit no-impact rationale)
 - [ ] Code review completed (inline self-review or full `ce-review`)

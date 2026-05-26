@@ -31,6 +31,8 @@ Before code review, run `kb-check` against the completed manifest scope. If dete
 
 If the manifest contains slices with `test_level` of `integration`, `functional-api`, `functional-cli`, `functional-browser`, or `full`, run `kb-functional-test` before `ce-review` to confirm the functional coverage is real and not mock-only. Also run it when the diff shows user-visible, API/CLI, persistence, auth, streaming, or integration changes without an adequate recorded test level.
 
+If the final diff includes `.tsx`, `.jsx`, `.vue`, or `.svelte` files, or any changed behavior primarily reached through the rendered UI, require `functional-browser` evidence before completion. Backend/API/unit-only proof is insufficient for those changes.
+
 **Invoke the `ce-review` skill** — full multi-agent code review on the feature diff.
 
 `ce-review` is a skill/orchestrator, not an Agent tool type. Do not call the Agent tool with `agent_type: ce-review`. Load/run the `ce-review` skill, and let that skill spawn valid reviewer agent types such as `code-review`, `correctness-reviewer`, `security-reviewer`, or `adversarial-reviewer`.
@@ -101,8 +103,9 @@ behavior.
    fixes.
 2. If user-visible, API/CLI, browser, persistence, auth, streaming, or
    integration behavior changed, run `kb-functional-test` again on the final
-   diff. For browser/UI work, use the available browser automation path from the
-   repo or platform; do not require one specific browser tool.
+   diff. For browser/UI work, verify through the rendered UI with Playwright
+   where viable, or the repo/platform authenticated browser transport when
+   Playwright cannot access the route.
 3. If the change is visual, workflow-heavy, reviewer-facing, or the user/PR
    expects a demo, capture demo evidence. Use a repo-local `feature-video` or
    equivalent demo skill if installed; otherwise capture screenshots, logs, or a
