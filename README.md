@@ -123,6 +123,11 @@ What changed:
 - `kb-qa` must convert visible acceptance criteria into executable browser
   assertions or the project stack equivalent. Screenshots support the result,
   but they are not the pass/fail oracle.
+- Generated commands and assertions must avoid nested-quote traps. If shell
+  commands, file operations, JSON, SQL, HTML, config blocks, or Playwright
+  selectors require quotes inside quotes or escaped escapes, write the content
+  to a temp file, heredoc, template literal, or parameterized locator helper
+  instead of constructing it inline.
 - `kb-regression-snapshot` captures deterministic state after each passed slice
   in `.atv/snapshots/<slice-id>.json` and verifies prior snapshots before the
   next slice starts. The LLM writes the compact snapshot spec; the bundled
