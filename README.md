@@ -107,11 +107,12 @@ What changed:
   and `📝 Work Log`. `🔒 blocked` is for dependency, tool, or another-agent
   waits that can resume when the blocker clears. `🧊 Parked / Cold Storage` is
   intentionally out of bounds today and only a human promotes it back to active.
-- `kb-fix`, `kb-handoff`, `kb-functional-test`, `kb-regression-snapshot`,
-  `kb-gate`, `kb-check`, `kb-research`, `kb-epic`, `kb-compact`, and `kb-ship`
-  were added to cover small fixes, repo-local restart packets, deterministic
-  testing, P0-P4 gates, research, large initiatives, token trimming, and release
-  readiness.
+- `kb-task`, `kb-fix`, `kb-handoff`, `kb-functional-test`,
+  `kb-regression-snapshot`, `kb-gate`, `kb-check`, `kb-research`, `kb-epic`,
+  `kb-compact`, and `kb-ship` were added to cover first-principles autonomous
+  task execution, small fixes, repo-local restart packets, deterministic
+  testing, P0-P4 gates, research, large initiatives, token trimming, and
+  release readiness.
 - `kb-functional-test` owns test-level classification for slices. Plans record
   `test_level` (`none`, `unit`, `integration`, `functional-api`,
   `functional-cli`, `functional-browser`, or `full`) and `functional_risk`
@@ -186,6 +187,11 @@ What changed:
   and durable references only. Project-generated brainstorms, plans, research,
   handoffs, and context maps belong in the project that created them or in this
   broader starter-kit history, not in the trimmed global skill repo.
+- KB skill changes are authored in `E:\working-skill-repo`, compared against
+  any global or ATV drift before overwrite, then synced to Codex, Copilot,
+  shared agents, this ATV fork, and the scaffold/plugin copies that ship that
+  skill. Update both READMEs when the visible workflow or shipped skill surface
+  changes.
 - Blocking question pickers are used only when the answer is truly one short
   choice. For voice dictation, paste, images, screenshots, files, or long
   corrections, skills should ask in normal chat or include `Other / let me
@@ -477,6 +483,7 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 | Skill | Role |
 |-------|------|
 | `/klfg` | Full KB orchestrator — `/kb-brainstorm` → `/kb-plan` → `/kb-work` → `/kb-complete` |
+| `/kb-task` | First-principles task runner that chooses the KB route and continues until verified or blocked |
 | `/kb-brainstorm` | Research-first requirements gathering; auto-starts planning when gate-clean |
 | `/kb-plan` | Vertical-slice decomposition with `expected_files` contracts |
 | `/kb-work` | Execute slices through 7 mandatory gates |
@@ -571,6 +578,7 @@ Then open **Copilot Chat** (⌃⌘I / Ctrl+Shift+I) and go:
 
 ```text
 /kb-brainstorm   →  Explore the problem, produce a design doc
+/kb-task         →  Reason from first principles, choose the KB route, continue until verified or blocked
 /kb-plan         →  Generate an implementation plan with acceptance criteria
 /kb-work         →  Build against the plan with incremental commits
 /ce-review       →  Multi-agent code review (security, architecture, performance)
@@ -852,6 +860,7 @@ brainstorm → plan → work → complete
 
 | Skill | What it does |
 |---|---|
+| `/kb-task` | First-principles task runner: choose the KB route and continue until verified or blocked |
 | `/kb-work` | Implements against the plan with incremental commits and system-wide sanity checks |
 | `/klfg` | Full KB pipeline: brainstorm → plan → work → complete |
 

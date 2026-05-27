@@ -121,6 +121,7 @@ Use plain task classes first, then map to skills:
 | Active handoff has only phases/workstreams/next steps | `kb-plan` |
 | Active handoff links a valid KB manifest | `kb-work` |
 | Recent work changed project memory | `kb-map refresh` |
+| User explicitly says `kb-task`, asks for first-principles execution, or wants one bounded task carried until verified/blocked | `kb-task` |
 | Small known bug or narrow fix | `kb-fix` |
 | External/prior-art research needed | `kb-research` |
 | Fuzzy idea, product direction, high path dependency | `kb-brainstorm` |

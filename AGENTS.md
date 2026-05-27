@@ -1,6 +1,6 @@
 # Agent Instructions
 
-For KB workflow requests, start with `kb-start`.
+For KB workflow requests, start with `kb-start`, unless the user explicitly invokes `kb-task` or asks for a first-principles task runner that should continue until done.
 
 On every fresh session or ambiguous work request, let `kb-map` perform the KB memory preflight:
 

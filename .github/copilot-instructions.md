@@ -2,7 +2,7 @@
 
 Use the KB workflow in this repo.
 
-For ambiguous KB/workflow requests, start with `kb-start`. Skills live under `.github/skills/`.
+For ambiguous KB/workflow requests, start with `kb-start`. Use `kb-task` when the user explicitly invokes it or asks for a first-principles task runner that should continue until done. Skills live under `.github/skills/`.
 
 Fresh-session preflight:
 
