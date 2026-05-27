@@ -125,8 +125,9 @@ What changed:
   but they are not the pass/fail oracle.
 - `kb-regression-snapshot` captures deterministic state after each passed slice
   in `.atv/snapshots/<slice-id>.json` and verifies prior snapshots before the
-  next slice starts. This keeps old slice behavior machine-checkable across long
-  runs and fresh sessions.
+  next slice starts. The LLM writes the compact snapshot spec; the bundled
+  runner verifies DOM/API/CLI/file checks mechanically. This keeps old slice
+  behavior machine-checkable across long runs and fresh sessions.
 - `kb-brainstorm` now proceeds to `kb-plan` when the requirements artifact is
   gate-clean. It pauses only for unresolved blockers, required human decisions,
   required research, or an explicit user stop.
