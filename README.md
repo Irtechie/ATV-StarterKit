@@ -107,10 +107,11 @@ What changed:
   and `📝 Work Log`. `🔒 blocked` is for dependency, tool, or another-agent
   waits that can resume when the blocker clears. `🧊 Parked / Cold Storage` is
   intentionally out of bounds today and only a human promotes it back to active.
-- `kb-fix`, `kb-functional-test`, `kb-regression-snapshot`, `kb-gate`,
-  `kb-check`, `kb-research`, `kb-epic`, `kb-compact`, and `kb-ship` were added to cover small fixes,
-  deterministic testing, P0-P4 gates, research, large initiatives, token
-  trimming, and release readiness.
+- `kb-fix`, `kb-handoff`, `kb-functional-test`, `kb-regression-snapshot`,
+  `kb-gate`, `kb-check`, `kb-research`, `kb-epic`, `kb-compact`, and `kb-ship`
+  were added to cover small fixes, repo-local restart packets, deterministic
+  testing, P0-P4 gates, research, large initiatives, token trimming, and release
+  readiness.
 - `kb-functional-test` owns test-level classification for slices. Plans record
   `test_level` (`none`, `unit`, `integration`, `functional-api`,
   `functional-cli`, `functional-browser`, or `full`) and `functional_risk`

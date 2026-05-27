@@ -1,26 +1,34 @@
 ---
 name: handoff
-description: Compact the current conversation into a handoff document for another agent to pick up.
+description: Create a repo-local handoff restart packet for another agent or fresh session to pick up. Prefer kb-handoff for KB workflows.
 argument-hint: "What will the next session be used for?"
 ---
 
-Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save to `C:\Users\marowe\.copilot\handoffs\` with a timestamped filename (e.g., `2026-05-23-token-optimization.md`).
+Write a compact handoff document so a fresh agent can continue the work without relying on chat history.
 
-Credit: Based on mattpocock/skills (MIT). Adapted for ATV workflows.
+Save inside the active project root:
+
+```text
+docs/handoffs/active/YYYY-MM-DD-<short-topic>.md
+```
+
+Resolve the project root first with `git rev-parse --show-toplevel`. If no valid project root exists, ask the user to change into the project directory or provide the project path. Do not write handoffs to `C:\Users\marowe\.copilot\handoffs`, home folders, drive roots, or global skill folders.
+
+Credit: Based on mattpocock/skills (MIT). Adapted for ATV/KB repo-local workflows.
 
 ## What to include
 
-1. **Context** — What repo, branch, and working directory. What the user was doing.
-2. **Decisions made** — Key architectural or design decisions from this session, with reasoning.
-3. **Work completed** — Files changed, commits made, what's done.
-4. **Work remaining** — What's left, any blockers, next steps.
-5. **Key files** — File paths the next session will need to read first.
-6. **Suggested skills** — Skills the next agent should invoke to continue.
+1. **Context** — repo root, branch, and what the user was doing.
+2. **Decisions made** — key architectural or design decisions, with reasoning.
+3. **Work completed** — files changed, commits made, what's done.
+4. **Work remaining** — what's left, blockers, next steps.
+5. **Key files** — repo-local paths the next session should read first.
+6. **Suggested route** — `kb-start`, `kb-plan`, `kb-work`, `kb-fix`, or another specific skill.
 
 ## Rules
 
-- Do NOT duplicate content already in other artifacts (plans, brainstorms, PRDs, committed docs). Reference by path instead.
-- Redact any sensitive information (API keys, passwords, PII).
-- Keep it under 2000 words — this is a handoff, not a novel.
-- If the user passed arguments, treat them as a description of what the next session will focus on and tailor accordingly.
-- If a `plan.md` exists in the session state folder, reference it rather than repeating its content.
+- Do not duplicate content already in plans, brainstorms, PRDs, committed docs, or `todo.md`; reference by path.
+- Redact API keys, passwords, tokens, PII, and private credentials.
+- Keep it under 1200 words unless the user asks for more.
+- If the user passed arguments, treat them as what the next session should focus on.
+- Update `todo.md` with a compact handoff pointer when the handoff represents active or blocked work.
