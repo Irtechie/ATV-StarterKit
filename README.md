@@ -107,11 +107,11 @@ What changed:
   and `📝 Work Log`. `🔒 blocked` is for dependency, tool, or another-agent
   waits that can resume when the blocker clears. `🧊 Parked / Cold Storage` is
   intentionally out of bounds today and only a human promotes it back to active.
-- `kb-task`, `kb-fix`, `kb-handoff`, `kb-functional-test`,
+- `kb-task`, `kb-fix`, `kb-troubleshoot`, `kb-handoff`, `kb-functional-test`,
   `kb-regression-snapshot`, `kb-gate`, `kb-check`, `kb-research`, `kb-epic`,
   `kb-compact`, and `kb-ship` were added to cover first-principles autonomous
-  task execution, small fixes, repo-local restart packets, deterministic
-  testing, P0-P4 gates, research, large initiatives, token trimming, and
+  task execution, small fixes, autonomous troubleshooting, repo-local restart
+  packets, deterministic testing, P0-P4 gates, research, large initiatives, token trimming, and
   release readiness.
 - `kb-functional-test` owns test-level classification for slices. Plans record
   `test_level` (`none`, `unit`, `integration`, `functional-api`,
@@ -242,6 +242,10 @@ the work by task shape, risk, and available artifacts:
 
 - Use `kb-fix` for small, bounded bugs or narrow changes where the likely fix is
   obvious and verification can prove it.
+- Use `kb-troubleshoot` when broken behavior needs evidence gathering and
+  self-correction. It must inspect local logs/tests/browser behavior and, when
+  framework/tool/dependency behavior may matter, research current external docs,
+  issues, changelogs, or known fixes before editing.
 - Use `kb-brainstorm` when product behavior, technical framing, success
   criteria, or tradeoffs are still unclear.
 - Use `kb-plan` when requirements or a handoff already explain the work and the
@@ -495,6 +499,7 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 |-------|------|
 | `/klfg` | Full KB orchestrator — `/kb-brainstorm` → `/kb-plan` → `/kb-work` → `/kb-complete` |
 | `/kb-task` | First-principles task runner that chooses the KB route and continues until verified or blocked |
+| `/kb-troubleshoot` | Autonomous debug loop: inspect logs/browser/tests, research uncertain assumptions, fix, and verify |
 | `/kb-brainstorm` | Research-first requirements gathering; auto-starts planning when gate-clean |
 | `/kb-plan` | Vertical-slice decomposition with `expected_files` contracts |
 | `/kb-work` | Execute slices through 7 mandatory gates |
@@ -590,6 +595,7 @@ Then open **Copilot Chat** (⌃⌘I / Ctrl+Shift+I) and go:
 ```text
 /kb-brainstorm   →  Explore the problem, produce a design doc
 /kb-task         →  Reason from first principles, choose the KB route, continue until verified or blocked
+/kb-troubleshoot →  Reproduce, inspect logs/browser evidence, research known fixes, fix, and verify
 /kb-plan         →  Generate an implementation plan with acceptance criteria
 /kb-work         →  Build against the plan with incremental commits
 /kb-review       →  KB code review with thermonuclear structural-quality lens
@@ -877,6 +883,7 @@ brainstorm → plan → work → complete
 | Skill | What it does |
 |---|---|
 | `/kb-task` | First-principles task runner: choose the KB route and continue until verified or blocked |
+| `/kb-troubleshoot` | Autonomous troubleshooting: reproduce, inspect logs/browser/tests, research uncertain assumptions and known fixes, fix, and verify |
 | `/kb-work` | Implements an existing KB manifest with incremental commits and system-wide sanity checks; routes free-form work back through `/kb-plan` first |
 | `/klfg` | Full KB pipeline: brainstorm → plan → work → complete |
 
