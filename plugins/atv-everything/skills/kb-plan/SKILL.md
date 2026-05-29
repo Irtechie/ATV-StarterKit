@@ -27,6 +27,8 @@ When assumptions are safe and reversible, record them in the manifest instead of
 
 Phase boundary: `kb-plan` produces a manifest and slice plans. It does not automatically invoke `kb-work` unless the user explicitly asked for execution or an orchestrator such as `klfg` called it.
 
+Execution intent includes phrases such as "go straight to work", "just build it", "don't ask many questions", "continue until done", "run it", or a handoff from `kb-task`, `kb-brainstorm`, or `klfg` that says to continue. In those cases, write the manifest and slice plans first, then immediately invoke `kb-work <manifest-path>`. Never skip manifest creation.
+
 ## Input
 
 <input> #$ARGUMENTS </input>
@@ -144,14 +146,14 @@ Break the work into thin end-to-end slices. For each slice, determine:
 - **Functional risk** - none / narrow / broad / full
 - **Blocked by** - which other slices must complete first, or none
 - **HITL flag** - does this need human judgment? Most should be `false` if the brainstorm was thorough.
-- **Expected files** - which files this slice will create or modify, with operation type. Used by `kb-work` for diff-scope verification and edit-safety.
+- **Expected files** - best current forecast of files this slice may create or modify, with operation type. Used by `kb-work` as an orientation and review-scope seed, not as a literal allowlist.
 
 Each entry in `expected_files` should specify:
   - `path` — the file path
   - `op` — `create`, `edit`, or `delete`
   - `scope` — one-line description of what specifically changes (for `edit` operations)
 
-This prevents agents from regenerating files from the plan spec instead of surgically editing current code.
+This helps agents start surgically instead of rediscovering the whole repo. It cannot perfectly predict implementation reality; `kb-work` records discovered files in the scope ledger when current code requires touching files not forecast here.
 
 ### 3. Validate the Breakdown
 
@@ -163,7 +165,7 @@ Check the proposed breakdown against:
 - Functional coverage: user-visible or cross-boundary slices include a narrow functional check unless explicitly justified.
 - Test-level classification: each slice says whether unit, integration, API/CLI/browser functional, or full-suite proof is required.
 - HITL: human flags are limited to credentials, external systems, subjective approval, or true decisions.
-- Expected files: each slice declares likely touched files and scope.
+- Expected files: each slice declares likely touched files and scope, with enough specificity to guide the first edit. Do not pretend the list is exhaustive when current code may reveal adjacent files.
 
 Ask the user only when a material decision remains. Otherwise proceed and record assumptions.
 
@@ -256,7 +258,7 @@ The plan body should include:
 
 - What to build, expressed as end-to-end behavior
 - Acceptance criteria
-- Expected files (must match `expected_files` in frontmatter — these are the files this slice is allowed to touch)
+- Expected files (must match `expected_files` in frontmatter as the initial forecast; actual touched files may expand during `kb-work` when justified by the acceptance criteria and recorded in the scope ledger)
 - Test scenarios specific enough for TDD or integration verification
 - Test inputs needed to run those scenarios without asking the user to manually test later
 - Scope boundary: what this slice does not include

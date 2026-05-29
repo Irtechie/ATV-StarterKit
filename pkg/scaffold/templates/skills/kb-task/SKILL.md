@@ -50,6 +50,7 @@ This is a task runner, not a separate implementation lane. It uses `kb-map` for 
    - Run the selected route immediately when safe.
    - If the first route produces a required artifact, continue to the next phase without asking unless a gate blocks.
    - Preserve phase order: brainstorm before plan, plan before work, work before complete.
+   - Treat "don't ask many questions" or "go straight to work" as execution intent, not permission to skip slices. If no valid manifest exists, run `kb-plan` before `kb-work`.
    - If the route changes because evidence contradicts the initial classification, record why and switch.
 
 5. **Verify**

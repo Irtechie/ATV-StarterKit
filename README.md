@@ -138,12 +138,19 @@ What changed:
 - `kb-brainstorm` now proceeds to `kb-plan` when the requirements artifact is
   gate-clean. It pauses only for unresolved blockers, required human decisions,
   required research, or an explicit user stop.
+- "Don't ask many questions", "go straight to work", and similar phrasing is
+  execution intent, not permission to skip slices. The workflow still goes
+  requirements/assumptions -> `kb-plan` -> `kb-work` -> `kb-complete`.
 - `kb-brainstorm` multiple-choice questions now always include an escape hatch
   such as `Other / let me explain` or `None of these`. If the answer may need an
   image, screenshot, file, pasted output, diagram, or longer explanation, the
   skill should ask in normal chat instead of the blocking question UI.
-- `kb-work` owns slice execution and calls `kb-complete` only after all slices
-  are done or intentionally skipped.
+- `kb-work` owns slice execution from a valid KB manifest and calls
+  `kb-complete` only after all slices are done or intentionally skipped. Raw
+  brainstorm notes, phase lists, and free-form feature asks route to `kb-plan`
+  first. A slice's `expected_files` are a forecast, not a hard allowlist; files
+  discovered during implementation are allowed when required by the slice and
+  recorded in the scope ledger.
 - `kb-complete` now records memory-maintenance signals in
   `docs/context/memory-maintenance.md`: contradictions, overlaps, stale docs,
   bloat, repeated rediscovery, durable refreshes, and closed handoffs. It stores
@@ -833,6 +840,10 @@ Every skill maps to a phase of the development lifecycle:
 
 Each step must produce output before the next starts: requirements exist, the vertical-slice manifest exists, every slice is complete, and review/learning has finished. Retries resume from the first missing gate.
 
+"Don't ask many questions", "go straight to work", and similar requests shorten Q&A; they do not skip planning. ATV must still produce or reuse a KB manifest before `/kb-work`, so `/kb-complete` has slice scope and verification evidence.
+
+The manifest's `expected_files` are a planning forecast, not a literal file prison. `/kb-work` records justified file discovery in the scope ledger and stops only for real boundary expansion or unrelated edits.
+
 ```
 brainstorm → plan → work → complete
      ✓        ✓      ✓        ✓
@@ -855,7 +866,7 @@ brainstorm → plan → work → complete
 
 | Skill | What it does |
 |---|---|
-| `/kb-plan` | Parallel research agents scan codebase + external docs; auto-discovers brainstorms; outputs plans with acceptance criteria |
+| `/kb-plan` | Produces the KB manifest and vertical slice plans; if execution intent is present, hands off to `/kb-work` |
 | `/deepen-plan` | Enriches each plan section with best practices and performance guidance |
 | `/gstack-plan-eng-review` | Forces hidden assumptions into the open: architecture, data flow, edge cases |
 | `/gstack-plan-design-review` | Scores design quality 0-10 per dimension; rewrites plan to hit 10 |
@@ -866,7 +877,7 @@ brainstorm → plan → work → complete
 | Skill | What it does |
 |---|---|
 | `/kb-task` | First-principles task runner: choose the KB route and continue until verified or blocked |
-| `/kb-work` | Implements against the plan with incremental commits and system-wide sanity checks |
+| `/kb-work` | Implements an existing KB manifest with incremental commits and system-wide sanity checks; routes free-form work back through `/kb-plan` first |
 | `/klfg` | Full KB pipeline: brainstorm → plan → work → complete |
 
 ### Review

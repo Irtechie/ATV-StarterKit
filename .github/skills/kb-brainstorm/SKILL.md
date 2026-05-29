@@ -406,6 +406,8 @@ Run `kb-gate` before Phase 10 when document-review or your own checks surfaced P
 
 Do not jump from brainstorm directly to `kb-work` or `kb-complete`.
 
+If the user says "don't ask many questions", "go straight to work", "just build it", or similar, treat that as a request to compress Q&A and continue after planning. It does not authorize skipping the requirements artifact, `kb-plan`, or the manifest. Convert safe unknowns into explicit assumptions or `Deferred to Planning`, then invoke `kb-plan <requirements-doc>` with execution intent so planning can continue to `kb-work`.
+
 If `Resolve Before Planning` contains any items:
 
 - Ask the blocking questions now, one at a time, by default.
@@ -415,7 +417,7 @@ If `Resolve Before Planning` contains any items:
 
 If no blocking questions remain:
 
-- Default: run `kb-plan <requirements-doc>` and skip the closing summary.
+- Default: run `kb-plan <requirements-doc>` and skip the closing summary. If the user asked to continue straight to implementation, pass that execution intent so `kb-plan` invokes `kb-work` after writing the manifest.
 - If the user explicitly asked to stop after brainstorm, print the closing summary instead.
 - If additional research is needed before planning, route to `kb-research`, update the requirements doc, then stop or return to the orchestrator.
 

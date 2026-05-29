@@ -12,14 +12,14 @@ After `kb-work` finishes executing all slices, this skill runs the quality revie
 
 <input> #$ARGUMENTS </input>
 
-**If input is empty:** Scan `docs/plans/` for the most recent `*-kb-*-manifest.md` file with `status: completed`. If none is found, ask: "Which KB manifest should I complete?"
+**If input is empty:** Scan `docs/plans/` for the most recent `*-kb-*-manifest.md` file with `status: completed`. If none is found but an active KB manifest exists with pending or in-progress slices, stop and invoke `kb-work <manifest-path>` first. If no manifest exists, do not run completion from a raw diff; route back to `kb-plan`/`kb-work` so completion has slice scope and verification evidence.
 
 **If input is a path:** Read the manifest at that path.
 
 ## Pre-Flight
 
 1. **Read the manifest** — confirm `status: completed` (all slices done/skipped). If slices are still `pending` or `in_progress`, stop: "This manifest has unfinished slices. Run `kb-work` first."
-2. **Collect scope context** — scan each slice's `notes` field for `scope-check:` entries. Build the combined list of scope-verified files across all slices. This becomes the review scope.
+2. **Collect scope context** — scan each slice's `notes` field for `scope-check:` and `scope-discovery:` entries. Build the combined list of actually changed, scope-verified files across all slices. This becomes the review scope.
 3. **Collect memory impact** — scan slice notes for `memory-impact:` and `kb-map-refresh:` entries.
 4. **Identify the branch baseline** — run `git merge-base HEAD main` to establish the diff range.
 5. **Run final snapshot sweep** — invoke `kb-regression-snapshot verify` for all snapshots under `.atv/snapshots/`. If any snapshot fails, STOP before review; later work regressed earlier passing behavior.
@@ -40,7 +40,7 @@ If the final diff includes `.tsx`, `.jsx`, `.vue`, or `.svelte` files, or any ch
 
 This is mandatory. Do not skip, defer, or make it optional.
 
-- **Pass scope from prior gates:** use the collected scope-verified file list from Pre-Flight. Pass this as the scoped file list so kb-review skips its own scope discovery (Stage 1). The scope gates already verified these are the correct files — no need to re-derive from git diff.
+- **Pass scope from prior gates:** use the collected scope-verified actual file list from Pre-Flight. Pass this as the scoped file list so kb-review skips its own scope discovery (Stage 1). The scope gates already explained planned and discovered files — no need to re-derive from git diff unless the manifest lacks this data.
 - Pass context: the full `git diff` of the feature branch against baseline, scoped to the verified file list
 - Capture the output: each finding has a severity (P0/P1/P2/P3) and confidence score
 - Store findings for the resolution gate (Step 2)
