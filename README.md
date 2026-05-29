@@ -165,21 +165,25 @@ What changed:
 - `klfg` remains the full hands-off orchestrator for brainstorm -> plan -> work
   -> complete.
 - The day-to-day working bundle still carries required ATV/CE dependencies:
-  `document-review`, `ce-review`, `ce-compound`, `ce-compound-refresh`, `learn`,
-  `evolve`, `tdd`, `todo-create`, `todo-triage`, and the reviewer/specialist
-  agents in `.github/agents/*.agent.md`.
+  `document-review`, `kb-review`, `ce-review`, `ce-compound`,
+  `ce-compound-refresh`, `learn`, `evolve`, `tdd`, `todo-create`,
+  `todo-triage`, and the reviewer/specialist agents in
+  `.github/agents/*.agent.md`.
 - Testing showed the agents are required runtime dependencies, not optional
   docs. In particular, `document-review` needs its document personas
   (`coherence-reviewer`, `feasibility-reviewer`, `product-lens-reviewer`,
   `design-lens-reviewer`, `security-lens-reviewer`, `scope-guardian-reviewer`,
-  `adversarial-document-reviewer`), and `ce-review` needs its code-review
-  personas (`correctness-reviewer`, `testing-reviewer`, security/performance/API
-  reviewers, language reviewers, schema/deployment reviewers, and learning
-  agents).
+  `adversarial-document-reviewer`), and `kb-review`/`ce-review` need their
+  code-review personas (`correctness-reviewer`, `testing-reviewer`,
+  `thermo-nuclear-code-quality-reviewer`, security/performance/API reviewers,
+  language reviewers, schema/deployment reviewers, and learning agents).
 - Heavy inherited ATV/CE skills now use a token diet in the working bundle:
   `ce-review` and `ce-compound-refresh` keep routing, gates, and safety rules in
   `SKILL.md`, while detailed phase mechanics live in lazy `references/` files.
   The goal is lower startup load without losing review or learning behavior.
+- `kb-review` is the KB-specific review orchestrator. It keeps the CE review
+  pipeline shape but replaces the standard maintainability persona with
+  `thermo-nuclear-code-quality-reviewer`.
 - The 2026-05-24 token-diet pass reduced `ce-review` to 235 lines and
   `ce-compound-refresh` to 289 lines in the working bundle by moving execution
   details into lazy references, not by deleting behavior.
@@ -201,8 +205,8 @@ What changed:
 ### Skill Runtime Surface
 
 The KB bundle ships the full `.github/agents/*.agent.md` surface for now because
-real testing showed missing ATV agents break `document-review` and `ce-review`
-dispatch. Treat agents in three tiers:
+real testing showed missing ATV agents break `document-review`, `kb-review`,
+and `ce-review` dispatch. Treat agents in three tiers:
 
 - **Required dispatch agents** are called by skills and must stay installed.
 - **Conditional specialists** are used only when the diff/task warrants their
@@ -324,7 +328,7 @@ You're interactive during brainstorm Q&A and when safety gates fire. Everything 
  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌──────────────┐     ┌──────┐
  │  BRAINSTORM  │────▶│    PLAN     │────▶│    WORK     │────▶│   COMPLETE   │────▶│ SHIP │
  │              │     │             │     │             │     │              │     │      │
- │ research     │     │ vertical    │     │ per-slice   │     │ ce-review    │     │/land │
+ │ research     │     │ vertical    │     │ per-slice   │     │ kb-review    │     │/land │
  │ then ask     │     │ slices +    │     │ execution   │     │ compound     │     │      │
  │ questions    │     │ expected_   │     │ through 7   │     │ learn        │     │      │
  │              │     │ files       │     │ hard gates  │     │ evolve       │     │      │
@@ -438,7 +442,7 @@ After all slices pass, the quality and learning pipeline runs automatically:
 
 | Step | What happens |
 |------|-------------|
-| **Code review** | `ce-review` with scope-verified file list pre-loaded. Multiple persona agents (security, performance, correctness). |
+| **Code review** | `kb-review` with scope-verified file list pre-loaded. Multiple persona agents including thermonuclear structural quality, security, performance, and correctness. |
 | **Resolution gate** | Safe/actionable P0-P4 findings are fixed by the agent. Human input is required only for product intent, access, risky operations, competing reasonable paths, or genuine ambiguity. |
 | **Follow-up resolution** | Review/TODO fallout is resolved or explicitly logged before completion. Parallel resolution is allowed only when file scopes are disjoint. |
 | **Proof/demo evidence** | Final checks rerun after review fixes. Browser, CLI, API, desktop, service, or snapshot proof is captured with available repo/platform tools. Every slice needs machine-verifiable evidence in the manifest: command/test path, exit code, timestamp, trace/log/API artifact, or snapshot result. Prose-only proof fails completion. |
@@ -461,7 +465,7 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 | Capability | Existed In | What This Fork Changed |
 |------------|-----------|----------------------|
 | **QA (lint + browser)** | gstack `/qa` | Moved from post-batch to **per-slice**. Failures caught before they compound. |
-| **Code review** | ATV `ce-review` | Unchanged — but scope-verified file list is pre-loaded from gates, skipping redundant discovery. |
+| **Code review** | ATV `ce-review` | KB now calls `kb-review`, a KB-specific fork that keeps the orchestrator and swaps in the thermonuclear structural-quality reviewer. General `ce-review` remains available. |
 | **Learning pipeline** | ATV observations → instincts → evolve | Unchanged — runs automatically after review findings are resolved. |
 | **Compound docs** | ATV `ce-compound` | Unchanged — fed by per-slice micro-learnings instead of just the final diff. |
 | **Destructive guards** | gstack `/careful` | Changed from **overridable warning** to **hard block**. Cannot be bypassed. |
@@ -487,7 +491,7 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 | `/kb-brainstorm` | Research-first requirements gathering; auto-starts planning when gate-clean |
 | `/kb-plan` | Vertical-slice decomposition with `expected_files` contracts |
 | `/kb-work` | Execute slices through 7 mandatory gates |
-| `/kb-complete` | Post-work: ce-review → compound → learn → evolve → cleanup |
+| `/kb-complete` | Post-work: kb-review → compound → learn → evolve → cleanup |
 | `/kb-qa` | Lint + browser verification (called by kb-work) |
 | `/kb-repair` | Surgical fix loop (called by kb-qa on failure) |
 
@@ -581,6 +585,7 @@ Then open **Copilot Chat** (⌃⌘I / Ctrl+Shift+I) and go:
 /kb-task         →  Reason from first principles, choose the KB route, continue until verified or blocked
 /kb-plan         →  Generate an implementation plan with acceptance criteria
 /kb-work         →  Build against the plan with incremental commits
+/kb-review       →  KB code review with thermonuclear structural-quality lens
 /ce-review       →  Multi-agent code review (security, architecture, performance)
 /ce-compound     →  Document what you learned for future sessions
 
@@ -702,7 +707,7 @@ Installed as a skill (`.github/skills/autoresearch/SKILL.md`). Sourced from [git
 A gated pipeline where each step produces an artifact the next step consumes:
 
 ```text
-/kb-brainstorm → /kb-plan → /kb-work → /ce-review → /ce-compound
+/kb-brainstorm → /kb-plan → /kb-work → /kb-review → /ce-compound
 ```
 
 Every time you run `/ce-compound`, solved problems get saved to `docs/solutions/`. Next time `/kb-plan` runs, the `learnings-researcher` agent searches those files first. Your repo gets smarter with every PR.
@@ -868,6 +873,7 @@ brainstorm → plan → work → complete
 
 | Skill | What it does |
 |---|---|
+| `/kb-review` | KB review gate with thermonuclear structural-quality reviewer plus security, performance, correctness, testing, and standards |
 | `/ce-review` | Parallel review agents: security, performance, architecture, language-specific |
 | `/gstack-review` | Staff-level code review with auto-fix and completeness checks |
 | `/gstack-design-review` | Design audit with atomic fix commits |

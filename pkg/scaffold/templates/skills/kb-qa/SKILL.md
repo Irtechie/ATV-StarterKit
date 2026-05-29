@@ -233,6 +233,6 @@ Actions are transport-agnostic above. Here's the mapping:
 
 - **Called from:** `kb-work` (Step 3.8, all slices)
 - **Hands off to:** `kb-repair` (on any failure)
-- **Results feed into:** `ce-review` (Step 5.4) as additional context
+- **Results feed into:** `kb-review` (Step 5.4) as additional context
 - **Screenshots persist:** `.atv/qa-screenshots/` (gitignored, ephemeral)
 - **Logs persist:** `todo.md` notes + manifest notes

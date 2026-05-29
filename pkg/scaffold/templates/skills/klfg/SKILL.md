@@ -1,6 +1,6 @@
 ---
 name: klfg
-description: "Full KB pipeline orchestrator. Chains /kb-brainstorm → /kb-plan → /kb-work → kb-complete → DONE. kb-work handles the per-slice gauntlet (scope lock, execution, tests, diff-scope, destructive guard, QA, repair, Figma sync). kb-complete handles post-work quality (ce-review, compound, learn, evolve). Use when the user says 'klfg', 'kb', 'run the full KB pipeline', 'go from brainstorm to done', or wants the hands-off KB vertical-slice workflow."
+description: "Full KB pipeline orchestrator. Chains /kb-brainstorm → /kb-plan → /kb-work → kb-complete → DONE. kb-work handles the per-slice gauntlet (scope lock, execution, tests, diff-scope, destructive guard, QA, repair, Figma sync). kb-complete handles post-work quality, follow-up resolution, proof/demo evidence, learning, memory refresh, compaction, and alerts. Use when the user says 'klfg', 'run the full KB pipeline', 'go from brainstorm to done', or wants the hands-off KB vertical-slice workflow."
 argument-hint: "[feature description]"
 disable-model-invocation: true
 ---
@@ -9,10 +9,10 @@ CRITICAL: You MUST execute every step below IN ORDER. Do NOT skip any required s
 
 This pipeline is interactive in **two specific places** and autonomous everywhere else:
 
-1. **Step 1 (brainstorm)** stops for product Q&A. That is the design — `kb-brainstorm` does research first, then asks the user targeted product questions before producing a requirements doc.
+1. **Step 1 (brainstorm)** stops for product Q&A. That is the design. Under `klfg`, once the requirements doc is complete and unblocked, the orchestrator continues to planning.
 2. **Step 3 (work)** stops only on slices the manifest flagged `hitl: true` and when safety gates fire (scope violations, destructive commands, QA failures that exhaust repair). `kb-work` handles them and resumes automatically once the user answers.
 
-Everything else — including kb-complete (review, compound, learn) — proceeds without prompting. Once the user picks "Proceed to /kb-plan" at the end of step 1, hands off till done.
+Everything else — including kb-plan, kb-work, and kb-complete — proceeds without prompting unless a gate blocks. This auto-chaining belongs to `klfg`, not to standalone `kb-brainstorm` or `kb-plan`.
 
 ## Pipeline
 
@@ -24,11 +24,15 @@ Everything else — including kb-complete (review, compound, learn) — proceeds
 
    Also check the requirements doc for `## Outstanding Questions` → `### Resolve Before Planning`. If that subsection has any unresolved entries, do NOT proceed — return to step 1 and resolve them first. `kb-brainstorm` is responsible for not handing off until that section is empty, but verify here as a safety check.
 
+   GATE: run `kb-gate` if brainstorm/document-review surfaced P0/P1/P2/P3 issues. Safe/actionable P0/P1 are rectified by the agent; human-only P0/P1 block planning. P2/P3 get the rectify-all prompt.
+
 2. `/kb-plan <reqs-path>`
 
-   GATE: STOP. Verify `/kb-plan` produced a manifest file at `docs/plans/*-kanban-*-manifest.md` and one plan file per slice. If no manifest was created, re-run `/kb-plan <reqs-path>`. Do NOT proceed to step 3 until both the manifest and per-slice plans exist.
+   GATE: STOP. Verify `/kb-plan` produced a manifest file at `docs/plans/*-kb-*-manifest.md` and one plan file per slice. If no manifest was created, re-run `/kb-plan <reqs-path>`. Do NOT proceed to step 3 until both the manifest and per-slice plans exist.
 
    **Record the manifest path.** Refer to it as `<manifest-path>` for the rest of the pipeline.
+
+   GATE: run `kb-gate` if planning surfaced P0/P1/P2/P3 issues. Safe/actionable P0/P1 are rectified by the agent; human-only P0/P1 block work. P2/P3 get the rectify-all prompt.
 
 3. `/kb-work <manifest-path>`
 
@@ -57,20 +61,23 @@ Everything else — including kb-complete (review, compound, learn) — proceeds
 
    `kb-complete` runs the post-work quality and learning pipeline:
 
-   - ce-review — full multi-agent code review with scope passthrough from kb-work's gates
+   - kb-review — full multi-agent code review with scope passthrough from kb-work's gates
    - Resolution Gate — P0/P1 must be fixed before proceeding
+   - Follow-up Resolution — resolve or record review/TODO fallout
+   - Proof/Demo Evidence — re-run final checks and capture demo evidence when useful
    - Compound + Learn + Evolve — document patterns, extract instincts, promote mature ones
+   - Memory Refresh + Compact + Alerts — keep fresh-session memory usable
    - Cleanup — prune ephemeral artifacts (screenshots, old observations)
 
-   GATE: STOP. After `kb-complete` returns, verify the manifest status is `reviewed`. If ce-review found unresolved P0/P1s, `kb-complete` will have stopped — re-run it after fixes.
+   GATE: STOP. After `kb-complete` returns, verify the manifest status is `reviewed`. If kb-review found unresolved P0/P1s, `kb-complete` will have stopped — re-run it after fixes.
 
 5. Output `<promise>DONE</promise>` once steps 1–4 are complete.
 
 ## Notes
 
 - **Why no `/unslop`:** intentionally omitted. Risk of flagging parallel agent WIP as false positives. Run manually if needed.
-- **Why a separate `kb-complete`:** the quality/learning pipeline (ce-review, compound, learn, evolve) is a separate skill so it can be invoked standalone after `kb-work`. Within `klfg`, it runs automatically — no pause, no prompt.
-- **Why no separate `/ce-review`:** kb-complete runs ce-review at Step 1 with full scope context from kb-work's gates. A second pass would be redundant.
+- **Why a separate `kb-complete`:** the finish pipeline (review, follow-up resolution, proof/demo evidence, compound, learn, evolve, memory refresh, compact, cleanup, alerts) is a separate skill. `kb-work` invokes it automatically only after all slices are done or intentionally skipped; `klfg` verifies that happened.
+- **Why no separate `/kb-review`:** kb-complete runs kb-review at Step 1 with full scope context from kb-work's gates. A second pass would be redundant.
 - **Why no separate `/learn` or `/observe`:** kb-complete feeds resolved P0/P1 findings to observations.jsonl (Step 2), runs `/learn` (Step 3), and auto-triggers `/evolve` every 5th KB completion.
 - **Why no separate `/ce-compound`:** kb-complete invokes ce-compound at Step 3 for features with novel patterns. Skips automatically for boilerplate.
 - **Why no `/land`:** committing, pushing, and opening a PR is a separate, deliberate act. Run `/land` after `klfg` finishes when you're ready to ship.

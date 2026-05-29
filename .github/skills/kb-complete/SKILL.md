@@ -1,6 +1,6 @@
 ---
 name: kb-complete
-description: "Post-work quality and learning pipeline. Runs ce-review -> resolution gate -> follow-up resolution -> proof/demo evidence -> compound -> learn -> evolve -> memory refresh/compact -> cleanup after kb-work finishes all slices. Use when the user says 'kb complete', 'complete the work', 'run review and learning', 'finish the KB pipeline', or after kb-work reports all slices done."
+description: "Post-work quality and learning pipeline. Runs kb-review -> resolution gate -> follow-up resolution -> proof/demo evidence -> compound -> learn -> evolve -> memory refresh/compact -> cleanup after kb-work finishes all slices. Use when the user says 'kb complete', 'complete the work', 'run review and learning', 'finish the KB pipeline', or after kb-work reports all slices done."
 argument-hint: "[path to KB manifest, or blank to find latest]"
 ---
 
@@ -28,27 +28,27 @@ If the manifest has no scope-check notes (older format), fall back to `git diff 
 
 ## Step 1: Code Review
 
-Before code review, run `kb-check` against the completed manifest scope. If deterministic checks fail, route to `kb-repair` or `kb-fix` before `ce-review`. LLM review does not replace executable verification.
+Before code review, run `kb-check` against the completed manifest scope. If deterministic checks fail, route to `kb-repair` or `kb-fix` before `kb-review`. LLM review does not replace executable verification.
 
-If the manifest contains slices with `test_level` of `integration`, `functional-api`, `functional-cli`, `functional-browser`, or `full`, run `kb-functional-test` before `ce-review` to confirm the functional coverage is real and not mock-only. Also run it when the diff shows user-visible, API/CLI, persistence, auth, streaming, or integration changes without an adequate recorded test level.
+If the manifest contains slices with `test_level` of `integration`, `functional-api`, `functional-cli`, `functional-browser`, or `full`, run `kb-functional-test` before `kb-review` to confirm the functional coverage is real and not mock-only. Also run it when the diff shows user-visible, API/CLI, persistence, auth, streaming, or integration changes without an adequate recorded test level.
 
 If the final diff includes `.tsx`, `.jsx`, `.vue`, or `.svelte` files, or any changed behavior primarily reached through the rendered UI, require `functional-browser` evidence before completion. Backend/API/unit-only proof is insufficient for those changes.
 
-**Invoke the `ce-review` skill** — full multi-agent code review on the feature diff.
+**Invoke the `kb-review` skill** — full multi-agent code review on the feature diff.
 
-`ce-review` is a skill/orchestrator, not an Agent tool type. Do not call the Agent tool with `agent_type: ce-review`. Load/run the `ce-review` skill, and let that skill spawn valid reviewer agent types such as `code-review`, `correctness-reviewer`, `security-reviewer`, or `adversarial-reviewer`.
+`kb-review` is a skill/orchestrator, not an Agent tool type. Do not call the Agent tool with `agent_type: kb-review`. Load/run the `kb-review` skill, and let that skill spawn valid reviewer agent types such as `code-review`, `correctness-reviewer`, `security-reviewer`, or `adversarial-reviewer`.
 
 This is mandatory. Do not skip, defer, or make it optional.
 
-- **Pass scope from prior gates:** use the collected scope-verified file list from Pre-Flight. Pass this as the scoped file list so ce-review skips its own scope discovery (Stage 1). The scope gates already verified these are the correct files — no need to re-derive from git diff.
+- **Pass scope from prior gates:** use the collected scope-verified file list from Pre-Flight. Pass this as the scoped file list so kb-review skips its own scope discovery (Stage 1). The scope gates already verified these are the correct files — no need to re-derive from git diff.
 - Pass context: the full `git diff` of the feature branch against baseline, scoped to the verified file list
 - Capture the output: each finding has a severity (P0/P1/P2/P3) and confidence score
 - Store findings for the resolution gate (Step 2)
-- **Note:** if scope-verified files are unavailable (older manifest, standalone run), let ce-review do its own scope discovery.
+- **Note:** if scope-verified files are unavailable (older manifest, standalone run), let kb-review do its own scope discovery.
 
 ## Step 2: Resolution Gate
 
-Review findings from `ce-review` determine whether completion is allowed:
+Review findings from `kb-review` determine whether completion is allowed:
 
 | Severity | Action |
 |----------|--------|
@@ -69,7 +69,7 @@ After resolving all P0/P1s, update the manifest notes with a summary:
 For each resolved P0/P1 finding, append one line to `.atv/observations.jsonl`:
 
 ```json
-{"ts":"<ISO-8601>","hook":"ce-review","tool":"kb-complete","args":{"finding_type":"<category>","severity":"P0|P1","resolution":"<what was fixed>"},"cwd":"<repo-root>","result":"resolved"}
+{"ts":"<ISO-8601>","hook":"kb-review","tool":"kb-complete","args":{"finding_type":"<category>","severity":"P0|P1","resolution":"<what was fixed>"},"cwd":"<repo-root>","result":"resolved"}
 ```
 
 This connects the review → learn pipeline. Only P0/P1 findings are worth learning from — P2/P3 are style preferences, not systemic patterns.
@@ -82,7 +82,7 @@ Mirror the useful part of the original LFG finish pattern: do not leave known,
 fixable follow-up work unresolved just because the main implementation passed.
 
 1. Collect unresolved review findings, TODO files, checklist items, and manifest
-   notes produced by `ce-review`, `kb-gate`, `kb-work`, `kb-qa`, or
+   notes produced by `kb-review`, `kb-gate`, `kb-work`, `kb-qa`, or
    `kb-functional-test`.
 2. Resolve all safe/actionable P0/P1 findings before continuing.
 3. For P2/P3 and todo-style follow-ups, run the smallest suitable resolver:
@@ -344,7 +344,7 @@ Ready to ship. Run /land when you're ready to push and open a PR.
 
 | Situation | Action |
 |-----------|--------|
-| ce-review fails to run | Log error, ask user whether to retry or skip review |
+| kb-review fails to run | Log error, ask user whether to retry or skip review |
 | P0/P1 fix breaks tests | Re-run tests, treat as new failure, fix before proceeding |
 | proof/demo evidence cannot run | Log the missing tool/server/credential and alert user with the closest deterministic proof completed |
 | compound/learn/evolve fails | Log error, continue — these are non-blocking |
@@ -355,7 +355,7 @@ Ready to ship. Run /land when you're ready to push and open a PR.
 ## Integration
 
 - **Input from:** `kb-work` (completed manifest)
-- **Review engine:** `ce-review` with scope passthrough
+- **Review engine:** `kb-review` with scope passthrough
 - **Follow-up resolution:** `kb-gate`, `todo-triage`, `todo-create`, or repo-local resolvers
 - **Proof/demo evidence:** `kb-check`, `kb-functional-test`, browser/CLI/API probes, optional repo-local demo skills
 - **Documentation:** `ce-compound` → `docs/solutions/`

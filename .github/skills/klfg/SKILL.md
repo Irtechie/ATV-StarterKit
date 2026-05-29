@@ -61,7 +61,7 @@ Everything else — including kb-plan, kb-work, and kb-complete — proceeds wit
 
    `kb-complete` runs the post-work quality and learning pipeline:
 
-   - ce-review — full multi-agent code review with scope passthrough from kb-work's gates
+   - kb-review — full multi-agent code review with scope passthrough from kb-work's gates
    - Resolution Gate — P0/P1 must be fixed before proceeding
    - Follow-up Resolution — resolve or record review/TODO fallout
    - Proof/Demo Evidence — re-run final checks and capture demo evidence when useful
@@ -69,7 +69,7 @@ Everything else — including kb-plan, kb-work, and kb-complete — proceeds wit
    - Memory Refresh + Compact + Alerts — keep fresh-session memory usable
    - Cleanup — prune ephemeral artifacts (screenshots, old observations)
 
-   GATE: STOP. After `kb-complete` returns, verify the manifest status is `reviewed`. If ce-review found unresolved P0/P1s, `kb-complete` will have stopped — re-run it after fixes.
+   GATE: STOP. After `kb-complete` returns, verify the manifest status is `reviewed`. If kb-review found unresolved P0/P1s, `kb-complete` will have stopped — re-run it after fixes.
 
 5. Output `<promise>DONE</promise>` once steps 1–4 are complete.
 
@@ -77,7 +77,7 @@ Everything else — including kb-plan, kb-work, and kb-complete — proceeds wit
 
 - **Why no `/unslop`:** intentionally omitted. Risk of flagging parallel agent WIP as false positives. Run manually if needed.
 - **Why a separate `kb-complete`:** the finish pipeline (review, follow-up resolution, proof/demo evidence, compound, learn, evolve, memory refresh, compact, cleanup, alerts) is a separate skill. `kb-work` invokes it automatically only after all slices are done or intentionally skipped; `klfg` verifies that happened.
-- **Why no separate `/ce-review`:** kb-complete runs ce-review at Step 1 with full scope context from kb-work's gates. A second pass would be redundant.
+- **Why no separate `/kb-review`:** kb-complete runs kb-review at Step 1 with full scope context from kb-work's gates. A second pass would be redundant.
 - **Why no separate `/learn` or `/observe`:** kb-complete feeds resolved P0/P1 findings to observations.jsonl (Step 2), runs `/learn` (Step 3), and auto-triggers `/evolve` every 5th KB completion.
 - **Why no separate `/ce-compound`:** kb-complete invokes ce-compound at Step 3 for features with novel patterns. Skips automatically for boilerplate.
 - **Why no `/land`:** committing, pushing, and opening a PR is a separate, deliberate act. Run `/land` after `klfg` finishes when you're ready to ship.
