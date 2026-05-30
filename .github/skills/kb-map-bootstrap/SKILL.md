@@ -123,6 +123,9 @@ docs/context/history/
 2.55. **Map eval surfaces**
    Invoke `kb-eval-map` after the repo inventory has enough evidence to identify
    app patterns, public workflows, existing tests, and likely proof surfaces.
+   Run this step even when Step 2.5 finds broken dependency/runtime chains. The
+   eval map should record what can be evaluated now and which checks are blocked
+   by the broken chain instead of disappearing because bootstrap found a problem.
 
    `kb-eval-map` owns:
    - classifying the repo as website, internal/corporate website, API, CLI,

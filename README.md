@@ -97,6 +97,7 @@ What changed:
 - `kb-eval-map` is now part of bootstrap-owned setup. It detects the target
   repo's native eval surface, writes `docs/context/eval-map.md`, and scaffolds
   one real smoke eval only when the primary workflow is known and safe to run.
+  It maps/scaffolds proof; it is not the full live skill-eval suite.
 - `todo.md` and `todo-done.md` replace `docs/kanban.md` and
   `docs/kanban-done.md` for the current KB workflow.
 - `todo.md` now carries its own rules at the top. Completed feature, slice,

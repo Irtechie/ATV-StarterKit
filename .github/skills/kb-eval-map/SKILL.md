@@ -109,6 +109,33 @@ Safe to scaffold when:
 - the assertion is observable and would fail if the workflow is broken;
 - the command can exit nonzero on failure.
 
+## Scaffold Validation
+
+After scaffolding a smoke eval, prove the eval itself is not shallow theater.
+
+Run the eval once against the normal local/dev target and record the passing
+command. Then validate at least one negative path:
+
+- UI/browser: temporarily point the assertion at a missing selector, wrong text
+  pattern, or disabled route in the eval file; the eval must fail.
+- API: temporarily expect the wrong status, missing required field, or wrong
+  schema shape; the eval must fail.
+- CLI: temporarily expect the wrong exit code, required output substring, or
+  side-effect file; the eval must fail.
+- File/config/generated artifact: temporarily expect the wrong checksum, missing
+  path, or invalid required value; the eval must fail.
+
+Revert the intentional break immediately after the negative check. Do not keep
+the broken assertion. If the eval still passes while intentionally broken, delete
+or rewrite it before reporting success.
+
+Record both proof points in `docs/context/eval-map.md` or
+`docs/context/operations/testing.md`:
+
+```text
+smoke-eval-validation: pass-command=<cmd>; negative-check=<what was broken>; negative-result=failed-as-expected
+```
+
 Do not scaffold when:
 
 - the workflow depends on credentials or session state not available to the
