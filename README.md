@@ -94,6 +94,9 @@ What changed:
   drive.
 - `kb-map-bootstrap` and `kb-map` create/update project memory so new sessions
   can recover context without a long chat history.
+- `kb-eval-map` is now part of bootstrap-owned setup. It detects the target
+  repo's native eval surface, writes `docs/context/eval-map.md`, and scaffolds
+  one real smoke eval only when the primary workflow is known and safe to run.
 - `todo.md` and `todo-done.md` replace `docs/kanban.md` and
   `docs/kanban-done.md` for the current KB workflow.
 - `todo.md` now carries its own rules at the top. Completed feature, slice,
