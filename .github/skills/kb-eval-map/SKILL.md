@@ -136,6 +136,20 @@ Record both proof points in `docs/context/eval-map.md` or
 smoke-eval-validation: pass-command=<cmd>; negative-check=<what was broken>; negative-result=failed-as-expected
 ```
 
+This evidence is required for any scaffolded smoke eval. A report that only says
+"smoke eval added" or "test passed" is incomplete. Record all of:
+
+- `pass-command` - exact command that passed against the normal local/dev target;
+- `pass-result` - exit code or assertion summary from the passing command;
+- `negative-check` - exact selector/status/output/schema/checksum/command
+  expectation that was intentionally broken;
+- `negative-command` - exact command used for the broken assertion;
+- `negative-result` - must be `failed-as-expected`;
+- `reverted` - confirm the intentional break was reverted before completion.
+
+If `negative-result` is anything other than `failed-as-expected`, the scaffolded
+eval is not proof. Rewrite it or delete it before reporting success.
+
 Do not scaffold when:
 
 - the workflow depends on credentials or session state not available to the
