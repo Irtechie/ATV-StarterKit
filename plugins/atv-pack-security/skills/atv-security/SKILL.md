@@ -336,17 +336,37 @@ For A03 alternation patterns, use the entries below instead of markdown table ro
 
 ### A06: Vulnerable and Outdated Components
 
-**Tier 1 — grep patterns:**
+**Tier 1 — machine dependency scan:**
 
-| Pattern | What it catches | Severity |
-|---------|----------------|----------|
-| `"dependencies"` in package.json | Check for known-vulnerable versions | 🟢 medium |
+If dependency manifests or lockfiles are present and `osv-scanner` is
+available, run OSV Scanner before making any dependency-vulnerability claim:
+
+```bash
+osv-scanner scan source -r <repo-or-scope-path> --format json --output-file docs/security/osv-YYYY-MM-DD.json
+```
+
+Use the scoped path when `/atv-security <path>` was requested. Otherwise scan
+the project root. Record the command, exit code, JSON report path, and summary
+counts by severity. Treat known critical/high reachable dependency
+vulnerabilities as security findings, not informational advice. Do not run
+`osv-scanner fix` automatically.
+
+If `osv-scanner` is unavailable, report A06 as `skipped-unavailable` and include
+the official install option:
+
+```bash
+go install github.com/google/osv-scanner/v2/cmd/osv-scanner@latest
+```
 
 **Tier 2 — LLM assessment:**
-- Read `package.json`, `requirements.txt`, `Gemfile`, or `go.mod`
-- Flag any dependency that hasn't been updated in >1 year (check version patterns)
-- Recommend: `npm audit`, `pip-audit`, `bundle audit`, `govulncheck`
-- Severity: 🟢 medium (recommend tooling, don't duplicate it)
+- Read manifest files such as `package.json`, `requirements.txt`, `Gemfile`,
+  `go.mod`, `Cargo.toml`, `pom.xml`, or lockfiles found by OSV.
+- Do not invent vulnerability findings from version age alone. Age can be a
+  maintenance warning only.
+- Recommend ecosystem-specific fallback tools only when OSV is unavailable or
+  the ecosystem is unsupported.
+- Severity follows the scanner result when OSV reports a vulnerability; fallback
+  stale-dependency warnings are 🟢 medium.
 
 ### A07: Identification and Authentication Failures
 
