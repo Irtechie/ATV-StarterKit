@@ -76,6 +76,39 @@ Read only what `kb-map` points to, then only what is needed to route:
 2. Relevant active handoff files or manifest paths named by `kb-map`.
 3. Specific subsystem, research, brainstorm, or plan files pointed to by `kb-map`.
 
+## Ranked Routing Decision List
+
+Choose the first matching route. This list is the only routing taxonomy; do not
+reconcile it with a second shape or complexity table.
+
+| Rank | Request Signal | Route | Proof/Gate |
+|---|---|---|---|
+| 1 | Project memory missing, partial, stale, or root invalid | `kb-map` | `kb-map` decides lookup/refresh/bootstrap |
+| 2 | User explicitly says `kb-task`, asks for first-principles execution, or wants one bounded task carried until verified/blocked | `kb-task` | task runner owns verification |
+| 3 | Direct explanation, tradeoff discussion, or pushback with no file changes requested | answer directly; use `kb-first-principles` behavior when challenged | no work gate |
+| 4 | Existing valid manifest should be executed | `kb-work` | manifest plus slice verification |
+| 5 | All runnable slices are done and work needs review/learning/cleanup | `kb-complete` | `kb-check`, `kb-review`, learning gates |
+| 6 | Release, PR, deploy, or final readiness | `kb-ship` | release/ship gate |
+| 7 | Broken behavior needs logs, browser checks, test iteration, or self-correction | `kb-troubleshoot` | reproduce and regression proof |
+| 8 | Architecture/module-depth exploration before implementation | `kb-architecture-deepening` | source/docs evidence and tradeoff table |
+| 9 | External docs, prior art, framework behavior, or market/product research materially affects the answer | `kb-research` | cited source notes |
+| 10 | Multiple independent streams, many blockers, deletion policy, migration scale, or several brainstorms/plans needed | `kb-epic` | brainstorms and plans complete before work |
+| 11 | Scripts/evals/proof harness plus skills/docs must change together, or cross-runtime propagation is part of the change | `kb-epic` or coded pipeline manifest | eval/proof/sync gate |
+| 12 | Clear feature/refactor needs slices, or user wants execution but no valid manifest exists | `kb-plan` | vertical-slice manifest |
+| 13 | Skill-bundle change with sync/docs/eval/standard gate implications | `kb-plan` | `kb-check -All` and sync report |
+| 14 | Fuzzy idea, product direction, or high path dependency | `kb-brainstorm` | answered questions before planning |
+| 15 | Small known bug, typo, narrow cleanup, or one skill/doc edit with no sync/eval/proof-harness implications | `kb-fix` or bounded direct edit | targeted proof plus `kb-check` when relevant |
+| 16 | Memory/docs/responses are too verbose | `kb-compact` | preserve commands, paths, dates, blockers |
+| 17 | User wants everything from idea to done | `klfg` | full pipeline |
+
+Pipeline-worthy changes have at least one of these signals: multiple owning
+surfaces, cross-runtime behavior, scorer/fixture/baseline changes,
+propagation/sync rules, several independent workstreams, or deletion/loaded
+surface measurement.
+
+If none of those signals are present, keep the route small. Do not build a
+pipeline just because the request mentions a skill.
+
 ## Current Truth
 
 `todo.md` may hold short-lived operational truth: current focus, active manifest, parked slices, blockers, and handoff pointers.
@@ -109,39 +142,11 @@ Before resuming any `docs/handoffs/active/*` file, classify it:
 
 Do not route a phase-shaped handoff directly to `kb-work`. `kb-work` requires a manifest and per-slice plans with `expected_files`.
 
-## Route Table
-
-Use plain task classes first, then map to skills:
-
-| Request Shape | Route |
-|---|---|
-| Project memory missing, partial, or stale | `kb-map` decides lookup/refresh/bootstrap |
-| Memory/docs/responses are too verbose | `kb-compact` |
-| Need to find app/subsystem context | `kb-map lookup` |
-| Active handoff has only phases/workstreams/next steps | `kb-plan` |
-| Active handoff links a valid KB manifest | `kb-work` |
-| Recent work changed project memory | `kb-map refresh` |
-| User explicitly says `kb-task`, asks for first-principles execution, or wants one bounded task carried until verified/blocked | `kb-task` |
-| User says "go straight to work", "don't ask many questions", "just build it", or similar, but no valid KB manifest exists | `kb-plan` with execution intent, then `kb-work` |
-| User says troubleshoot/debug/self-correct, asks to inspect logs/browser behavior, or wants the agent to iterate until broken behavior is fixed | `kb-troubleshoot` |
-| Small known bug or narrow fix | `kb-fix` |
-| External/prior-art research needed | `kb-research` |
-| Fuzzy idea, product direction, high path dependency | `kb-brainstorm` |
-| Clear feature needs slices | `kb-plan` |
-| Manifest exists and work should run | `kb-work` |
-| All runnable slices done, need review/learning/cleanup | `kb-complete` |
-| Large initiative with many brainstorms/plans | `kb-epic` |
-| Release, PR, deploy, final readiness | `kb-ship` |
-| User wants everything from idea to done | `klfg` |
-
-## Route Complexity
-
-- **Small fix**: one bug, obvious scope, low risk, and low path dependency. Use `kb-fix`.
-- **Feature/refactor**: one bounded behavior change or refactor with enough uncertainty to need a manifest. Use `kb-brainstorm` if behavior is unclear; otherwise `kb-plan`.
-- **Large initiative**: high-complexity work such as framework migration, major architecture replacement, cross-subsystem rewrite, many unknowns, or a backlog that needs multiple brainstorms/plans. Use `kb-epic`.
-- **Release**: packaging, PR, deploy, or final readiness. Use `kb-ship`.
-
 Route by complexity, not by file count or guessed duration. The useful signals are uncertainty, blast radius, coupling, reversibility, verification burden, and user/product path dependency.
+
+Record `workflow_shape` in generated manifests when planning follows the ranked
+list. Use the closest rank label, such as `single-skill-edit`,
+`skill-bundle-change`, `pipeline-change`, or `multi-stream-epic`.
 
 When in doubt, prefer the lane that prevents rework. Do not pick a 20-minute shortcut when the decision creates path dependency.
 

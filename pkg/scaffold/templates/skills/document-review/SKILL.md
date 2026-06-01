@@ -23,7 +23,7 @@ The caller receives findings with their original classifications intact and deci
 
 Callers invoke headless mode by including `mode:headless` in the skill arguments, e.g.:
 ```
-Skill("compound-engineering:document-review", "mode:headless docs/plans/my-plan.md")
+document-review mode:headless docs/plans/my-plan.md
 ```
 
 
@@ -35,7 +35,7 @@ If `mode:headless` is not present, the skill runs in its default interactive mod
 
 **If no document is specified (interactive mode):** Ask which document to review, or find the most recent in `docs/brainstorms/` or `docs/plans/` using a file-search/glob tool (the glob tool).
 
-**If no document is specified (headless mode):** Output "Review failed: headless mode requires a document path. Re-invoke with: Skill(\"compound-engineering:document-review\", \"mode:headless <path>\")" without dispatching agents.
+**If no document is specified (headless mode):** Output "Review failed: headless mode requires a document path. Re-invoke with: document-review mode:headless <path>" without dispatching agents.
 
 ### Classify Document Type
 
@@ -88,6 +88,20 @@ Analyze the document content to determine which conditional personas to activate
 
 ## Phase 2: Announce and Dispatch Personas
 
+`document-review` is this skill/orchestrator, not an Agent tool `agent_type`.
+
+Never call the Agent tool with `agent_type: document-review`. Use runtime-valid document reviewer agent types:
+
+- `coherence-reviewer`
+- `feasibility-reviewer`
+- `product-lens-reviewer`
+- `design-lens-reviewer`
+- `security-lens-reviewer`
+- `scope-guardian-reviewer`
+- `adversarial-document-reviewer`
+
+If a desired persona does not exist as a runtime agent type, use `general-purpose` with the persona instructions in the task prompt rather than inventing an agent type. A broader valid reviewer is better than a failed dispatch.
+
 ### Announce the Review Team
 
 Tell the user which personas will review and why. For conditional personas, include the justification:
@@ -103,15 +117,15 @@ Reviewing with:
 ### Build Agent List
 
 Always include:
-- `compound-engineering:document-review:coherence-reviewer`
-- `compound-engineering:document-review:feasibility-reviewer`
+- `coherence-reviewer`
+- `feasibility-reviewer`
 
 Add activated conditional personas:
-- `compound-engineering:document-review:product-lens-reviewer`
-- `compound-engineering:document-review:design-lens-reviewer`
-- `compound-engineering:document-review:security-lens-reviewer`
-- `compound-engineering:document-review:scope-guardian-reviewer`
-- `compound-engineering:document-review:adversarial-document-reviewer`
+- `product-lens-reviewer`
+- `design-lens-reviewer`
+- `security-lens-reviewer`
+- `scope-guardian-reviewer`
+- `adversarial-document-reviewer`
 
 ### Dispatch
 

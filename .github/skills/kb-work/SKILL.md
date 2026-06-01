@@ -35,8 +35,9 @@ Run all vertical slices from a `kb-plan` manifest in dependency order. Keep each
 3. **Validate slice contracts** - each slice plan must have `expected_files`, `verification`, `blockers`, `status`, and acceptance criteria. New slice plans should also have `test_level` and `functional_risk`. If core fields are missing, stop and route to `kb-plan`; do not infer a manifest from a phase list. If only `test_level` or `functional_risk` is missing on an older plan, invoke `kb-functional-test` to classify them before execution.
 4. **Check status** - skip any slices already marked `done`. Resume from the first runnable `pending` slice.
 5. **Check worktree** - note dirty or untracked files before executing so unrelated user changes are not staged or reverted.
-6. **Sync with board** - read `todo.md` and confirm its status table matches the manifest. If they diverge, the board wins — another agent may have updated it. Reconcile the manifest from the board before proceeding.
-7. **Confirm once only when needed:** If the user did not explicitly ask to run/execute/work the manifest, ask: "Ready to execute N remaining slices in order. Proceed?" If the user already asked to execute, continue without this prompt.
+6. **Read active landmines** — if `docs/context/landmines.md` exists, read only `Active Landmines` and carry any relevant failure modes into slice execution and verification. If a slice touches an `owner_surface`, treat that landmine as a hard guardrail until the slice proves the `verification` condition or explicitly leaves it active.
+7. **Sync with board** — read `todo.md` and confirm its status table matches the manifest. If they diverge, the board wins — another agent may have updated it. Reconcile the manifest from the board before proceeding.
+8. **Confirm once only when needed:** If the user did not explicitly ask to run/execute/work the manifest, ask: "Ready to execute N remaining slices in order. Proceed?" If the user already asked to execute, continue without this prompt.
 
 After initial execution starts, do not ask before moving from one runnable slice to the next.
 
@@ -219,6 +220,27 @@ Quoting sanity rule: when shell commands, file operations, or test assertions in
 - Do not construct CSS selectors through mixed-quote string concatenation. Use template literals or parameterized locator helpers.
 
 Use `references/execution-prompt.md` as the per-slice execution prompt/checklist. Load it only when starting a slice.
+
+### Step 3.1: Protected Oracle Gate
+
+If the slice plan or manifest declares `protected_oracles`, enforce the
+anti-cheat contract before implementation changes:
+
+1. Identify every oracle file: tests, fixtures, scorers, snapshots, schemas, or
+   contracts that define expected behavior.
+2. If the oracle is new or intentionally changed for this slice, create/update it
+   before implementation and prove RED when practical.
+3. Record the oracle SHA256 in the slice plan or manifest after the oracle is
+   accepted.
+4. After the SHA is recorded, do not edit that oracle unless the plan is
+   explicitly amended with a new reason and a new SHA.
+5. Before marking the slice done, recompute oracle hashes. Any unexpected hash
+   change blocks the slice.
+
+If `protected_oracles` is empty, continue with the declared verification mode.
+Do not invent a protected oracle when expected behavior cannot be known before
+implementation.
+
 ### Step 3.5: System-Wide Test Check
 
 Before marking a slice done, pause and ask these questions — vertical slices cut through all layers, so side-effects matter:
@@ -244,7 +266,7 @@ After a slice completes, verify that the files actually changed are explainable 
 
    This produces the list of files modified by this slice relative to the branch baseline.
 
-2. **Load the forecast scope** from the slice plan's `expected_files` frontmatter field plus any `scope-discovery:` notes recorded during execution.
+2. **Load the forecast scope** from the slice plan's `expected_files` frontmatter field plus any `scope-discovery:` notes recorded during execution. Also load any `protected_oracles` and their recorded hashes.
 
 3. **Compare and enforce:**
 
@@ -257,6 +279,10 @@ After a slice completes, verify that the files actually changed are explainable 
    | Changed file expands product scope, architecture direction, dependencies, migrations, auth/security boundaries, destructive behavior, or another slice's promised behavior | STOP. Amend the manifest through `kb-plan` or get HITL before proceeding. |
    | Changed file is unrelated cleanup or opportunistic improvement | Revert or park as follow-up before proceeding. |
    | Forecast files were not changed | Treat as a completeness signal, not a failure. If the slice still satisfies acceptance criteria, record `scope-forecast-unused: <file> - <why not needed>`. |
+
+   If a changed file is a protected oracle and its SHA changed after protection,
+   STOP unless the manifest or slice plan explicitly records an oracle update
+   reason and the new SHA.
 
 4. **Log results** in the KB manifest under the slice's `notes` field:
 
@@ -407,7 +433,8 @@ KB work is resumable:
 - **Input from:** `kb-plan`
 - **Deepening:** Use `kb-research` only when a slice has a material unresolved uncertainty before execution.
 - **Execution engine:** Fresh sub-agents when available, local execution otherwise
-- **Verification:** Invokes `tdd` skill principles per slice when verification mode requires it
+- **Verification:** Preserves and reruns protected test oracles for `tdd` slices; load standalone `tdd` only for explicit test-first coaching.
+- **Protected oracles:** When declared by `kb-plan`, freezes behavior tests, fixtures, scorers, snapshots, or contracts before implementation so the target cannot move silently
 - **Deterministic checks:** Invokes `kb-check` before a slice is marked done
 - **Functional checks:** Invokes `kb-functional-test` for user-visible and cross-boundary behavior
 - **Post-completion:** Automatically invoke `kb-complete` after all slices are done or intentionally skipped
