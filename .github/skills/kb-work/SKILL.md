@@ -1,19 +1,21 @@
 ---
 name: kb-work
-description: "Sequential executor for kb-plan output. Runs all vertical slices in dependency order with fresh context per task, TDD enforcement, and HITL pauses. Use when the user says 'kb work', 'work the plan', 'execute the plan', 'run the KB pipeline', 'execute all slices', or wants guided execution of a planned feature."
+description: "Bounded swarm executor for kb-plan output. Runs all ready vertical slices from the dependency DAG, parallelizing only independent/isolated work, with TDD enforcement, scope gates, and HITL pauses. Use when the user says 'kb work', 'work the plan', 'execute the plan', 'run the KB pipeline', 'execute all slices', or wants guided execution of a planned feature."
 argument-hint: "[path to KB manifest, or blank to find latest]"
 ---
 
-# KB Work - Sequential Slice Executor
+# KB Work - Bounded Swarm Slice Executor
 
-Run all vertical slices from a `kb-plan` manifest in dependency order. Keep each slice tied to its acceptance criteria, enforce the requested verification mode, and pause on HITL tasks.
+Run all vertical slices from a `kb-plan` manifest by pulling the safe ready set
+from the dependency DAG. Keep each slice tied to its acceptance criteria,
+enforce the requested verification mode, and pause on HITL tasks.
 
 ## Quick Start
 
 1. Read the KB manifest.
 2. Validate the dependency DAG and statuses.
 3. Confirm execution once unless the user already asked to run/execute/work the manifest.
-4. Execute ready slices in topological order without asking between slices.
+4. Execute the safe ready set without asking between slices.
 5. Update the manifest after each slice so the workflow is resumable.
 6. After all runnable slices are terminal, immediately invoke `kb-complete <manifest-path>` unless the user explicitly said to stop before completion.
 
@@ -42,11 +44,15 @@ Terminal means one of:
   exact resume criteria recorded in `todo.md` and the manifest;
 - the user explicitly says to pause or stop.
 
-Default WIP cap is one active slice per checkout/model context. Do not claim or
-start another slice until the current slice is terminal unless the runtime gives
-each slice an isolated checkout/context and the manifest proves the file scopes
-are disjoint. Record any explicit parallel exception in the manifest before
-starting it.
+Default WIP is the safe ready set, not one slice. A slice is ready when its
+blockers are `done` or `skipped`, its status is `pending`, and it is not marked
+as a serial-only gate. Dispatch ready slices together only when the runtime gives
+each active slice an isolated checkout/context or an equivalent write-isolation
+guarantee. On a shared checkout, WIP is one mutating slice at a time.
+
+`expected_files` is a forecast, not proof of disjointness. If active slices
+observe or claim writes to the same path, serialize or requeue one slice before
+continuing. Observed overlap beats planned disjointness.
 
 Do not stop at weaker milestones:
 
@@ -69,13 +75,14 @@ KB state system unless the repo already opted into `done.md`.
 1. **Read the manifest** - parse the YAML frontmatter to get the ordered slice list.
 2. **Validate DAG** - confirm no cycles in blockers, all referenced slice IDs exist, and all slice files exist.
 3. **Validate slice contracts** - each slice plan must have `expected_files`, `verification`, `blockers`, `status`, and acceptance criteria. New slice plans should also have `test_level` and `functional_risk`. If core fields are missing, stop and route to `kb-plan`; do not infer a manifest from a phase list. If only `test_level` or `functional_risk` is missing on an older plan, invoke `kb-functional-test` to classify them before execution.
-4. **Check status** - skip any slices already marked `done`. Resume from the first runnable `pending` slice.
+4. **Check status** - skip any slices already marked `done`. Resume from the first safe ready set.
 5. **Check worktree** - note dirty or untracked files before executing so unrelated user changes are not staged or reverted.
 6. **Read active landmines** — if `docs/context/landmines.md` exists, read only `Active Landmines` and carry any relevant failure modes into slice execution and verification. If a slice touches an `owner_surface`, treat that landmine as a hard guardrail until the slice proves the `verification` condition or explicitly leaves it active.
 7. **Sync with board** — read `todo.md` and confirm its status table matches the manifest. If they diverge, the board wins — another agent may have updated it. Reconcile the manifest from the board before proceeding.
 8. **Confirm once only when needed:** If the user did not explicitly ask to run/execute/work the manifest, ask: "Ready to execute N remaining slices in order. Proceed?" If the user already asked to execute, continue without this prompt.
 
-After initial execution starts, do not ask before moving from one runnable slice to the next.
+After initial execution starts, do not ask before moving from one safe ready set
+to the next.
 
 Treat statuses as:
 
@@ -112,14 +119,22 @@ Active handoff files under `docs/handoffs/active/` are restart packets. Create o
 - Do not use root **Work Log** as a permanent archive. During execution, add notes only when they help a later agent resume: blockers, verification commands, durable memory impacts, or non-obvious decisions. Routine "slice complete" and verification-success notes belong in `todo-done.md` at feature completion, not in `todo.md`.
 - Blocked is not parked. Use `🔒 blocked` for dependencies, another-agent waits, tool failures, or missing inputs. Use `🧊 Parked / Cold Storage` only for work a human intentionally deferred out of scope.
 
-## Dependency Ordering
+## Ready-Set Ordering
 
-Execute with a topological sort:
+Execute by repeatedly pulling the safe ready set from the dependency DAG:
 
 1. Build a map of `slice_id -> slice`.
 2. For each pending slice, check all `blockers`.
-3. Run the first pending slice whose blockers are complete.
-4. If pending slices remain but none are runnable, mark the manifest blocked and report the dependency problem.
+3. The candidate ready set is every pending slice whose blockers are complete.
+4. Exclude serial-only slices from co-dispatch when other ready slices exist:
+   `can_continue_other_slices: false`, HITL-critical gates, destructive
+   approvals, browser/e2e contention without isolated sessions, and any slice
+   with an active write lease collision.
+5. Dispatch the remaining safe ready set in isolated contexts when available.
+   If no isolation is available, run the same ready set one mutating slice at a
+   time while preserving the ready-set order.
+6. If pending slices remain but none are runnable, mark the manifest blocked and
+   report the dependency problem.
 
 ## Execution Loop
 
@@ -127,9 +142,10 @@ For each slice in dependency order:
 
 ### Continuous Execution Rule
 
-Slices should run continuously once execution has started.
+Ready sets should run continuously once execution has started.
 
-Do **not** ask "Proceed to execute slice-N?" between slices. Move to the next runnable slice automatically after:
+Do **not** ask "Proceed to execute slice-N?" between slices. Move to the next
+safe ready set automatically after:
 
 - slice status is updated;
 - board and manifest are synced;
@@ -144,6 +160,7 @@ Pause only when a real gate requires it:
 - out-of-scope file edit or diff-scope failure;
 - QA/repair exhaustion or stuck loop;
 - dependency deadlock;
+- observed write overlap that cannot be serialized or requeued safely;
 - user explicitly asked to pause or stop.
 
 ### Step 1: Check HITL Flag
