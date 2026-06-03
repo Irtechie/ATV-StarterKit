@@ -16,8 +16,10 @@ Break work into independently executable **vertical slices** (tracer bullets). E
 2. Draft thin end-to-end slices with dependencies and verification modes.
 3. Review the breakdown yourself against the source material; ask the user only for blocking decisions.
 4. Write one KB manifest plus one plan file per slice.
-5. Stop after writing the manifest unless the user invoked `klfg` or explicitly asked to execute.
-6. Stage or commit only the generated files when the user explicitly asked for a commit.
+5. Create or update the manifest `gate_ledger`; `plan-to-work` must be
+   `passed` before `kb-work` may execute.
+6. Stop after writing the manifest unless the user invoked `klfg` or explicitly asked to execute.
+7. Stage or commit only the generated files when the user explicitly asked for a commit.
 
 ## Interaction Method
 
@@ -173,6 +175,13 @@ Ask the user only when a material decision remains. Otherwise proceed and record
 
 Run `kb-gate` before writing final plans when validation surfaces P0/P1/P2/P3 issues. P0/P1 block work, but the agent should rectify safe/actionable blockers before asking the user. For P2/P3, ask whether to rectify all fixable issues before moving on.
 
+Before handing off to `kb-work`, write a `plan-to-work` gate in the manifest.
+Load `kb-gate/references/gate-ledger.md` if needed. The gate must include proof
+for: manifest path, every slice plan path, dependency DAG validation, acceptance
+criteria, `expected_files`, verification mode, `test_level`, `functional_risk`,
+HITL classification, and any protected oracle policy. If any proof is missing,
+set `status: blocked` and do not invoke `kb-work`.
+
 ### 4. Generate Plan Files
 
 Create a manifest and individual slice plans.
@@ -187,6 +196,32 @@ brainstorm_path: docs/brainstorms/<source-file>.md
 created: YYYY-MM-DD
 status: active
 workflow_shape: "<direct-chat|single-skill-edit|skill-bundle-change|pipeline-change|multi-stream-epic>"
+gate_ledger:
+  - gate_id: brainstorm-to-plan
+    owner_skill: kb-brainstorm
+    status: passed
+    required_evidence:
+      - "<requirements path exists>"
+      - "Resolve Before Planning is empty or quarantined"
+    proof:
+      - docs/brainstorms/<source-file>.md
+    blockers: []
+    passed_at: "<timestamp>"
+    allowed_next_action: "kb-plan <requirements-path>"
+  - gate_id: plan-to-work
+    owner_skill: kb-plan
+    status: passed
+    required_evidence:
+      - "<manifest path exists>"
+      - "<all slice plan paths exist>"
+      - "DAG has no missing blockers or cycles"
+      - "each slice has acceptance criteria, expected_files, verification, test_level, functional_risk"
+    proof:
+      - docs/plans/YYYY-MM-DD-000-kb-<name>-manifest.md
+      - docs/plans/YYYY-MM-DD-001-<type>-<name>-plan.md
+    blockers: []
+    passed_at: "<timestamp>"
+    allowed_next_action: "kb-work <manifest-path>"
 slices:
   - id: slice-001
     title: "<title>"
@@ -450,6 +485,7 @@ Omit empty sections. These conventions are defined inline in the top `## Rules` 
 - Confirm every `blockers` entry references an existing slice ID.
 - Confirm no dependency cycles exist.
 - Confirm every slice has a verification mode and acceptance criteria.
+- Confirm the manifest has a `plan-to-work` gate with `status: passed` or `status: blocked`; never leave it absent or pending.
 - Confirm every generated plan path is listed in the manifest.
 - Confirm the manifest body table matches the YAML frontmatter.
 

@@ -5,7 +5,12 @@ argument-hint: "[feature description]"
 disable-model-invocation: true
 ---
 
-CRITICAL: You MUST execute every step below IN ORDER. Do NOT skip any required step. Do NOT jump ahead to coding or implementation. The brainstorm (step 1), plan (step 2), and work (step 3) phases each have a GATE that must verify their output exists before the next step begins. Violating this order produces bad output.
+CRITICAL: You MUST execute every step below IN ORDER. Do NOT skip any required step. Do NOT jump ahead to coding or implementation. The brainstorm (step 1), plan (step 2), work (step 3), and complete (step 4) phases each have a GATE that must verify required evidence before the next step begins. Violating this order produces bad output.
+
+Gate evidence lives in the KB manifest `gate_ledger` once a manifest exists.
+Before advancing phases, read `kb-gate/references/gate-ledger.md` when needed
+and verify the relevant gate status and `allowed_next_action`. Artifact
+existence is necessary but not sufficient.
 
 This pipeline is interactive in **two specific places** and autonomous everywhere else:
 
@@ -24,7 +29,7 @@ Everything else — including kb-plan, kb-work, and kb-complete — proceeds wit
 
    Also check the requirements doc for `## Outstanding Questions` → `### Resolve Before Planning`. If that subsection has any unresolved entries, do NOT proceed — return to step 1 and resolve them first. `kb-brainstorm` is responsible for not handing off until that section is empty, but verify here as a safety check.
 
-   GATE: run `kb-gate` if brainstorm/document-review surfaced P0/P1/P2/P3 issues. Safe/actionable P0/P1 are rectified by the agent; human-only P0/P1 block planning. P2/P3 get the rectify-all prompt.
+   GATE: run `kb-gate` if brainstorm/document-review surfaced P0/P1/P2/P3 issues. Safe/actionable P0/P1 are rectified by the agent; human-only P0/P1 block planning. P2/P3 get the rectify-all prompt. Record `brainstorm-to-plan` as passed, blocked, or needs-human before invoking `kb-plan`.
 
 2. `/kb-plan <reqs-path>`
 
@@ -32,7 +37,7 @@ Everything else — including kb-plan, kb-work, and kb-complete — proceeds wit
 
    **Record the manifest path.** Refer to it as `<manifest-path>` for the rest of the pipeline.
 
-   GATE: run `kb-gate` if planning surfaced P0/P1/P2/P3 issues. Safe/actionable P0/P1 are rectified by the agent; human-only P0/P1 block work. P2/P3 get the rectify-all prompt.
+   GATE: read the manifest `gate_ledger`. `plan-to-work` must be `passed` and `allowed_next_action` must be `kb-work <manifest-path>`. Run `kb-gate/scripts/check_gate_ledger.py <manifest-path> --gate plan-to-work --allowed-next "kb-work <manifest-path>"`. If absent, pending, blocked, stale, or the checker fails, run `kb-gate`/repair planning and do not start work. Safe/actionable P0/P1 are rectified by the agent; human-only P0/P1 block work. P2/P3 get the rectify-all prompt.
 
 3. `/kb-work <manifest-path>`
 
@@ -51,7 +56,7 @@ Everything else — including kb-plan, kb-work, and kb-complete — proceeds wit
 
    HITL pauses: slices flagged `hitl: true`, scope violations, destructive commands, QA failures that exhaust repair (5-iteration cap, stuck detection).
 
-   GATE: STOP. After `kb-work` returns, re-read the manifest. Every slice must be `status: done` or `status: skipped`. If any slice is `pending`, `in_progress`, or `blocked`, re-run `/kb-work <manifest-path>` to resume.
+   GATE: STOP. After `kb-work` returns, re-read the manifest. Every slice must be `status: done` or `status: skipped`, every completed slice must have a passing `slice-<id>-to-done` gate, and `work-to-complete` must be `passed` with `allowed_next_action` set to `kb-complete <manifest-path>`. Run `kb-gate/scripts/check_gate_ledger.py <manifest-path> --gate work-to-complete --allowed-next "kb-complete <manifest-path>"`. If any slice is `pending`, `in_progress`, or `blocked`, re-run `/kb-work <manifest-path>` to resume.
 
    If a slice is genuinely stuck (e.g., `blocked` for an external reason), surface that to the user and stop the pipeline. Do not paper over a blocked slice.
 
@@ -69,7 +74,7 @@ Everything else — including kb-plan, kb-work, and kb-complete — proceeds wit
    - Memory Refresh + Compact + Alerts — keep fresh-session memory usable
    - Cleanup — prune ephemeral artifacts (screenshots, old observations)
 
-   GATE: STOP. After `kb-complete` returns, verify the manifest status is `reviewed`. If kb-review found unresolved P0/P1s, `kb-complete` will have stopped — re-run it after fixes.
+   GATE: STOP. After `kb-complete` returns, verify the manifest status is `reviewed` and `complete-to-ship` is `passed` or explicitly quarantined with forbidden claims recorded. Run `kb-gate/scripts/check_gate_ledger.py <manifest-path> --gate complete-to-ship --allow-quarantine`. If kb-review found unresolved P0/P1s, or the final proof/cleanup/learning evidence is missing, `kb-complete` must stop — re-run it after fixes.
 
 5. Output `<promise>DONE</promise>` once steps 1–4 are complete.
 

@@ -8,6 +8,28 @@ argument-hint: "[phase, artifact path, or finding list]"
 
 Do not let known issues drift silently into the next phase.
 
+## Gate Ledger
+
+For multi-phase workflows, expensive tests, benchmark waves, or any work where
+phase drift is costly, use `references/gate-ledger.md`. The ledger is the
+source of truth for whether the next phase may start.
+
+Hard rule: do not advance a workflow because the agent believes a phase is
+"probably done." Advance only when the relevant gate record is `passed` or, for
+out-of-scope evidence, explicitly `quarantined` with forbidden claims recorded.
+
+Before answering that a phase is complete:
+
+1. Read or create the manifest's `gate_ledger`.
+2. Verify every required evidence item has proof.
+3. Classify unresolved findings.
+4. Set the gate status and `allowed_next_action`.
+5. Report the gate check output.
+
+If no manifest exists, write the gate record into the active plan, packet,
+handoff, or `todo.md` section and require the next phase to create a manifest
+before execution.
+
 ## Severity
 
 | Severity | Meaning | Default |

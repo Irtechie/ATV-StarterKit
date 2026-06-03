@@ -38,10 +38,11 @@ already opted into a `done.md` workflow.
 ## Pre-Flight
 
 1. **Read the manifest** — confirm `status: completed` (all slices done/skipped). If slices are still `pending` or `in_progress`, stop: "This manifest has unfinished slices. Run `kb-work` first."
-2. **Collect scope context** — scan each slice's `notes` field for `scope-check:` and `scope-discovery:` entries. Build the combined list of actually changed, scope-verified files across all slices. This becomes the review scope.
-3. **Collect memory impact** — scan slice notes for `memory-impact:` and `kb-map-refresh:` entries.
-4. **Identify the branch baseline** — run `git merge-base HEAD main` to establish the diff range.
-5. **Run final snapshot sweep** — invoke `kb-regression-snapshot verify` for all snapshots under `.atv/snapshots/`. If any snapshot fails, STOP before review; later work regressed earlier passing behavior.
+2. **Validate gate ledger** — the manifest must contain `gate_ledger` with `work-to-complete` set to `passed`, and every completed slice must have a passing `slice-<id>-to-done` gate. Run `kb-gate/scripts/check_gate_ledger.py <manifest-path> --gate work-to-complete --allowed-next "kb-complete <manifest-path>"`. If missing, blocked, or the checker fails, stop and invoke `kb-work <manifest-path>` or `kb-gate` to repair the ledger. Do not run completion from a manifest that merely says `status: completed`.
+3. **Collect scope context** — scan each slice's `notes` field for `scope-check:` and `scope-discovery:` entries. Build the combined list of actually changed, scope-verified files across all slices. This becomes the review scope.
+4. **Collect memory impact** — scan slice notes for `memory-impact:` and `kb-map-refresh:` entries.
+5. **Identify the branch baseline** — run `git merge-base HEAD main` to establish the diff range.
+6. **Run final snapshot sweep** — invoke `kb-regression-snapshot verify` for all snapshots under `.atv/snapshots/`. If any snapshot fails, STOP before review; later work regressed earlier passing behavior.
 
 If the manifest has no scope-check notes (older format), fall back to `git diff --name-only $(git merge-base HEAD main)..HEAD` for the file list.
 
@@ -351,7 +352,30 @@ Prune ephemeral artifacts. Heavy KB usage generates file sprawl — clean it up 
 
 ## Step 5: Done
 
-Update the manifest `status: reviewed` and report:
+Before updating the manifest to `status: reviewed`, write `complete-to-ship` in
+the manifest `gate_ledger`.
+
+Required proof:
+
+- `kb-check` final command/result;
+- `kb-functional-test` or explicit skip reason for every functional/API/CLI/UI slice;
+- `kb-review` mode and finding counts;
+- P0/P1 resolved or human/quarantine blocker recorded;
+- follow-up-resolution summary;
+- proof/demo evidence paths or skip reason;
+- compound/learn/evolve result or non-blocking failure note;
+- project-memory refresh/skip proof;
+- memory-maintenance update;
+- cleanup result;
+- alerts list.
+
+If any required proof is missing, set `complete-to-ship` to `blocked` and do not
+report `KB <name> complete`.
+
+Update the manifest `status: reviewed` only after `complete-to-ship` is
+`passed` or explicitly `quarantined` for out-of-scope issues, and after
+`kb-gate/scripts/check_gate_ledger.py <manifest-path> --gate complete-to-ship --allow-quarantine`
+passes. Then report:
 
 ```text
 KB <name> complete.

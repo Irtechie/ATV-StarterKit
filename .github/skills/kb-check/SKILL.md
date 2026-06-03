@@ -70,9 +70,10 @@ When the same manual verification would be repeated twice, create a script.
 
 Good scripts accept scope arguments, print concise pass/fail output, exit nonzero on failure, avoid network unless needed, run in CI or from an agent session, and are documented in `docs/context/operations/testing.md`.
 
-For protected-oracle work, prefer reusable SHA/manifest scripts over manual
-inspection. In this repo, `scripts/skill-eval-manifest-selftest.ps1` proves that
-tampering with a protected fixture/scorer manifest fails deterministically.
+For protected-oracle work, prefer reusable SHA/manifest checks over manual
+inspection. In this repo, `go run .\cmd\kbcheck skill-eval-manifest-selftest`
+proves that tampering with a protected fixture/scorer manifest fails
+deterministically.
 
 ## Output
 

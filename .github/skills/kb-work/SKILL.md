@@ -14,10 +14,11 @@ enforce the requested verification mode, and pause on HITL tasks.
 
 1. Read the KB manifest.
 2. Validate the dependency DAG and statuses.
-3. Confirm execution once unless the user already asked to run/execute/work the manifest.
-4. Execute the safe ready set without asking between slices.
-5. Update the manifest after each slice so the workflow is resumable.
-6. After all runnable slices are terminal, immediately invoke `kb-complete <manifest-path>` unless the user explicitly said to stop before completion.
+3. Verify the manifest `gate_ledger` allows `kb-work`; repair or block if `plan-to-work` is not passed.
+4. Confirm execution once unless the user already asked to run/execute/work the manifest.
+5. Execute the safe ready set without asking between slices.
+6. Update the manifest after each slice so the workflow is resumable.
+7. After all runnable slices are terminal, write the `work-to-complete` gate and immediately invoke `kb-complete <manifest-path>` unless the user explicitly said to stop before completion.
 
 ## Input
 
@@ -74,12 +75,13 @@ KB state system unless the repo already opted into `done.md`.
 
 1. **Read the manifest** - parse the YAML frontmatter to get the ordered slice list.
 2. **Validate DAG** - confirm no cycles in blockers, all referenced slice IDs exist, and all slice files exist.
-3. **Validate slice contracts** - each slice plan must have `expected_files`, `verification`, `blockers`, `status`, and acceptance criteria. New slice plans should also have `test_level` and `functional_risk`. If core fields are missing, stop and route to `kb-plan`; do not infer a manifest from a phase list. If only `test_level` or `functional_risk` is missing on an older plan, invoke `kb-functional-test` to classify them before execution.
-4. **Check status** - skip any slices already marked `done`. Resume from the first safe ready set.
-5. **Check worktree** - note dirty or untracked files before executing so unrelated user changes are not staged or reverted.
-6. **Read active landmines** — if `docs/context/landmines.md` exists, read only `Active Landmines` and carry any relevant failure modes into slice execution and verification. If a slice touches an `owner_surface`, treat that landmine as a hard guardrail until the slice proves the `verification` condition or explicitly leaves it active.
-7. **Sync with board** — read `todo.md` and confirm its status table matches the manifest. If they diverge, the board wins — another agent may have updated it. Reconcile the manifest from the board before proceeding.
-8. **Confirm once only when needed:** If the user did not explicitly ask to run/execute/work the manifest, ask: "Ready to execute N remaining slices in order. Proceed?" If the user already asked to execute, continue without this prompt.
+3. **Validate gate ledger** - read `gate_ledger`. The `plan-to-work` gate must be `passed` and its `allowed_next_action` must name this manifest. Run `kb-gate/scripts/check_gate_ledger.py <manifest-path> --gate plan-to-work --allowed-next "kb-work <manifest-path>"` before execution. If the gate is absent, pending, blocked, stale, or the checker fails, stop and route to `kb-plan`/`kb-gate` to repair it before execution. Do not execute from a manifest that lacks a passing gate.
+4. **Validate slice contracts** - each slice plan must have `expected_files`, `verification`, `blockers`, `status`, and acceptance criteria. New slice plans should also have `test_level` and `functional_risk`. If core fields are missing, stop and route to `kb-plan`; do not infer a manifest from a phase list. If only `test_level` or `functional_risk` is missing on an older plan, invoke `kb-functional-test` to classify them before execution.
+5. **Check status** - skip any slices already marked `done`. Resume from the first safe ready set.
+6. **Check worktree** - note dirty or untracked files before executing so unrelated user changes are not staged or reverted.
+7. **Read active landmines** — if `docs/context/landmines.md` exists, read only `Active Landmines` and carry any relevant failure modes into slice execution and verification. If a slice touches an `owner_surface`, treat that landmine as a hard guardrail until the slice proves the `verification` condition or explicitly leaves it active.
+8. **Sync with board** — read `todo.md` and confirm its status table matches the manifest. If they diverge, the board wins — another agent may have updated it. Reconcile the manifest from the board before proceeding.
+9. **Confirm once only when needed:** If the user did not explicitly ask to run/execute/work the manifest, ask: "Ready to execute N remaining slices in order. Proceed?" If the user already asked to execute, continue without this prompt.
 
 After initial execution starts, do not ask before moving from one safe ready set
 to the next.
@@ -403,6 +405,14 @@ After the slice completes:
    - If no and repair/progress is still possible: run `kb-repair` or a bounded fix loop, then retry verification.
    - If no progress remains: update manifest `status: blocked` or `parked`, add failure notes and resume criteria, then continue unrelated runnable slices.
 
+   Before setting `status: done`, write or update a gate record
+   `slice-<slice_id>-to-done`. This gate must prove: implementation finished,
+   scope check passed, protected oracles were preserved or explicitly amended,
+   deterministic checks ran, functional/browser checks ran when required,
+   regression snapshot captured, and memory impact was classified. If any proof
+   is missing, leave the slice `blocked` and set `allowed_next_action` to the
+   missing proof step.
+
 2. **Sync board** — update `todo.md` status for this slice (done or blocked). Append validation note.
 
 3. **Run verification**
@@ -434,10 +444,11 @@ When all slices are `done` or intentionally `skipped`:
 1. Update manifest `status: completed`.
 2. Run final verification.
 3. Run `kb-gate` if verification, QA, repair, or functional-test checks surfaced P0/P1/P2/P3/P4 issues. P0/P1 block completion while unresolved, but safe/actionable blockers should be rectified before asking the user. P2/P3/P4 do not block by severity alone.
-4. **Refresh project memory** — if any slice has `memory-impact: durable` or `refresh=pending`, run `kb-map refresh` before archiving. Update affected architecture, operation, decision, research, `todo.md`, and handoff pointers. Add manifest note: `kb-map-refresh: done` or `kb-map-refresh: skipped - <reason>`.
-5. **Archive to board** — move the feature summary from `todo.md` to `todo-done.md`. Prepend at the top of the archive file with a completion date header.
-6. **Prune active board** — remove the completed feature section from `todo.md`. Also remove routine work-log entries for the completed feature from `todo.md`; keep only still-active rows, `🔒 blocked` rows, `🛑 human-required` rows, the `🧊 Parked / Cold Storage` section, or handoff-pointer items.
-7. Report summary:
+4. Write `work-to-complete` in the manifest `gate_ledger`. Required proof: every non-skipped slice has a passing `slice-<id>-to-done` gate, skipped slices have explicit reason, final verification command/result is recorded, no unresolved P0/P1 exists, board/manifest are synced, and `scope-verified-files` is populated. Run `kb-gate/scripts/check_gate_ledger.py <manifest-path> --gate work-to-complete --allowed-next "kb-complete <manifest-path>"`. If the gate is not passed or the checker fails, do not invoke `kb-complete`.
+5. **Refresh project memory** — if any slice has `memory-impact: durable` or `refresh=pending`, run `kb-map refresh` before archiving. Update affected architecture, operation, decision, research, `todo.md`, and handoff pointers. Add manifest note: `kb-map-refresh: done` or `kb-map-refresh: skipped - <reason>`.
+6. **Archive to board** — move the feature summary from `todo.md` to `todo-done.md`. Prepend at the top of the archive file with a completion date header.
+7. **Prune active board** — remove the completed feature section from `todo.md`. Also remove routine work-log entries for the completed feature from `todo.md`; keep only still-active rows, `🔒 blocked` rows, `🛑 human-required` rows, the `🧊 Parked / Cold Storage` section, or handoff-pointer items.
+8. Report summary:
 
 ```text
 KB <name> — all slices complete.
@@ -450,7 +461,7 @@ Verification: <command/result>
 Next: kb-complete runs automatically for review, documentation, and learning.
 ```
 
-8. **Persist scope context** — collect the forecast and discovered file lists from each slice's `notes` field (the `scope-check:` and `scope-discovery:` entries from Step 3.6). Write the combined actual changed file list to the manifest frontmatter as `scope-verified-files` so `kb-complete` can pass it to kb-review without re-deriving.
+9. **Persist scope context** — collect the forecast and discovered file lists from each slice's `notes` field (the `scope-check:` and `scope-discovery:` entries from Step 3.6). Write the combined actual changed file list to the manifest frontmatter as `scope-verified-files` so `kb-complete` can pass it to kb-review without re-deriving.
 
 **Post-work steps (kb-review, compound, learn, evolve, cleanup) are handled by `kb-complete`.** After all slices are `done` or intentionally `skipped`, invoke `kb-complete <manifest-path>` automatically unless the user explicitly asked to stop after work execution. The `kb-work` run is not complete until `kb-complete` reaches its Done section or records a real blocker.
 
