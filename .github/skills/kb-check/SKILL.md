@@ -33,7 +33,7 @@ Prefer existing project commands over invented commands.
 
 ## Workflow
 
-1. Run `go run .\cmd\kbcheck core --list` when present to inspect discovered commands.
+1. Run `go run ./cmd/kbcheck core --list` when present to inspect discovered commands.
 2. Pick the narrowest commands that verify the touched behavior.
 3. Run checks in this order when available: format/lint, typecheck/static analysis, unit tests, integration/e2e/browser checks, build/package, security/dependency audit.
 4. Capture command, exit code, and relevant output.
@@ -43,7 +43,7 @@ Prefer existing project commands over invented commands.
 In this portable skill bundle, the canonical local gate is:
 
 ```powershell
-go run .\cmd\kbcheck core
+go run ./cmd/kbcheck core
 ```
 
 `cmd/kbcheck` owns top-level orchestration. Existing PowerShell scripts may
@@ -71,7 +71,7 @@ When the same manual verification would be repeated twice, create a script.
 Good scripts accept scope arguments, print concise pass/fail output, exit nonzero on failure, avoid network unless needed, run in CI or from an agent session, and are documented in `docs/context/operations/testing.md`.
 
 For protected-oracle work, prefer reusable SHA/manifest checks over manual
-inspection. In this repo, `go run .\cmd\kbcheck skill-eval-manifest-selftest`
+inspection. In this repo, `go run ./cmd/kbcheck skill-eval-manifest-selftest`
 proves that tampering with a protected fixture/scorer manifest fails
 deterministically.
 

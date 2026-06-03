@@ -316,7 +316,7 @@ docs/context/history/
 
 5. **Write testing operations**
    - Create/update `docs/context/operations/testing.md`.
-   - Include deterministic commands discovered by `go run .\cmd\kbcheck core --list` when present, or equivalent manifest inspection.
+   - Include deterministic commands discovered by `go run ./cmd/kbcheck core --list` when present, or equivalent manifest inspection.
    - Note which checks are fast, broad, flaky, external-service dependent, or CI-only.
 
 6. **Write subsystem docs**
