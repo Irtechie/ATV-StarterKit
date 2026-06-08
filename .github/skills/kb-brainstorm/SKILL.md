@@ -426,7 +426,9 @@ Run `kb-gate` before Phase 10 when document-review or your own checks surfaced P
 
 #### 10.1 Phase Boundary
 
-`kb-brainstorm` is complete when the requirements artifact is reviewed, gate-clean, and ready to become slices. The default next phase is `kb-plan`.
+`kb-brainstorm` is complete when the requirements artifact is reviewed,
+gate-clean, and ready to become slices. The next phase is `kb-plan`, but do not
+assume every host will auto-chain skills.
 
 Do not jump from brainstorm directly to `kb-work` or `kb-complete`.
 
@@ -451,13 +453,26 @@ when the downstream artifact supports a gate ledger. Required evidence:
 
 If no blocking questions remain:
 
-- Default: run `kb-plan <requirements-doc>` and skip the closing summary. If the user asked to continue straight to implementation, pass that execution intent so `kb-plan` invokes `kb-work` after writing the manifest.
-- If the user explicitly asked to stop after brainstorm, print the closing summary instead.
-- If additional research is needed before planning, route to `kb-research`, update the requirements doc, then stop or return to the orchestrator.
+- If the user asked to continue straight to implementation, or an orchestrator
+  such as `klfg`, `kb-epic`, or `kb-goal` called this brainstorm with execution
+  intent, invoke `kb-plan <requirements-doc>` with that execution intent so
+  planning can continue to `kb-work` after writing the manifest.
+- Otherwise ask once: "Brainstorm is gate-clean. Continue with `kb-plan
+  <requirements-doc>` now?"
+- If the user says yes, invoke `kb-plan <requirements-doc>`.
+- If the user says yes and asks to implement too, invoke `kb-plan
+  <requirements-doc>` with execution intent so `kb-plan` continues to
+  `kb-work <manifest-path>`.
+- If the user says no, or the host cannot invoke the next skill, print the
+  closing summary with the exact next command.
+- If additional research is needed before planning, route to `kb-research`,
+  update the requirements doc, then stop or return to the orchestrator.
 
 #### 10.2 Handle the Selected Option
 
-**Default:** Start `/kb-plan <requirements-doc>` after the requirements artifact is gate-clean.
+**Default:** Ask whether to start `/kb-plan <requirements-doc>` after the
+requirements artifact is gate-clean, unless execution intent or an orchestrator
+already authorized continuing.
 
 **Stop conditions:** Pause instead of planning only when:
 
@@ -476,7 +491,9 @@ When the user is satisfied with the additional Q&A, **do not jump straight back 
 
 #### 10.3 Closing Summary
 
-Use the closing summary only when this brainstorm run is ending, pausing, or handing off without immediately invoking `kb-plan`.
+Use the closing summary when this brainstorm run is ending, pausing, handing off
+without immediately invoking `kb-plan`, or the host cannot auto-chain the next
+skill.
 
 When complete and ready for planning, display:
 
@@ -496,7 +513,8 @@ Key decisions:
 Slice candidates: [count]
 Confidence: [High/Medium/Low]
 
-Next step: `/kb-plan`  # run now unless stopped by a condition above
+Next command: `/kb-plan docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
+To implement after planning: say "yes, then work" or run `kb-work <manifest-path>` after `kb-plan` creates the manifest.
 ```
 
 If the user pauses with `Resolve Before Planning` still populated, display:
@@ -528,7 +546,7 @@ Resume with `/kb-brainstorm` when ready to resolve these before planning.
 ## Integration with Other Skills
 
 - **Input from:** idea exploration or a fresh feature description from the user.
-- **Default next step:** invoke `/kb-plan <requirements-doc>` for vertical-slice decomposition once the brainstorm is gate-clean.
+- **Default next step:** ask whether to continue with `/kb-plan <requirements-doc>` once the brainstorm is gate-clean, unless execution intent or an orchestrator already authorized continuing.
 - **Stop instead:** only for unresolved blockers, required human decisions, required research, or explicit user instruction.
 - **Optional follow-up:** `kb-research` for another targeted research pass that should become reusable local memory.
 - **Document review:** Always run `document-review` before handoff (Phase 9).

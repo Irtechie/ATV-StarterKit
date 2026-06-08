@@ -41,14 +41,14 @@ func Packs() []Pack {
 			Category:    "planning",
 			Description: "Planning & design pack — Brainstorming, KB Brainstorm, CE legacy planning, CE Ideate, KB Plan, Deepen Brainstorm, Deepen Plan, and architecture skills for shaping work before coding.",
 			Keywords:    []string{"atv", "compound-engineering", "planning", "brainstorming"},
-			SkillNames:  []string{"brainstorming", "ce-brainstorm", "kb-brainstorm", "ce-ideate", "ce-plan", "kb-plan", "deepen-brainstorm", "deepen-plan", "improve-codebase-architecture"},
+			SkillNames:  []string{"brainstorming", "ce-brainstorm", "kb-brainstorm", "kb-start", "kb-map", "kb-fix", "kb-research", "kb-architecture-deepening", "kb-epic", "ce-ideate", "ce-plan", "kb-plan", "deepen-brainstorm", "deepen-plan", "improve-codebase-architecture"},
 		},
 		{
 			Name:        "atv-pack-review",
 			Category:    "review",
 			Description: "Code review pack — multi-agent CE Review and document review skills for catching issues early.",
 			Keywords:    []string{"atv", "code-review", "compound-engineering"},
-			SkillNames:  []string{"ce-review", "document-review"},
+			SkillNames:  []string{"ce-review", "document-review", "kb-review", "repo-critic"},
 		},
 		{
 			Name:        "atv-pack-shipping",
@@ -63,9 +63,14 @@ func Packs() []Pack {
 				"kb-repair",
 				"ce-work",
 				"kb-work",
+				"kb-ship",
+				"kb-task",
+				"kb-troubleshoot",
 				"klfg",
 				"land",
 				"takeoff",
+				"todo-create",
+				"todo-triage",
 			},
 		},
 		{
@@ -108,7 +113,7 @@ func Packs() []Pack {
 			Category:    "maintenance",
 			Description: "Maintenance & health pack — atv-doctor (diagnose ATV install health) and atv-update (update marketplace plugins; advisory for project scaffold). Keep your ATV install healthy and current.",
 			Keywords:    []string{"atv", "maintenance", "doctor", "update", "health"},
-			SkillNames:  []string{"atv-doctor", "atv-update"},
+			SkillNames:  []string{"atv-doctor", "atv-update", "kb-check", "kb-compact", "kb-eval-map", "kb-functional-test", "kb-gate", "kb-handoff", "kb-map-bootstrap", "kb-memory-review", "kb-regression-snapshot"},
 		},
 	}
 }

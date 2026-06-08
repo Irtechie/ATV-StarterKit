@@ -18,13 +18,19 @@ Fix narrowly, verify yourself, and escalate when the bug is not actually small.
 
 1. **Orient** - classify as regression, known bug, flaky behavior, environment issue, or missing requirement.
 2. **Reproduce** - build an agent-runnable signal: failing test, command, browser flow, curl, fixture, or logs.
-3. **Hypothesize** - write 1-3 falsifiable causes before editing.
-4. **Fix narrowly** - edit the smallest responsible area.
-5. **Verify** - rerun the reproduction and relevant tests. For UI bugs, use browser verification when available.
-6. **Record** - update `todo.md`, handoff files if needed, and learning docs when the fix teaches something reusable.
-7. **Refresh memory if durable** - run `kb-map refresh` when the fix changes behavior, architecture, run/test commands, integrations, sharp edges, or "do not repeat" knowledge. Skip with a note when the fix is cosmetic or isolated.
+3. **Micro-plan** - before editing, write a compact plan with the reproduced signal, likely cause, intended file/behavior target, protected test/oracle files, and exact verification command/probe.
+4. **Hypothesize** - write 1-3 falsifiable causes before editing.
+5. **Fix narrowly** - edit the smallest responsible area.
+6. **Verify** - rerun the reproduction and relevant tests. For UI bugs, use browser verification when available.
+7. **Record** - update `todo.md`, handoff files if needed, and learning docs when the fix teaches something reusable.
+8. **Refresh memory if durable** - run `kb-map refresh` when the fix changes behavior, architecture, run/test commands, integrations, sharp edges, or "do not repeat" knowledge. Skip with a note when the fix is cosmetic or isolated.
 
 Do not tell the user to test normal app behavior if the agent can test it.
+
+The micro-plan is not a `kb-plan` manifest. Escalate to `kb-plan` only when the
+bug becomes multi-slice, crosses several owning surfaces, or needs dependency
+ordering. For a narrow fix, the micro-plan exists to freeze the failing signal
+and verification target before the code changes.
 
 ## Ceilings
 

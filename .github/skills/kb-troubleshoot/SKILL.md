@@ -42,20 +42,25 @@ This is the autonomous debugging lane. Use `kb-fix` for tiny known bugs; use `kb
    - If the bug is intermittent, run the reproduction enough times to identify frequency or conditions.
    - If no reproduction is possible after three strategies, record the attempted signals and switch to the closest deterministic probe instead of guessing.
 
-4. **Localize**
+4. **Diagnostic plan**
+   - Before editing, write a compact diagnostic plan: reproduced signal, current evidence, 1-3 falsifiable hypotheses, likely files/boundaries to inspect, protected test/oracle files, and the exact verification command/browser/API/CLI probe that must pass.
+   - This is not a `kb-plan` manifest. Escalate to `kb-plan` only when the fix becomes multi-slice, crosses several owning surfaces, or needs dependency ordering.
+   - If the plan cannot name an executable verification target, gather more evidence before editing.
+
+5. **Localize**
    - Form 1-3 falsifiable hypotheses.
    - Inspect the smallest code path that explains the evidence.
    - Prefer reading actual runtime boundaries over guessing: routes, event handlers, network calls, state transitions, persistence, worker/job logs, auth/session checks, and browser console/network output.
    - If a hypothesis depends on framework/library/runtime behavior and the agent is relying on memory, run `kb-research` or consult primary docs/source before editing. Do this especially for changed APIs, browser behavior, async timing, auth/session behavior, build tooling, package manager quirks, database semantics, or third-party integrations.
    - Search externally when a known fix is likely to exist: exact error text, dependency version mismatch, migration failure, browser console warning, failing Playwright locator behavior, build error, test runner failure, auth/session issue, deployment/runtime error, or package manager conflict.
 
-5. **Fix**
+6. **Fix**
    - Make the smallest coherent fix that addresses the reproduced failure.
    - If the fix expands into a feature or multi-slice change, route to `kb-plan` with execution intent instead of continuing as ad hoc debugging.
    - If QA/lint/browser checks fail from the attempted fix, invoke `kb-repair` with the failure report.
    - If the problem is a narrow known bug, `kb-fix` may own the inner fix loop.
 
-6. **Verify and iterate**
+7. **Verify and iterate**
    - Re-run the original reproduction.
    - Run the relevant regression checks from `kb-check`.
    - For UI bugs, run browser assertions through the rendered UI and capture console/network cleanliness after each interaction.
@@ -85,7 +90,7 @@ If the sentence depends on "probably", "usually", "I think", or remembered frame
 - use `kb-research` for external/framework behavior and prefer primary docs or source.
 - search exact error signatures and dependency versions for known fixes before inventing one.
 
-7. **Close the loop**
+8. **Close the loop**
    - Record the final proof: command/test/browser assertion, exit status, artifact path, and timestamp when available.
    - Update `todo.md` or handoff only if work remains blocked or follow-up is real.
    - Run `kb-map refresh` when the fix changes durable behavior, commands, architecture, integration knowledge, or a sharp edge worth remembering.

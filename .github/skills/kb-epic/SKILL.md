@@ -1,6 +1,6 @@
 ---
 name: kb-epic
-description: Large-initiative coordinator for KB workflows. Use for app migrations, framework rewrites, major architecture changes, multi-subsystem initiatives, multiple brainstorms/manifests, long backlogs, or dark-factory execution across related workstreams.
+description: Large-initiative coordinator for KB workflows. Use for app migrations, framework rewrites, major architecture changes, multi-subsystem initiatives, multiple brainstorms/manifests, long backlogs, or queued execution across related workstreams.
 argument-hint: "[initiative description or epic path]"
 ---
 
@@ -35,7 +35,7 @@ Use `kb-epic` when:
 - Work spans multiple subsystems.
 - Architecture direction affects many later slices.
 - Several brainstorms should feed one release.
-- The user wants a dark-factory queue.
+- The user wants a queued multi-workstream execution plan.
 
 ## Epic Location
 
@@ -71,7 +71,7 @@ Last refreshed: YYYY-MM-DD
 
 ## Dependency Map
 
-## Dark Factory Queue
+## Execution Queue
 
 ## Human Checkpoints
 

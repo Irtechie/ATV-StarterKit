@@ -131,7 +131,7 @@ Check for skills that could provide domain-specific insights. Search project and
 rg --files .github/skills -g "SKILL.md"
 ```
 
-Also check available global/plugin skill roots exposed by the current platform, such as `~/.copilot/skills`, `~/.codex/skills`, or `~/.claude/skills`.
+Also check available global/plugin skill roots exposed by the current platform, such as `~/.copilot/skills` or `~/.codex/skills`.
 
 For each matching skill, apply only the relevant perspective:
 

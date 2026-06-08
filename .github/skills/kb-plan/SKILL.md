@@ -18,7 +18,9 @@ Break work into independently executable **vertical slices** (tracer bullets). E
 4. Write one KB manifest plus one plan file per slice.
 5. Create or update the manifest `gate_ledger`; `plan-to-work` must be
    `passed` before `kb-work` may execute.
-6. Stop after writing the manifest unless the user invoked `klfg` or explicitly asked to execute.
+6. After writing the manifest, continue to `kb-work <manifest-path>` only when
+   execution was requested or an orchestrator called this plan. Otherwise ask
+   once and print the exact next command.
 7. Stage or commit only the generated files when the user explicitly asked for a commit.
 
 ## Interaction Method
@@ -35,9 +37,25 @@ to `kb-brainstorm`/`kb-gate`. Only `safe-assumption`,
 `defer-to-planning`, and `parked` items may cross into planning, and each must
 be recorded in the manifest.
 
-Phase boundary: `kb-plan` produces a manifest and slice plans. It does not automatically invoke `kb-work` unless the user explicitly asked for execution or an orchestrator such as `klfg` called it.
+Phase boundary: `kb-plan` produces a manifest and slice plans. It does not
+automatically invoke `kb-work` unless the user explicitly asked for execution or
+an orchestrator such as `klfg`, `kb-epic`, or `kb-goal` called it.
 
 Execution intent includes phrases such as "go straight to work", "just build it", "don't ask many questions", "continue until done", "run it", or a handoff from `kb-task`, `kb-brainstorm`, or `klfg` that says to continue. In those cases, write the manifest and slice plans first, then immediately invoke `kb-work <manifest-path>`. Never skip manifest creation.
+
+Without execution intent, ask once after the manifest is valid:
+
+```text
+Plan is ready: <manifest-path>
+Continue with `kb-work <manifest-path>` now?
+```
+
+If the user says yes, invoke `kb-work <manifest-path>`. If the user says no, or
+the host cannot invoke the next skill, stop and print:
+
+```text
+Next command: `kb-work <manifest-path>`
+```
 
 ## Input
 

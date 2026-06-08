@@ -41,6 +41,7 @@ This is a task runner, not a separate implementation lane. It uses `kb-map` for 
    | Broken behavior needs autonomous diagnosis from logs, browser evidence, commands, or unclear symptoms | `kb-troubleshoot` |
    | Clear bounded task that needs slices before implementation | `kb-plan` -> `kb-work` -> `kb-complete` |
    | Unclear product/technical behavior or high path dependency | `kb-brainstorm` -> `kb-plan` -> `kb-work` -> `kb-complete` |
+   | Long-lived objective that should persist across sessions or run for days | `kb-goal` |
    | User wants full feature from idea to done and Q&A is acceptable | `klfg` |
    | Valid manifest already exists | `kb-work <manifest>` -> `kb-complete <manifest>` |
    | Work is already implemented and needs finish gates | `kb-complete` |

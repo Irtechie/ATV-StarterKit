@@ -85,6 +85,13 @@ What changed:
   handoff/restart only when context pressure exists and durable local memory can
   replace the live chat at lower total context cost or lower drift risk. It does
   not interrupt active work just because a session is long.
+- `kb-goal` is the durable objective governor for work that may run for days
+  across sessions. It keeps the goal ledger, terminal proof, blockers, and next
+  action while routing each unit through normal KB lanes. `klfg` remains one
+  strict pipeline run; `kb-goal` may run many pipelines or smaller lanes before
+  the larger goal can be called complete. Under a goal, brainstorming is
+  low-interruption: the agent picks the best path from evidence and asks only
+  for true planning blockers.
 - `kb-map` is now project-root anchored: it reads memory from the active repo,
   not `~`, `.copilot/handoffs`, the whole drive, or sibling repos.
 - `kb-map` checks standard memory files by exact path under the repo root, not
@@ -173,8 +180,8 @@ What changed:
 - Before planning from a handoff, `kb-plan` checks for existing brainstorm,
   requirements, manifest, or plan files and uses the best existing source of
   truth instead of duplicating work.
-- `klfg` remains the full hands-off orchestrator for brainstorm -> plan -> work
-  -> complete.
+- `klfg` remains the full hands-off orchestrator for one brainstorm -> plan ->
+  work -> complete pipeline run.
 - The day-to-day working bundle still carries required ATV/CE dependencies:
   `document-review`, `kb-review`, `ce-review`, `ce-compound`,
   `ce-compound-refresh`, `learn`, `evolve`, `tdd`, `todo-create`,
@@ -520,6 +527,8 @@ This fork doesn't replace the upstream tools — it adds an execution engine wit
 | **[ATV StarterKit](https://github.com/All-The-Vibes/ATV-StarterKit)** | The entire foundation: learning system, ce-review, ce-compound, 45+ skills, 51 agents, observer hooks |
 | **[gstack](https://github.com/garrytan/gstack)** (Garry Tan / YC) | QA philosophy, continuous console monitoring, atomic commit pattern, stuck detection |
 | **[Matt Pocock](https://github.com/mattpocock/skills)** | Vertical-slice-as-primitive, TDD anti-pattern identification, hard-gate pattern (`git-guardrails`), [`/handoff`](https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md) session handoff, workflow skill patterns. The KB pipeline is a Kanban-Based synthesis of Matt's skills + ATV StarterKit foundations |
+| **[Shyam Sridhar's kevin-copilot](https://github.com/shyamsridhar123/kevin-copilot)** | Copilot-first token-saver / terse-response instruction surface |
+| **[Shyam Sridhar's TokenMasterX](https://github.com/shyamsridhar123/TokenMasterX)** | Graph/token-aware repo orientation ideas that informed the graphify/TokenMasterX map-bootstrap path |
 | **[agent-browser](https://github.com/vercel-labs/agent-browser)** (Vercel Labs) | Native Rust CDP automation, snapshot refs, ~100ms latency |
 | **[Compound Engineering](https://github.com/EveryInc/compound-engineering-plugin)** (Every, Inc.) | Knowledge-compounds-over-time: plan → work → review → document → learn |
 | **[Karpathy](https://x.com/karpathy/status/2015883857489522876)** | "Models make wrong assumptions and run with them" — the observation that motivated structural enforcement |
