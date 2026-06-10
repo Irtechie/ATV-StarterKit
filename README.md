@@ -214,6 +214,16 @@ What changed:
   shared agents, this ATV fork, and the scaffold/plugin copies that ship that
   skill. Update both READMEs when the visible workflow or shipped skill surface
   changes.
+- The working bundle now separates contributor checks from release/sync checks:
+  `go run ./cmd/kbcheck core` stays repo-local and fresh-clone safe, while
+  `go run ./cmd/kbcheck local-release` and `go run ./cmd/kbcheck
+  skill-sync-report` own global/ATV propagation drift. Optional ATV scaffold and
+  plugin skill drift is warning-only unless that surface is intentionally being
+  shipped.
+- `learn` is intentionally shipped in the ATV GitHub, scaffold, and plugin skill
+  surfaces. Observer hooks such as `.github/hooks/copilot-hooks.json` remain an
+  ATV integration layer; the portable KB skill bundle treats them as optional,
+  not as files guaranteed by the skill itself.
 - Blocking question pickers are used only when the answer is truly one short
   choice. For voice dictation, paste, images, screenshots, files, or long
   corrections, skills should ask in normal chat or include `Other / let me
